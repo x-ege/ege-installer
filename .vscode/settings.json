@@ -11,13 +11,5 @@
   },
   "[javascript]": {
     "editor.defaultFormatter": "vscode.typescript-language-features"
-  },
-  "files.exclude": {
-    "**/resource/EasyX_extracted/**": true,
-    "**/resource/Setup_extracted/**": true
-  },
-  "search.exclude": {
-    "**/resource/EasyX_extracted/**": true,
-    "**/resource/Setup_extracted/**": true
   }
 }

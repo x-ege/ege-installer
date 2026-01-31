@@ -1,0 +1,434 @@
+﻿<!DOCTYPE html>
+<html>
+
+<head>
+  <title>EGE 图形库安装程序</title>
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta charset="UTF-8">
+  <HTA:APPLICATION ID="EGEInstaller" APPLICATIONNAME="EGE Installer" BORDER="thin" BORDERSTYLE="normal" CAPTION="yes"
+    ICON="assets/logo.ico" MAXIMIZEBUTTON="no" MINIMIZEBUTTON="yes" NAVIGABLE="no" SCROLL="no" SELECTION="no"
+    SHOWINTASKBAR="yes" SINGLEINSTANCE="yes" SYSMENU="yes" VERSION="1.0" WINDOWSTATE="normal" />
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: "Microsoft YaHei", "Segoe UI", sans-serif;
+    }
+
+    body {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 500px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+    }
+
+    .container {
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+      width: 600px;
+      overflow: hidden;
+    }
+
+    .header {
+      background: linear-gradient(135deg, #4a5568 0%, #2d3748 100%);
+      color: white;
+      padding: 25px 30px;
+      text-align: center;
+    }
+
+    .header h1 {
+      font-size: 24px;
+      font-weight: 600;
+      margin-bottom: 5px;
+    }
+
+    .header p {
+      font-size: 13px;
+      opacity: 0.8;
+    }
+
+    .content {
+      padding: 25px 30px;
+    }
+
+    .step {
+      display: none;
+    }
+
+    .step.active {
+      display: block;
+    }
+
+    .ide-list {
+      max-height: 250px;
+      overflow-y: auto;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      margin: 15px 0;
+    }
+
+    .ide-item {
+      display: flex;
+      align-items: center;
+      padding: 12px 15px;
+      border-bottom: 1px solid #e2e8f0;
+      transition: background 0.2s;
+    }
+
+    .ide-item:last-child {
+      border-bottom: none;
+    }
+
+    .ide-item:hover {
+      background: #f7fafc;
+    }
+
+    .ide-item input[type="checkbox"] {
+      width: 18px;
+      height: 18px;
+      margin-right: 12px;
+      cursor: pointer;
+    }
+
+    .ide-item label {
+      flex: 1;
+      cursor: pointer;
+    }
+
+    .ide-item .ide-name {
+      font-weight: 500;
+      color: #2d3748;
+    }
+
+    .ide-item .ide-path {
+      font-size: 11px;
+      color: #718096;
+      margin-top: 2px;
+    }
+
+    .ide-item .ide-status {
+      font-size: 12px;
+      padding: 3px 8px;
+      border-radius: 4px;
+    }
+
+    .ide-item .ide-status.found {
+      background: #c6f6d5;
+      color: #276749;
+    }
+
+    .ide-item .ide-status.not-found {
+      background: #fed7d7;
+      color: #c53030;
+    }
+
+    .buttons {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 20px;
+      padding-top: 20px;
+      border-top: 1px solid #e2e8f0;
+    }
+
+    .btn {
+      padding: 10px 25px;
+      border: none;
+      border-radius: 6px;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+    }
+
+    .btn-secondary {
+      background: #e2e8f0;
+      color: #4a5568;
+    }
+
+    .btn-secondary:hover {
+      background: #cbd5e0;
+    }
+
+    .btn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    .progress-container {
+      margin: 20px 0;
+    }
+
+    .progress-bar {
+      height: 8px;
+      background: #e2e8f0;
+      border-radius: 4px;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      width: 0%;
+      transition: width 0.3s;
+    }
+
+    .progress-text {
+      font-size: 13px;
+      color: #4a5568;
+      margin-top: 10px;
+      text-align: center;
+    }
+
+    .log-area {
+      background: #1a202c;
+      color: #a0aec0;
+      padding: 15px;
+      border-radius: 8px;
+      font-family: "Consolas", monospace;
+      font-size: 12px;
+      height: 150px;
+      overflow-y: auto;
+      margin: 15px 0;
+    }
+
+    .log-area .success {
+      color: #68d391;
+    }
+
+    .log-area .error {
+      color: #fc8181;
+    }
+
+    .log-area .info {
+      color: #63b3ed;
+    }
+
+    .result-icon {
+      font-size: 60px;
+      text-align: center;
+      margin: 20px 0;
+    }
+
+    .result-icon.success {
+      color: #48bb78;
+    }
+
+    .result-icon.error {
+      color: #f56565;
+    }
+
+    .result-text {
+      text-align: center;
+      font-size: 18px;
+      color: #2d3748;
+      margin-bottom: 15px;
+    }
+
+    .info-box {
+      background: #ebf8ff;
+      border-left: 4px solid #4299e1;
+      padding: 12px 15px;
+      margin: 15px 0;
+      border-radius: 0 6px 6px 0;
+    }
+
+    .info-box p {
+      color: #2b6cb0;
+      font-size: 13px;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>EGE 图形库安装程序</h1>
+      <p>Easy Graphics Engine - 简易图形引擎</p>
+    </div>
+    <div class="content">
+      <!-- Step 1: Welcome -->
+      <div id="step1" class="step active">
+        <h2 style="color: #2d3748; margin-bottom: 15px;">欢迎使用 EGE 安装程序</h2>
+        <p style="color: #4a5568; line-height: 1.8;">
+          EGE (Easy Graphics Engine) 是一个简易的 Windows 图形编程库，
+          兼容 BGI (graphics.h) 接口，适合 C/C++ 教学和图形编程入门。
+        </p>
+        <div class="info-box">
+          <p><strong>本安装程序将为您完成以下操作：</strong></p>
+          <p>• 检测已安装的 IDE/编译器</p>
+          <p>• 自动配置 EGE 头文件和库文件</p>
+          <p>• 支持 Visual Studio, MinGW, Dev-C++ 等多种环境</p>
+        </div>
+        <div class="buttons">
+          <button class="btn btn-secondary" onclick="window.close()">取消</button>
+          <button class="btn btn-primary" onclick="detectIDEs()">开始检测 →</button>
+        </div>
+      </div>
+
+      <!-- Step 2: Select IDEs -->
+      <div id="step2" class="step">
+        <h2 style="color: #2d3748; margin-bottom: 10px;">选择安装目标</h2>
+        <p style="color: #718096; font-size: 13px;">请选择要安装 EGE 库的 IDE/编译器：</p>
+        <div id="ideList" class="ide-list">
+          <!-- IDE items will be populated dynamically -->
+        </div>
+        <div class="buttons">
+          <button class="btn btn-secondary" onclick="showStep(1)">← 上一步</button>
+          <button class="btn btn-primary" id="installBtn" onclick="startInstall()">安装 →</button>
+        </div>
+      </div>
+
+      <!-- Step 3: Installing -->
+      <div id="step3" class="step">
+        <h2 style="color: #2d3748; margin-bottom: 15px;">正在安装...</h2>
+        <div class="progress-container">
+          <div class="progress-bar">
+            <div id="progressFill" class="progress-fill"></div>
+          </div>
+          <p id="progressText" class="progress-text">准备中...</p>
+        </div>
+        <div id="logArea" class="log-area"></div>
+      </div>
+
+      <!-- Step 4: Complete -->
+      <div id="step4" class="step">
+        <div id="resultIcon" class="result-icon success">✓</div>
+        <p id="resultText" class="result-text">安装完成！</p>
+        <div id="resultDetails" class="info-box">
+          <p>EGE 库已成功安装到选定的 IDE 中。</p>
+          <p>您现在可以在程序中使用 #include &lt;graphics.h&gt; 开始图形编程。</p>
+        </div>
+        <div class="buttons" style="justify-content: center;">
+          <button class="btn btn-primary" onclick="window.close()">完成</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script language="JScript" src="detector.js"></script>
+  <script language="JScript" src="installer.js"></script>
+  <script language="JScript">
+    // Initialize window size
+    window.resizeTo(650, 580);
+    window.moveTo((screen.width - 650) / 2, (screen.height - 580) / 2);
+
+    var currentStep = 1;
+    var detectedIDEs = [];
+    var selectedIDEs = [];
+
+    function showStep(step) {
+      document.getElementById('step' + currentStep).className = 'step';
+      document.getElementById('step' + step).className = 'step active';
+      currentStep = step;
+    }
+
+    function detectIDEs() {
+      showStep(2);
+      var ideList = document.getElementById('ideList');
+      ideList.innerHTML = '<p style="padding:20px;color:#718096;text-align:center;">正在检测已安装的 IDE...</p>';
+
+      // Use setTimeout to allow UI to update
+      window.setTimeout(function () {
+        detectedIDEs = Detector.detectAll();
+        renderIDEList();
+      }, 100);
+    }
+
+    function renderIDEList() {
+      var ideList = document.getElementById('ideList');
+      var html = '';
+
+      for (var i = 0; i < detectedIDEs.length; i++) {
+        var ide = detectedIDEs[i];
+        var statusClass = ide.found ? 'found' : 'not-found';
+        var statusText = ide.found ? '已检测到' : '未找到';
+        var checked = ide.found ? 'checked' : '';
+        var disabled = ide.found ? '' : 'disabled';
+
+        html += '<div class="ide-item">';
+        html += '<input type="checkbox" id="ide' + i + '" ' + checked + ' ' + disabled + ' onchange="updateSelection()">';
+        html += '<label for="ide' + i + '">';
+        html += '<div class="ide-name">' + ide.name + '</div>';
+        html += '<div class="ide-path">' + (ide.path || '未安装') + '</div>';
+        html += '</label>';
+        html += '<span class="ide-status ' + statusClass + '">' + statusText + '</span>';
+        html += '</div>';
+      }
+
+      ideList.innerHTML = html;
+      updateSelection();
+    }
+
+    function updateSelection() {
+      selectedIDEs = [];
+      for (var i = 0; i < detectedIDEs.length; i++) {
+        var checkbox = document.getElementById('ide' + i);
+        if (checkbox && checkbox.checked) {
+          selectedIDEs.push(detectedIDEs[i]);
+        }
+      }
+      document.getElementById('installBtn').disabled = selectedIDEs.length === 0;
+    }
+
+    function startInstall() {
+      if (selectedIDEs.length === 0) {
+        alert('请至少选择一个安装目标！');
+        return;
+      }
+      showStep(3);
+
+      // Start installation with slight delay for UI
+      window.setTimeout(function () {
+        Installer.install(selectedIDEs, updateProgress, onInstallComplete);
+      }, 100);
+    }
+
+    function updateProgress(percent, message) {
+      document.getElementById('progressFill').style.width = percent + '%';
+      document.getElementById('progressText').innerText = message;
+    }
+
+    function log(message, type) {
+      var logArea = document.getElementById('logArea');
+      var className = type || '';
+      logArea.innerHTML += '<div class="' + className + '">' + message + '</div>';
+      logArea.scrollTop = logArea.scrollHeight;
+    }
+
+    function onInstallComplete(success, message) {
+      showStep(4);
+      var icon = document.getElementById('resultIcon');
+      var text = document.getElementById('resultText');
+      var details = document.getElementById('resultDetails');
+
+      if (success) {
+        icon.className = 'result-icon success';
+        icon.innerText = '✓';
+        text.innerText = '安装完成！';
+        details.innerHTML = '<p>EGE 库已成功安装到选定的 IDE 中。</p>' +
+          '<p>您现在可以在程序中使用 <code>#include &lt;graphics.h&gt;</code> 开始图形编程。</p>';
+      } else {
+        icon.className = 'result-icon error';
+        icon.innerText = '✗';
+        text.innerText = '安装出现错误';
+        details.innerHTML = '<p>' + message + '</p>';
+      }
+    }
+  </script>
+</body>
+
+</html>
