@@ -18,7 +18,7 @@ Installer for [EGE (Easy Graphics Engine)](https://github.com/x-ege/xege) - conf
 | Visual Studio | 2010-2026 | x86, x64 |
 | MinGW-w64 | MSYS2, Standalone | x86, x64 |
 | Dev-C++ | Embarcadero, Red Panda | x86, x64 |
-| Code::Blocks | Latest | x86 |
+| Code::Blocks | Latest | x64 |
 
 ## Usage
 

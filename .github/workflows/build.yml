@@ -1,0 +1,115 @@
+﻿name: Build and Package
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: windows-latest
+    
+    steps:
+      - name: Checkout installer repository
+        uses: actions/checkout@v4
+
+      - name: Clone xege-sdk repository
+        run: |
+          git clone https://github.com/x-ege/xege-sdk.git ${{ github.workspace }}\xege_libs
+          Write-Host "xege-sdk cloned to: ${{ github.workspace }}\xege_libs"
+          
+          # Display directory structure for verification
+          Get-ChildItem -Path "${{ github.workspace }}\xege_libs" -Recurse -Depth 2 | 
+            Select-Object FullName | Format-Table -AutoSize
+
+      - name: Verify xege-sdk structure
+        run: |
+          $xegeLibs = "${{ github.workspace }}\xege_libs"
+          
+          # Check required directories
+          $requiredDirs = @("include", "lib")
+          foreach ($dir in $requiredDirs) {
+            $path = Join-Path $xegeLibs $dir
+            if (Test-Path $path) {
+              Write-Host "✓ Found: $path" -ForegroundColor Green
+            } else {
+              Write-Host "✗ Missing: $path" -ForegroundColor Red
+              exit 1
+            }
+          }
+          
+          # Check for header files
+          $headerFiles = @("ege.h", "graphics.h")
+          foreach ($header in $headerFiles) {
+            $path = Join-Path $xegeLibs "include\$header"
+            if (Test-Path $path) {
+              Write-Host "✓ Found header: $header" -ForegroundColor Green
+            } else {
+              Write-Host "⚠ Header not found: $header" -ForegroundColor Yellow
+            }
+          }
+          
+          Write-Host ""
+          Write-Host "xege-sdk verification completed." -ForegroundColor Cyan
+
+      - name: Install 7-Zip
+        run: choco install 7zip -y
+
+      - name: Get version
+        id: version
+        run: |
+          $version = Get-Date -Format "yyyy.MM.dd"
+          
+          # Try to get version from git tag if available
+          $tag = git describe --tags --abbrev=0 2>$null
+          if ($LASTEXITCODE -eq 0 -and $tag) {
+            $version = $tag -replace "^v", ""
+          }
+          
+          # For PR builds, add PR number
+          if ("${{ github.event_name }}" -eq "pull_request") {
+            $version = "$version-pr${{ github.event.pull_request.number }}"
+          }
+          
+          Write-Host "Version: $version"
+          echo "VERSION=$version" >> $env:GITHUB_OUTPUT
+
+      - name: Build installer package
+        run: |
+          $xegeLibs = "${{ github.workspace }}\xege_libs"
+          $version = "${{ steps.version.outputs.VERSION }}"
+          
+          Write-Host "Building with xege_libs: $xegeLibs"
+          Write-Host "Version: $version"
+          
+          & .\scripts\release.ps1 -XegeLibsPath $xegeLibs -Version $version -OutputDir "dist"
+
+      - name: Verify build output
+        run: |
+          $distDir = "${{ github.workspace }}\dist"
+          
+          if (-not (Test-Path $distDir)) {
+            Write-Host "Error: dist directory not found" -ForegroundColor Red
+            exit 1
+          }
+          
+          $files = Get-ChildItem -Path $distDir -File
+          if ($files.Count -eq 0) {
+            Write-Host "Error: No output files found" -ForegroundColor Red
+            exit 1
+          }
+          
+          Write-Host "Build outputs:" -ForegroundColor Cyan
+          foreach ($file in $files) {
+            $sizeMB = [math]::Round($file.Length / 1MB, 2)
+            Write-Host "  $($file.Name) - $sizeMB MB"
+          }
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ege-setup-${{ steps.version.outputs.VERSION }}
+          path: dist/*
+          retention-days: 30
