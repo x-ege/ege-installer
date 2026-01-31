@@ -26,7 +26,7 @@ if ($XegeLibsPath) {
     if ($XegeLibsPath -match "^/([a-zA-Z])/") {
         $driveLetter = $matches[1].ToUpper()
         $XegeLibsPath = $XegeLibsPath -replace "^/[a-zA-Z]/", "${driveLetter}:\"
-        $XegeLibsPath = $XegeLibsPath -replace "/", "\"
+        $XegeLibsPath = $XegeLibsPath.Replace("/", "\")
     }
     $EgeLibsDir = $XegeLibsPath
 } else {
@@ -160,6 +160,9 @@ RunProgram="mshta.exe \"%%T\\installer\\setup.hta\""
     $ArchivePath = Join-Path $TempDir "ege-setup.7z"
     & $7zPath a -t7z -mx=9 -mf=BCJ2 -r $ArchivePath "$TempDir\installer" "$TempDir\libs" "$TempDir\version.txt" | Out-Null
     
+    if ($LASTEXITCODE -ne 0) {
+        throw "7-Zip failed with exit code $LASTEXITCODE"
+    }
     if (-not (Test-Path $ArchivePath)) {
         throw "Failed to create archive"
     }
