@@ -1,4 +1,4 @@
-﻿# EGE Installer
+﻿# EGE Installer (WIP)
 
 [![GitHub](https://img.shields.io/badge/GitHub-x--ege/xege-blue)](https://github.com/x-ege/xege)
 
