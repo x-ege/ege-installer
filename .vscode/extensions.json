@@ -1,0 +1,7 @@
+{
+  "recommendations": [
+    "ms-vscode.powershell",
+    "ecmel.vscode-html-css",
+    "formulahendry.auto-close-tag"
+  ]
+}

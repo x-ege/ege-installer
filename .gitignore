@@ -1,0 +1,24 @@
+﻿# Build outputs
+dist/
+*.exe
+!resource/*.exe
+
+# Extracted analysis files
+resource/EasyX_extracted/
+resource/Setup_extracted/
+resource/extracted_hta.html
+
+# Temp files
+*.tmp
+*.log
+~$*
+
+# IDE
+.idea/
+*.suo
+*.user
+
+# OS
+Thumbs.db
+Desktop.ini
+.DS_Store
