@@ -16,67 +16,98 @@
       font-family: "Microsoft YaHei", "Segoe UI", sans-serif;
     }
 
+    html,
+    body {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+    }
+
     body {
       background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      min-height: 500px;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      padding: 20px;
     }
 
     .container {
       background: white;
-      border-radius: 12px;
-      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-      width: 600px;
+      width: 100%;
+      height: 100%;
       overflow: hidden;
+      display: flex;
+      flex-direction: column;
     }
 
     .header {
       background: linear-gradient(135deg, #4a5568 0%, #2d3748 100%);
       color: white;
-      padding: 25px 30px;
-      text-align: center;
+      padding: 16px 30px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
     }
 
-    .header h1 {
-      font-size: 24px;
+    .header-left h1 {
+      font-size: 22px;
       font-weight: 600;
-      margin-bottom: 5px;
     }
 
-    .header p {
+    .header-left p {
       font-size: 13px;
-      opacity: 0.8;
+      opacity: 0.85;
+      margin-top: 2px;
+    }
+
+    .header-right {
+      text-align: right;
+    }
+
+    .version-badge {
+      background: rgba(255, 255, 255, 0.2);
+      padding: 4px 12px;
+      border-radius: 12px;
+      font-size: 12px;
     }
 
     .content {
-      padding: 25px 30px;
+      flex: 1;
+      padding: 20px 30px;
+      overflow: auto;
+      display: flex;
+      flex-direction: column;
     }
 
-    .step {
-      display: none;
+    .intro {
+      background: #f0f9ff;
+      border-left: 4px solid #3b82f6;
+      padding: 12px 16px;
+      margin-bottom: 16px;
+      border-radius: 0 6px 6px 0;
     }
 
-    .step.active {
-      display: block;
+    .intro p {
+      font-size: 14px;
+      color: #1e40af;
+      line-height: 1.5;
+    }
+
+    .section-title {
+      font-size: 15px;
+      color: #374151;
+      margin-bottom: 12px;
+      font-weight: 500;
     }
 
     .ide-list {
-      max-height: 250px;
-      overflow-y: auto;
-      border: 1px solid #e2e8f0;
+      flex: 1;
+      border: 1px solid #e5e7eb;
       border-radius: 8px;
-      margin: 15px 0;
+      overflow-y: auto;
     }
 
     .ide-item {
       display: flex;
       align-items: center;
-      padding: 12px 15px;
-      border-bottom: 1px solid #e2e8f0;
-      transition: background 0.2s;
+      padding: 12px 16px;
+      border-bottom: 1px solid #e5e7eb;
     }
 
     .ide-item:last-child {
@@ -84,171 +115,272 @@
     }
 
     .ide-item:hover {
-      background: #f7fafc;
+      background: #f9fafb;
     }
 
-    .ide-item input[type="checkbox"] {
-      width: 18px;
-      height: 18px;
-      margin-right: 12px;
-      cursor: pointer;
-    }
-
-    .ide-item label {
+    .ide-info {
       flex: 1;
-      cursor: pointer;
     }
 
-    .ide-item .ide-name {
+    .ide-name {
+      font-size: 14px;
       font-weight: 500;
-      color: #2d3748;
+      color: #1f2937;
     }
 
-    .ide-item .ide-path {
-      font-size: 11px;
-      color: #718096;
+    .ide-path {
+      font-size: 12px;
+      color: #6b7280;
       margin-top: 2px;
     }
 
-    .ide-item .ide-status {
-      font-size: 12px;
-      padding: 3px 8px;
+    .ide-status {
+      margin: 0 12px;
+      padding: 3px 10px;
       border-radius: 4px;
+      font-size: 12px;
+      min-width: 70px;
+      text-align: center;
     }
 
-    .ide-item .ide-status.found {
-      background: #c6f6d5;
-      color: #276749;
+    .ide-status.installed {
+      background: #dcfce7;
+      color: #166534;
     }
 
-    .ide-item .ide-status.not-found {
-      background: #fed7d7;
-      color: #c53030;
+    .ide-status.not-installed {
+      background: #fef9c3;
+      color: #854d0e;
     }
 
-    .buttons {
+    .ide-status.not-found {
+      background: #f3f4f6;
+      color: #9ca3af;
+    }
+
+    .ide-actions {
       display: flex;
-      justify-content: space-between;
-      margin-top: 20px;
-      padding-top: 20px;
-      border-top: 1px solid #e2e8f0;
+      gap: 8px;
     }
 
     .btn {
-      padding: 10px 25px;
+      padding: 6px 16px;
       border: none;
-      border-radius: 6px;
-      font-size: 14px;
+      border-radius: 4px;
+      font-size: 13px;
       font-weight: 500;
       cursor: pointer;
-      transition: all 0.2s;
+      transition: all 0.15s;
+      min-width: 64px;
     }
 
-    .btn-primary {
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    .btn-install {
+      background: #3b82f6;
       color: white;
     }
 
-    .btn-primary:hover {
-      transform: translateY(-1px);
-      box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+    .btn-install:hover {
+      background: #2563eb;
     }
 
-    .btn-secondary {
-      background: #e2e8f0;
-      color: #4a5568;
+    .btn-uninstall {
+      background: #ef4444;
+      color: white;
     }
 
-    .btn-secondary:hover {
-      background: #cbd5e0;
+    .btn-uninstall:hover {
+      background: #dc2626;
     }
 
     .btn:disabled {
-      opacity: 0.6;
+      background: #e5e7eb;
+      color: #9ca3af;
       cursor: not-allowed;
     }
 
-    .progress-container {
-      margin: 20px 0;
+    .footer {
+      padding: 12px 30px;
+      border-top: 1px solid #e5e7eb;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: #f9fafb;
+    }
+
+    .footer-left {
+      font-size: 12px;
+      color: #6b7280;
+    }
+
+    .footer-right {
+      display: flex;
+      gap: 10px;
+    }
+
+    .btn-scan {
+      padding: 8px 20px;
+      background: #10b981;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      font-size: 13px;
+      cursor: pointer;
+    }
+
+    .btn-scan:hover {
+      background: #059669;
+    }
+
+    .btn-close {
+      padding: 8px 24px;
+      background: #6b7280;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      font-size: 14px;
+      cursor: pointer;
+    }
+
+    .btn-close:hover {
+      background: #4b5563;
+    }
+
+    .toggle-section {
+      margin-top: 16px;
+      padding-top: 12px;
+      border-top: 1px dashed #e5e7eb;
+    }
+
+    .toggle-btn {
+      background: none;
+      border: none;
+      color: #6b7280;
+      font-size: 13px;
+      cursor: pointer;
+      padding: 4px 0;
+    }
+
+    .toggle-btn:hover {
+      color: #374151;
+    }
+
+    .hidden-section {
+      display: none;
+    }
+
+    .hidden-section.show {
+      display: block;
+    }
+
+    .loading {
+      text-align: center;
+      padding: 40px;
+      color: #6b7280;
+    }
+
+    .loading-spinner {
+      width: 40px;
+      height: 40px;
+      border: 3px solid #e5e7eb;
+      border-top-color: #3b82f6;
+      border-radius: 50%;
+      margin: 0 auto 16px;
+    }
+
+    /* Modal overlay */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.5);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .modal-overlay.show {
+      display: flex;
+    }
+
+    .modal {
+      background: white;
+      border-radius: 8px;
+      width: 500px;
+      max-height: 80%;
+      overflow: hidden;
+      box-shadow: 0 25px 50px rgba(0, 0, 0, 0.25);
+    }
+
+    .modal-header {
+      padding: 16px 20px;
+      background: #f9fafb;
+      border-bottom: 1px solid #e5e7eb;
+      font-size: 16px;
+      font-weight: 500;
+      color: #1f2937;
+    }
+
+    .modal-body {
+      padding: 20px;
+      max-height: 300px;
+      overflow-y: auto;
+    }
+
+    .modal-footer {
+      padding: 12px 20px;
+      border-top: 1px solid #e5e7eb;
+      text-align: right;
+    }
+
+    .log-area {
+      background: #1f2937;
+      color: #d1d5db;
+      padding: 12px;
+      border-radius: 6px;
+      font-family: "Consolas", monospace;
+      font-size: 12px;
+      max-height: 200px;
+      overflow-y: auto;
+    }
+
+    .log-area .success {
+      color: #4ade80;
+    }
+
+    .log-area .error {
+      color: #f87171;
+    }
+
+    .log-area .info {
+      color: #60a5fa;
     }
 
     .progress-bar {
       height: 8px;
-      background: #e2e8f0;
+      background: #e5e7eb;
       border-radius: 4px;
+      margin-bottom: 12px;
       overflow: hidden;
     }
 
     .progress-fill {
       height: 100%;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      background: linear-gradient(90deg, #3b82f6, #8b5cf6);
       width: 0%;
       transition: width 0.3s;
     }
 
-    .progress-text {
-      font-size: 13px;
-      color: #4a5568;
-      margin-top: 10px;
+    .empty-message {
       text-align: center;
+      padding: 40px 20px;
+      color: #6b7280;
     }
 
-    .log-area {
-      background: #1a202c;
-      color: #a0aec0;
-      padding: 15px;
-      border-radius: 8px;
-      font-family: "Consolas", monospace;
-      font-size: 12px;
-      height: 150px;
-      overflow-y: auto;
-      margin: 15px 0;
-    }
-
-    .log-area .success {
-      color: #68d391;
-    }
-
-    .log-area .error {
-      color: #fc8181;
-    }
-
-    .log-area .info {
-      color: #63b3ed;
-    }
-
-    .result-icon {
-      font-size: 60px;
-      text-align: center;
-      margin: 20px 0;
-    }
-
-    .result-icon.success {
-      color: #48bb78;
-    }
-
-    .result-icon.error {
-      color: #f56565;
-    }
-
-    .result-text {
-      text-align: center;
-      font-size: 18px;
-      color: #2d3748;
-      margin-bottom: 15px;
-    }
-
-    .info-box {
-      background: #ebf8ff;
-      border-left: 4px solid #4299e1;
-      padding: 12px 15px;
-      margin: 15px 0;
-      border-radius: 0 6px 6px 0;
-    }
-
-    .info-box p {
-      color: #2b6cb0;
-      font-size: 13px;
+    .empty-message p {
+      margin-bottom: 8px;
     }
   </style>
 </head>
@@ -256,177 +388,758 @@
 <body>
   <div class="container">
     <div class="header">
-      <h1>EGE 图形库安装程序</h1>
-      <p>Easy Graphics Engine - 简易图形引擎</p>
+      <div class="header-left">
+        <h1 id="appTitle">EGE 图形库安装程序</h1>
+        <p>Easy Graphics Engine - 简易图形引擎</p>
+      </div>
+      <div class="header-right">
+        <span id="versionBadge" class="version-badge">v1.0.0</span>
+      </div>
     </div>
+
     <div class="content">
-      <!-- Step 1: Welcome -->
-      <div id="step1" class="step active">
-        <h2 style="color: #2d3748; margin-bottom: 15px;">欢迎使用 EGE 安装程序</h2>
-        <p style="color: #4a5568; line-height: 1.8;">
-          EGE (Easy Graphics Engine) 是一个简易的 Windows 图形编程库，
-          兼容 BGI (graphics.h) 接口，适合 C/C++ 教学和图形编程入门。
-        </p>
-        <div class="info-box">
-          <p><strong>本安装程序将为您完成以下操作：</strong></p>
-          <p>• 检测已安装的 IDE/编译器</p>
-          <p>• 自动配置 EGE 头文件和库文件</p>
-          <p>• 支持 Visual Studio, MinGW, Dev-C++ 等多种环境</p>
-        </div>
-        <div class="buttons">
-          <button class="btn btn-secondary" onclick="window.close()">取消</button>
-          <button class="btn btn-primary" onclick="detectIDEs()">开始检测 →</button>
+      <div class="intro">
+        <p>在下面找到您所用的开发平台，点击「安装」将 EGE 库安装至该平台，或点击「卸载」从该平台移除。</p>
+      </div>
+
+      <p class="section-title">检测到的开发环境：</p>
+      <div id="ideList" class="ide-list">
+        <div class="loading">
+          <div class="loading-spinner"></div>
+          <p>正在检测已安装的 IDE...</p>
         </div>
       </div>
 
-      <!-- Step 2: Select IDEs -->
-      <div id="step2" class="step">
-        <h2 style="color: #2d3748; margin-bottom: 10px;">选择安装目标</h2>
-        <p style="color: #718096; font-size: 13px;">请选择要安装 EGE 库的 IDE/编译器：</p>
-        <div id="ideList" class="ide-list">
-          <!-- IDE items will be populated dynamically -->
-        </div>
-        <div class="buttons">
-          <button class="btn btn-secondary" onclick="showStep(1)">← 上一步</button>
-          <button class="btn btn-primary" id="installBtn" onclick="startInstall()">安装 →</button>
-        </div>
+      <div id="notFoundSection" class="toggle-section hidden-section">
+        <button class="toggle-btn" onclick="toggleNotFound()">▶ 显示未检测到的环境</button>
+        <div id="notFoundList" class="ide-list" style="margin-top: 12px; display: none;"></div>
       </div>
+    </div>
 
-      <!-- Step 3: Installing -->
-      <div id="step3" class="step">
-        <h2 style="color: #2d3748; margin-bottom: 15px;">正在安装...</h2>
-        <div class="progress-container">
-          <div class="progress-bar">
-            <div id="progressFill" class="progress-fill"></div>
-          </div>
-          <p id="progressText" class="progress-text">准备中...</p>
-        </div>
-        <div id="logArea" class="log-area"></div>
+    <div class="footer">
+      <div class="footer-left">
+        <span id="statusText">就绪</span>
       </div>
-
-      <!-- Step 4: Complete -->
-      <div id="step4" class="step">
-        <div id="resultIcon" class="result-icon success">✓</div>
-        <p id="resultText" class="result-text">安装完成！</p>
-        <div id="resultDetails" class="info-box">
-          <p>EGE 库已成功安装到选定的 IDE 中。</p>
-          <p>您现在可以在程序中使用 #include &lt;graphics.h&gt; 开始图形编程。</p>
-        </div>
-        <div class="buttons" style="justify-content: center;">
-          <button class="btn btn-primary" onclick="window.close()">完成</button>
-        </div>
+      <div class="footer-right">
+        <button class="btn-scan" onclick="scanForMinGW()">扫描 MinGW</button>
+        <button class="btn-close" onclick="window.close()">关闭</button>
       </div>
     </div>
   </div>
 
+  <!-- Operation Modal -->
+  <div id="operationModal" class="modal-overlay">
+    <div class="modal">
+      <div class="modal-header" id="modalTitle">正在安装...</div>
+      <div class="modal-body">
+        <div class="progress-bar">
+          <div id="modalProgress" class="progress-fill"></div>
+        </div>
+        <div id="modalLog" class="log-area"></div>
+      </div>
+      <div class="modal-footer">
+        <button id="modalCloseBtn" class="btn btn-install" onclick="closeModal()" disabled>完成</button>
+      </div>
+    </div>
+  </div>
+
+  <script language="JScript">
+    // 全局错误处理
+    window.onerror = function (msg, url, line) {
+      alert('脚本错误:\n' + msg + '\n文件: ' + url + '\n行号: ' + line);
+      return true;
+    };
+
+    // 基础变量
+    var fso, shell, currentPath, libsPath, egeVersion;
+    var detectedIDEs = [];
+    var notFoundIDEs = [];
+    var notFoundExpanded = false;
+
+    // 初始化
+    try {
+      fso = new ActiveXObject("Scripting.FileSystemObject");
+      shell = new ActiveXObject("WScript.Shell");
+
+      var htaPath = document.location.pathname;
+      if (htaPath.charAt(0) === '/') {
+        htaPath = htaPath.substr(1);
+      }
+      htaPath = htaPath.replace(/\//g, '\\');
+      currentPath = fso.GetParentFolderName(htaPath);
+      libsPath = fso.GetParentFolderName(currentPath) + '\\libs';
+
+      // 读取版本号（处理UTF-8 BOM）
+      var versionFile = fso.GetParentFolderName(currentPath) + '\\version.txt';
+      if (fso.FileExists(versionFile)) {
+        var ts = fso.OpenTextFile(versionFile, 1);
+        egeVersion = ts.ReadLine();
+        ts.Close();
+        // 移除可能的BOM字符 (\uFEFF 或 \xEF\xBB\xBF)
+        if (egeVersion.charCodeAt(0) === 0xFEFF || egeVersion.charCodeAt(0) === 0xEF) {
+          egeVersion = egeVersion.substring(1);
+        }
+        // 移除非版本号字符，只保留数字和点
+        egeVersion = egeVersion.replace(/[^0-9.]/g, '');
+      } else {
+        egeVersion = '1.0.0';
+      }
+      if (!egeVersion || egeVersion.length === 0) {
+        egeVersion = '1.0.0';
+      }
+
+      // 更新标题和版本显示
+      document.getElementById('appTitle').innerText = 'EGE 图形库安装程序';
+      document.getElementById('versionBadge').innerText = 'v' + egeVersion;
+      document.title = 'EGE 图形库安装程序 v' + egeVersion;
+
+    } catch (e) {
+      alert('初始化错误: ' + e.message);
+    }
+  </script>
+
   <script language="JScript" src="detector.js"></script>
   <script language="JScript" src="installer.js"></script>
+
   <script language="JScript">
-    // Initialize window size
-    window.resizeTo(650, 580);
-    window.moveTo((screen.width - 650) / 2, (screen.height - 580) / 2);
+    // 获取DPI缩放比例（通过多种方式尝试）
+    function getDpiScale() {
+      try {
+        // 方案一：通过注册表读取系统DPI设置
+        var regDpi = null;
+        try {
+          // Windows 10/11 缩放设置
+          regDpi = shell.RegRead('HKCU\\Control Panel\\Desktop\\WindowMetrics\\AppliedDPI');
+        } catch (e1) {
+          try {
+            // 备用位置
+            regDpi = shell.RegRead('HKCU\\Control Panel\\Desktop\\LogPixels');
+          } catch (e2) { }
+        }
+        if (regDpi && regDpi > 96) {
+          return regDpi / 96;
+        }
 
-    var currentStep = 1;
-    var detectedIDEs = [];
-    var selectedIDEs = [];
+        // 方案二：IE/HTA 获取DPI方式
+        if (screen.deviceXDPI && screen.logicalXDPI && screen.deviceXDPI > screen.logicalXDPI) {
+          return screen.deviceXDPI / screen.logicalXDPI;
+        }
 
-    function showStep(step) {
-      document.getElementById('step' + currentStep).className = 'step';
-      document.getElementById('step' + step).className = 'step active';
-      currentStep = step;
-    }
+        // 方案三：根据屏幕分辨率推断（如果分辨率很高但逻辑尺寸小，可能是高DPI）
+        // 如果屏幕物理宽度大于2560但screen.width小于2560，则可能有缩放
+        if (screen.width <= 1920 && window.screen.availWidth <= 1920) {
+          // 可能是高DPI屏幕，使用稍大的窗口
+          return 1.25;  // 默认假设125%缩放作为安全值
+        }
 
-    function detectIDEs() {
-      showStep(2);
-      var ideList = document.getElementById('ideList');
-      ideList.innerHTML = '<p style="padding:20px;color:#718096;text-align:center;">正在检测已安装的 IDE...</p>';
-
-      // Use setTimeout to allow UI to update
-      window.setTimeout(function () {
-        detectedIDEs = Detector.detectAll();
-        renderIDEList();
-      }, 100);
-    }
-
-    function renderIDEList() {
-      var ideList = document.getElementById('ideList');
-      var html = '';
-
-      for (var i = 0; i < detectedIDEs.length; i++) {
-        var ide = detectedIDEs[i];
-        var statusClass = ide.found ? 'found' : 'not-found';
-        var statusText = ide.found ? '已检测到' : '未找到';
-        var checked = ide.found ? 'checked' : '';
-        var disabled = ide.found ? '' : 'disabled';
-
-        html += '<div class="ide-item">';
-        html += '<input type="checkbox" id="ide' + i + '" ' + checked + ' ' + disabled + ' onchange="updateSelection()">';
-        html += '<label for="ide' + i + '">';
-        html += '<div class="ide-name">' + ide.name + '</div>';
-        html += '<div class="ide-path">' + (ide.path || '未安装') + '</div>';
-        html += '</label>';
-        html += '<span class="ide-status ' + statusClass + '">' + statusText + '</span>';
-        html += '</div>';
+        return 1;
+      } catch (e) {
+        return 1;
       }
-
-      ideList.innerHTML = html;
-      updateSelection();
     }
 
-    function updateSelection() {
-      selectedIDEs = [];
-      for (var i = 0; i < detectedIDEs.length; i++) {
-        var checkbox = document.getElementById('ide' + i);
-        if (checkbox && checkbox.checked) {
-          selectedIDEs.push(detectedIDEs[i]);
+    // 初始化窗口（考虑DPI缩放）
+    var dpiScale = getDpiScale();
+    var baseWidth = 750;
+    var baseHeight = 620;
+    var initWidth = Math.round(baseWidth * dpiScale);
+    var initHeight = Math.round(baseHeight * dpiScale);
+
+    // 确保窗口不会超过屏幕
+    if (initWidth > screen.availWidth * 0.95) {
+      initWidth = Math.round(screen.availWidth * 0.9);
+    }
+    if (initHeight > screen.availHeight * 0.95) {
+      initHeight = Math.round(screen.availHeight * 0.9);
+    }
+
+    window.resizeTo(initWidth, initHeight);
+    window.moveTo(Math.round((screen.width - initWidth) / 2), Math.round((screen.height - initHeight) / 2));
+
+    // 禁用resize
+    document.body.onresize = function () {
+      if (window.outerWidth !== initWidth || window.outerHeight !== initHeight) {
+        window.resizeTo(initWidth, initHeight);
+      }
+    };
+
+    // 检查脚本加载
+    if (typeof Detector === 'undefined' || typeof Installer === 'undefined') {
+      document.getElementById('ideList').innerHTML =
+        '<div class="empty-message"><p style="color:#dc2626;">加载错误：无法加载检测或安装模块</p></div>';
+    } else {
+      // 启动检测
+      window.setTimeout(function () {
+        detectAllIDEs();
+      }, 200);
+    }
+
+    /**
+     * 检测所有IDE
+     */
+    function detectAllIDEs() {
+      var allIDEs = Detector.detectAll();
+
+      // 分离已检测到和未检测到的
+      detectedIDEs = [];
+      notFoundIDEs = [];
+
+      for (var i = 0; i < allIDEs.length; i++) {
+        var ide = allIDEs[i];
+        // 检查是否已安装EGE
+        ide.egeInstalled = checkEgeInstalled(ide);
+
+        if (ide.found) {
+          detectedIDEs.push(ide);
+        } else {
+          notFoundIDEs.push(ide);
         }
       }
-      document.getElementById('installBtn').disabled = selectedIDEs.length === 0;
+
+      // 去重：移除父子目录关系的重复项
+      detectedIDEs = deduplicateIDEs(detectedIDEs);
+
+      renderIDEList();
     }
 
-    function startInstall() {
-      if (selectedIDEs.length === 0) {
-        alert('请至少选择一个安装目标！');
-        return;
-      }
-      showStep(3);
+    /**
+     * 去除IDE列表中的重复项（主要是父子目录关系）
+     * 策略：保留更具体的路径（子目录），移除模糊的路径（父目录）
+     */
+    function deduplicateIDEs(ides) {
+      if (ides.length <= 1) return ides;
 
-      // Start installation with slight delay for UI
+      // 首先规范化所有路径（移除尾部反斜杠，统一大小写）
+      for (var n = 0; n < ides.length; n++) {
+        if (ides[n].path) {
+          ides[n].path = ides[n].path.replace(/\\+$/, ''); // 移除尾部的反斜杠
+        }
+      }
+
+      var toRemove = [];
+
+      // 标记需要移除的项
+      for (var i = 0; i < ides.length; i++) {
+        var ide1 = ides[i];
+        var path1 = ide1.path.toLowerCase();
+
+        for (var j = 0; j < ides.length; j++) {
+          if (i === j) continue;
+
+          var ide2 = ides[j];
+          var path2 = ide2.path.toLowerCase();
+
+          // 如果 path1 是 path2 的父目录，标记移除 path1（保留更具体的子目录）
+          if (path2.indexOf(path1 + '\\') === 0) {
+            if (toRemove.indexOf(i) === -1) {
+              toRemove.push(i);
+            }
+          }
+        }
+      }
+
+      // 移除标记的项
+      var deduplicated = [];
+      for (var k = 0; k < ides.length; k++) {
+        if (toRemove.indexOf(k) === -1) {
+          deduplicated.push(ides[k]);
+        }
+      }
+
+      return deduplicated;
+    }
+
+    /**
+     * 检查IDE是否已安装EGE
+     */
+    function checkEgeInstalled(ide) {
+      if (!ide.found || !ide.includePath) return false;
+      try {
+        var headerPath = ide.includePath + '\\graphics.h';
+        return fso.FileExists(headerPath);
+      } catch (e) {
+        return false;
+      }
+    }
+
+    /**
+     * 渲染IDE列表
+     */
+    function renderIDEList() {
+      var listEl = document.getElementById('ideList');
+
+      if (detectedIDEs.length === 0) {
+        listEl.innerHTML = '<div class="empty-message">' +
+          '<p>未检测到任何已安装的开发环境</p>' +
+          '<p style="font-size:12px;">请先安装 Visual Studio、MinGW 或 Red Panda 等开发工具</p></div>';
+      } else {
+        var html = '';
+        for (var i = 0; i < detectedIDEs.length; i++) {
+          html += renderIDEItem(detectedIDEs[i], i, true);
+        }
+        listEl.innerHTML = html;
+      }
+
+      // 渲染未检测到的
+      if (notFoundIDEs.length > 0) {
+        document.getElementById('notFoundSection').className = 'toggle-section';
+        var notFoundHtml = '';
+        for (var j = 0; j < notFoundIDEs.length; j++) {
+          notFoundHtml += renderIDEItem(notFoundIDEs[j], j, false);
+        }
+        document.getElementById('notFoundList').innerHTML = notFoundHtml;
+      }
+
+      updateStatus();
+    }
+
+    /**
+     * 渲染单个IDE项
+     */
+    function renderIDEItem(ide, index, isFound) {
+      var statusClass, statusText;
+      var prefix = isFound ? 'found' : 'notfound';
+
+      if (!ide.found) {
+        statusClass = 'not-found';
+        statusText = '未找到';
+      } else if (ide.egeInstalled) {
+        statusClass = 'installed';
+        statusText = '已安装';
+      } else {
+        statusClass = 'not-installed';
+        statusText = '未安装';
+      }
+
+      var installDisabled = !ide.found ? 'disabled' : '';
+      var uninstallDisabled = (!ide.found || !ide.egeInstalled) ? 'disabled' : '';
+
+      var html = '<div class="ide-item" id="' + prefix + '_' + index + '">';
+      html += '<div class="ide-info">';
+      html += '<div class="ide-name">' + ide.name + '</div>';
+      html += '<div class="ide-path">' + (ide.path || '未安装') + '</div>';
+      html += '</div>';
+      html += '<span class="ide-status ' + statusClass + '">' + statusText + '</span>';
+      html += '<div class="ide-actions">';
+      html += '<button class="btn btn-install" onclick="doInstall(' + index + ', ' + isFound + ')" ' + installDisabled + '>安装</button>';
+      html += '<button class="btn btn-uninstall" onclick="doUninstall(' + index + ', ' + isFound + ')" ' + uninstallDisabled + '>卸载</button>';
+      html += '</div>';
+      html += '</div>';
+
+      return html;
+    }
+
+    /**
+     * 切换显示未检测到的环境
+     */
+    function toggleNotFound() {
+      notFoundExpanded = !notFoundExpanded;
+      var btn = document.getElementById('notFoundSection').getElementsByTagName('button')[0];
+      var list = document.getElementById('notFoundList');
+
+      if (notFoundExpanded) {
+        btn.innerText = '▼ 隐藏未检测到的环境';
+        list.style.display = 'block';
+      } else {
+        btn.innerText = '▶ 显示未检测到的环境';
+        list.style.display = 'none';
+      }
+    }
+
+    /**
+     * 检查是否是内置EGE的IDE（仅 Red Panda）
+     */
+    function isBuiltinEgeIDE(ide) {
+      var name = ide.name.toLowerCase();
+      return name.indexOf('red panda') >= 0 ||
+        name.indexOf('redpanda') >= 0;
+    }
+
+    /**
+     * 获取内置EGE IDE的提示信息
+     */
+    function getBuiltinEgeWarning(ide, isInstall) {
+      var ideName = 'Red Panda';
+      if (isInstall) {
+        return ideName + ' 已内置 EGE 图形库。\n\n' +
+          '通常无需手动安装，您可以直接通过「新建 EGE 项目」的方式使用 EGE。\n\n' +
+          '只有在需要更新到最新版 EGE 时才需要执行此安装。\n\n' +
+          '确定要继续安装吗？';
+      } else {
+        return ideName + ' 已内置 EGE 图形库。\n\n' +
+          '卸载后可能影响 ' + ideName + ' 的正常使用。\n\n' +
+          '如需恢复，请重新安装 ' + ideName + ' 或重新运行本安装程序。\n\n' +
+          '确定要继续卸载吗？';
+      }
+    }
+
+    /**
+     * 执行安装
+     */
+    function doInstall(index, isFound) {
+      var ide = isFound ? detectedIDEs[index] : notFoundIDEs[index];
+      if (!ide || !ide.found) return;
+
+      // 对于内置EGE的IDE，显示额外提示
+      if (isBuiltinEgeIDE(ide)) {
+        var confirmed = confirm(getBuiltinEgeWarning(ide, true));
+        if (!confirmed) return;
+      }
+
+      showModal('正在安装到 ' + ide.name + '...');
+
       window.setTimeout(function () {
-        Installer.install(selectedIDEs, updateProgress, onInstallComplete);
+        try {
+          Installer.install([ide], updateModalProgress, function (success, message) {
+            if (success) {
+              modalLog('安装完成！', 'success');
+              ide.egeInstalled = true;
+            } else {
+              modalLog('安装失败: ' + message, 'error');
+            }
+            enableModalClose();
+            renderIDEList();
+          }, libsPath);
+        } catch (e) {
+          modalLog('安装出错: ' + e.message, 'error');
+          enableModalClose();
+        }
       }, 100);
     }
 
-    function updateProgress(percent, message) {
-      document.getElementById('progressFill').style.width = percent + '%';
-      document.getElementById('progressText').innerText = message;
+    /**
+     * 执行卸载
+     */
+    function doUninstall(index, isFound) {
+      var ide = isFound ? detectedIDEs[index] : notFoundIDEs[index];
+      if (!ide || !ide.found || !ide.egeInstalled) return;
+
+      // 对于内置EGE的IDE，显示特殊提示
+      if (isBuiltinEgeIDE(ide)) {
+        var confirmed = confirm(getBuiltinEgeWarning(ide, false));
+        if (!confirmed) return;
+      } else {
+        var confirmed = confirm('确定要从 ' + ide.name + ' 卸载 EGE 库吗？');
+        if (!confirmed) return;
+      }
+
+      showModal('正在从 ' + ide.name + ' 卸载...');
+
+      window.setTimeout(function () {
+        try {
+          uninstallFromIDE(ide, function (success, message) {
+            if (success) {
+              modalLog('卸载完成！', 'success');
+              ide.egeInstalled = false;
+            } else {
+              modalLog('卸载失败: ' + message, 'error');
+            }
+            enableModalClose();
+            renderIDEList();
+          });
+        } catch (e) {
+          modalLog('卸载出错: ' + e.message, 'error');
+          enableModalClose();
+        }
+      }, 100);
     }
 
-    function log(message, type) {
-      var logArea = document.getElementById('logArea');
+    /**
+     * 卸载EGE
+     */
+    function uninstallFromIDE(ide, callback) {
+      modalLog('开始卸载 EGE 库...', 'info');
+
+      var filesToDelete = ['ege.h', 'graphics.h'];
+      var libFilesToDelete = ['libgraphics.a', 'graphics.lib', 'graphics64.lib'];
+
+      var deletedCount = 0;
+      var errorCount = 0;
+
+      // 删除头文件
+      modalLog('删除头文件...', 'info');
+      for (var i = 0; i < filesToDelete.length; i++) {
+        var headerPath = ide.includePath + '\\' + filesToDelete[i];
+        if (fso.FileExists(headerPath)) {
+          try {
+            fso.DeleteFile(headerPath, true);
+            modalLog('  删除: ' + filesToDelete[i], 'success');
+            deletedCount++;
+          } catch (e) {
+            modalLog('  删除失败: ' + filesToDelete[i] + ' - ' + e.message, 'error');
+            errorCount++;
+          }
+        }
+      }
+
+      // 删除ege目录
+      var egeDir = ide.includePath + '\\ege';
+      if (fso.FolderExists(egeDir)) {
+        try {
+          fso.DeleteFolder(egeDir, true);
+          modalLog('  删除: ege\\ 目录', 'success');
+          deletedCount++;
+        } catch (e) {
+          modalLog('  删除失败: ege\\ 目录 - ' + e.message, 'error');
+          errorCount++;
+        }
+      }
+
+      // 删除库文件
+      modalLog('删除库文件...', 'info');
+      if (ide.libPath) {
+        for (var j = 0; j < libFilesToDelete.length; j++) {
+          var libPath = ide.libPath + '\\' + libFilesToDelete[j];
+          if (fso.FileExists(libPath)) {
+            try {
+              fso.DeleteFile(libPath, true);
+              modalLog('  删除: ' + libFilesToDelete[j], 'success');
+              deletedCount++;
+            } catch (e) {
+              modalLog('  删除失败: ' + libFilesToDelete[j] + ' - ' + e.message, 'error');
+              errorCount++;
+            }
+          }
+        }
+      }
+
+      updateModalProgress(100, '卸载完成');
+
+      if (errorCount > 0) {
+        callback(false, '部分文件删除失败');
+      } else if (deletedCount === 0) {
+        callback(false, '未找到需要删除的文件');
+      } else {
+        callback(true, '成功删除 ' + deletedCount + ' 个文件');
+      }
+    }
+
+    /**
+     * 显示模态框
+     */
+    function showModal(title) {
+      document.getElementById('modalTitle').innerText = title;
+      document.getElementById('modalLog').innerHTML = '';
+      document.getElementById('modalProgress').style.width = '0%';
+      document.getElementById('modalCloseBtn').disabled = true;
+      document.getElementById('operationModal').className = 'modal-overlay show';
+    }
+
+    /**
+     * 关闭模态框
+     */
+    function closeModal() {
+      document.getElementById('operationModal').className = 'modal-overlay';
+    }
+
+    /**
+     * 启用模态框关闭按钮
+     */
+    function enableModalClose() {
+      document.getElementById('modalCloseBtn').disabled = false;
+    }
+
+    /**
+     * 更新模态框进度
+     */
+    function updateModalProgress(percent, message) {
+      document.getElementById('modalProgress').style.width = percent + '%';
+      if (message) {
+        document.getElementById('modalTitle').innerText = message;
+      }
+    }
+
+    /**
+     * 模态框日志
+     */
+    function modalLog(message, type) {
+      var logArea = document.getElementById('modalLog');
       var className = type || '';
       logArea.innerHTML += '<div class="' + className + '">' + message + '</div>';
       logArea.scrollTop = logArea.scrollHeight;
     }
 
-    function onInstallComplete(success, message) {
-      showStep(4);
-      var icon = document.getElementById('resultIcon');
-      var text = document.getElementById('resultText');
-      var details = document.getElementById('resultDetails');
+    /**
+     * 全局log函数（供Installer模块使用）
+     */
+    function log(message, type) {
+      modalLog(message, type);
+    }
 
-      if (success) {
-        icon.className = 'result-icon success';
-        icon.innerText = '✓';
-        text.innerText = '安装完成！';
-        details.innerHTML = '<p>EGE 库已成功安装到选定的 IDE 中。</p>' +
-          '<p>您现在可以在程序中使用 <code>#include &lt;graphics.h&gt;</code> 开始图形编程。</p>';
-      } else {
-        icon.className = 'result-icon error';
-        icon.innerText = '✗';
-        text.innerText = '安装出现错误';
-        details.innerHTML = '<p>' + message + '</p>';
+    /**
+     * 扫描MinGW - 让用户选择目录并递归查找MinGW安装
+     */
+    function scanForMinGW() {
+      try {
+        var shellApp = new ActiveXObject("Shell.Application");
+        var folder = shellApp.BrowseForFolder(0, "选择要扫描的目录（将递归搜索 MinGW 安装）", 0x0051, "");
+
+        if (!folder) return; // 用户取消
+
+        var folderPath = folder.Self.Path;
+        document.getElementById('statusText').innerText = '正在扫描: ' + folderPath + '...';
+
+        // 使用setTimeout让UI更新
+        window.setTimeout(function () {
+          var foundMinGWs = [];
+          scanDirectory(folderPath, foundMinGWs, 0, 7); // 最大深度7层（覆盖 AppData 深层工具）
+
+          if (foundMinGWs.length > 0) {
+            // 添加找到的MinGW到检测列表
+            var addedCount = 0;
+            for (var i = 0; i < foundMinGWs.length; i++) {
+              var mingw = foundMinGWs[i];
+              var mingwPathLower = mingw.path.toLowerCase();
+
+              // 检查是否已存在或与已有IDE有父子目录关系
+              var shouldSkip = false;
+              for (var j = 0; j < detectedIDEs.length; j++) {
+                var existingPath = detectedIDEs[j].path.toLowerCase();
+                var existingInclude = (detectedIDEs[j].includePath || '').toLowerCase();
+
+                // 跳过完全相同的路径
+                if (existingPath === mingwPathLower) {
+                  shouldSkip = true;
+                  break;
+                }
+
+                // 跳过是已有IDE子目录的情况（如 RedPanda-Cpp\mingw64）
+                if (mingwPathLower.indexOf(existingPath + '\\') === 0) {
+                  shouldSkip = true;
+                  break;
+                }
+
+                // 跳过已有IDE的includePath包含此MinGW的情况
+                if (existingInclude && existingInclude.indexOf(mingwPathLower) === 0) {
+                  shouldSkip = true;
+                  break;
+                }
+              }
+
+              if (!shouldSkip) {
+                mingw.egeInstalled = checkEgeInstalled(mingw);
+                detectedIDEs.push(mingw);
+                addedCount++;
+              }
+            }
+            renderIDEList();
+            if (addedCount > 0) {
+              alert('扫描完成！新增 ' + addedCount + ' 个 MinGW 安装。');
+            } else {
+              alert('扫描完成，找到 ' + foundMinGWs.length + ' 个 MinGW，但均已在列表中。');
+            }
+          } else {
+            alert('扫描完成，未找到 MinGW 安装。\n\n提示：MinGW 目录应包含 bin\\gcc.exe 或 bin\\g++.exe');
+          }
+
+          updateStatus();
+        }, 100);
+
+      } catch (e) {
+        alert('扫描出错: ' + e.message);
+        updateStatus();
       }
+    }
+
+    /**
+     * 递归扫描目录查找MinGW
+     */
+    function scanDirectory(path, results, depth, maxDepth) {
+      if (depth > maxDepth) return;
+
+      try {
+        var folder = fso.GetFolder(path);
+
+        // 检查当前目录是否是MinGW
+        if (isMinGWDirectory(path)) {
+          var is64bit = path.toLowerCase().indexOf('64') >= 0 ||
+            path.toLowerCase().indexOf('x64') >= 0;
+          results.push({
+            name: 'MinGW' + (is64bit ? '-w64' : '32') + ' (扫描发现)',
+            path: path,
+            type: 'mingw',
+            found: true,
+            includePath: path + '\\include',
+            libPath: path + '\\lib'
+          });
+          return; // 找到后不再递归此目录
+        }
+
+        // 递归子目录
+        var subFolders = new Enumerator(folder.SubFolders);
+        for (; !subFolders.atEnd(); subFolders.moveNext()) {
+          var subPath = subFolders.item().Path;
+          var subName = fso.GetFileName(subPath).toLowerCase();
+
+          // 跳过一些目录以提高性能
+          if (subName === 'windows' || subName === '$recycle.bin' ||
+            subName === 'system volume information' || subName.charAt(0) === '.') {
+            continue;
+          }
+
+          // 优先扫描可能有MinGW或IDE的目录（扩展关键词列表）
+          var isRelevantPath =
+            subName.indexOf('mingw') >= 0 ||
+            subName.indexOf('msys') >= 0 ||
+            subName.indexOf('gcc') >= 0 ||
+            subName.indexOf('tdm') >= 0 ||
+            subName.indexOf('clion') >= 0 ||
+            subName.indexOf('jetbrains') >= 0 ||
+            subName.indexOf('redpanda') >= 0 ||
+            subName.indexOf('devcpp') >= 0 ||
+            subName.indexOf('dev-cpp') >= 0 ||
+            subName.indexOf('codeblocks') >= 0 ||
+            subName === 'program files' ||
+            subName === 'program files (x86)' ||
+            subName === 'programs' ||  // Toolbox 安装路径
+            subName === 'appdata' ||   // 用户应用数据
+            subName === 'local';       // AppData\Local
+
+          if (isRelevantPath) {
+            // 关键路径继续深入扫描
+            scanDirectory(subPath, results, depth + 1, maxDepth);
+          } else if (depth < 3) {
+            // 前三层扫描所有目录（增加覆盖范围）
+            scanDirectory(subPath, results, depth + 1, maxDepth);
+          }
+        }
+      } catch (e) {
+        // 忽略权限错误等
+      }
+    }
+
+    /**
+     * 检查目录是否是MinGW安装
+     */
+    function isMinGWDirectory(path) {
+      try {
+        var binPath = path + '\\bin';
+        if (!fso.FolderExists(binPath)) return false;
+
+        // 检查是否有gcc或g++
+        var hasGcc = fso.FileExists(binPath + '\\gcc.exe') ||
+          fso.FileExists(binPath + '\\g++.exe');
+
+        // 检查是否有include和lib目录
+        var hasInclude = fso.FolderExists(path + '\\include');
+        var hasLib = fso.FolderExists(path + '\\lib');
+
+        return hasGcc && hasInclude && hasLib;
+      } catch (e) {
+        return false;
+      }
+    }
+
+    /**
+     * 更新状态栏
+     */
+    function updateStatus() {
+      var installedCount = 0;
+      for (var i = 0; i < detectedIDEs.length; i++) {
+        if (detectedIDEs[i].egeInstalled) installedCount++;
+      }
+      document.getElementById('statusText').innerText =
+        '检测到 ' + detectedIDEs.length + ' 个开发环境，' + installedCount + ' 个已安装 EGE';
     }
   </script>
 </body>

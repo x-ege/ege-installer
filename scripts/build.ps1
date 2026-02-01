@@ -1,49 +1,85 @@
-﻿# EGE Installer Build Script
-# 构建 EGE 安装程序打包脚本
+﻿# EGE Installer Build Script (NSIS)
+# 使用 NSIS 打包 HTA 安装界面
+#
+# 用法:
+#   .\build.ps1                                    # 本地开发构建
+#   .\build.ps1 -Version "1.2.3"                   # 指定版本号
+#   .\build.ps1 -XegeLibsPath "C:\path\to\libs"    # 自定义库路径 (CI)
 
 param(
     [string]$OutputDir = "dist",
-    [string]$Version = "1.0.0"
+    [string]$Version = "1.0.0",
+    [string]$XegeLibsPath                          # 可选：自定义 xege_libs 路径
 )
 
 $ErrorActionPreference = "Stop"
 $ScriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
 $ProjectRoot = Split-Path -Parent $ScriptDir
 $SrcDir = Join-Path $ProjectRoot "src"
-$EgeLibsDir = Join-Path (Split-Path -Parent $ProjectRoot) "xege_libs"
 
-Write-Host "=== EGE Installer Build Script ===" -ForegroundColor Cyan
-Write-Host "Project Root: $ProjectRoot"
-Write-Host "Source Dir: $SrcDir"
-Write-Host "EGE Libs Dir: $EgeLibsDir"
-Write-Host ""
+# 确定 EGE 库目录
+if ($XegeLibsPath) {
+    # 处理 Unix 风格路径 (如 /c/Users/...)
+    if ($XegeLibsPath -match "^/([a-zA-Z])/") {
+        $driveLetter = $matches[1].ToUpper()
+        $XegeLibsPath = $XegeLibsPath -replace "^/[a-zA-Z]/", "${driveLetter}:\"
+        $XegeLibsPath = $XegeLibsPath.Replace("/", "\")
+    }
+    $EgeLibsDir = $XegeLibsPath
+} else {
+    # 默认路径：项目父目录下的 xege_libs
+    $EgeLibsDir = Join-Path (Split-Path -Parent $ProjectRoot) "xege_libs"
+}
 
-# 检查 7-Zip
-$7zPath = $null
-$7zPaths = @(
-    "C:\Program Files\7-Zip\7z.exe",
-    "C:\Program Files (x86)\7-Zip\7z.exe",
-    (Get-Command "7z.exe" -ErrorAction SilentlyContinue).Source
+$LogFile = Join-Path $ProjectRoot "logs\build.log"
+
+# 初始化日志
+New-Item -ItemType Directory -Path (Join-Path $ProjectRoot "logs") -Force | Out-Null
+"=== Build started at $(Get-Date -Format 'yyyy-MM-dd HH:mm:ss') ===" | Out-File $LogFile
+
+function Log($msg) {
+    Write-Host $msg
+    $msg | Out-File $LogFile -Append
+}
+
+Log "=== EGE Installer Build Script (NSIS) ==="
+Log "Project Root: $ProjectRoot"
+Log "Source Dir: $SrcDir"
+Log "EGE Libs Dir: $EgeLibsDir"
+Log ""
+
+# 检查 NSIS
+$nsisPath = $null
+$nsisPaths = @(
+    "C:\Program Files (x86)\NSIS\makensis.exe",
+    "C:\Program Files\NSIS\makensis.exe",
+    (Get-Command "makensis.exe" -ErrorAction SilentlyContinue).Source
 )
 
-foreach ($path in $7zPaths) {
+foreach ($path in $nsisPaths) {
     if ($path -and (Test-Path $path)) {
-        $7zPath = $path
+        $nsisPath = $path
         break
     }
 }
 
-if (-not $7zPath) {
-    Write-Host "Error: 7-Zip not found. Please install 7-Zip." -ForegroundColor Red
+if (-not $nsisPath) {
+    Log "Error: NSIS not found."
+    Log ""
+    Log "请安装 NSIS："
+    Log "  1. 下载: https://nsis.sourceforge.io/Download"
+    Log "  2. 或使用 winget: winget install NSIS.NSIS"
+    Log "  3. 或使用 scoop: scoop install nsis"
+    Log ""
     exit 1
 }
 
-Write-Host "Using 7-Zip: $7zPath" -ForegroundColor Green
+Log "Using NSIS: $nsisPath"
 
 # 检查 EGE 库目录
 if (-not (Test-Path $EgeLibsDir)) {
-    Write-Host "Error: EGE libs directory not found: $EgeLibsDir" -ForegroundColor Red
-    Write-Host "Please ensure xege_libs is in the parent directory." -ForegroundColor Yellow
+    Log "Error: EGE libs directory not found: $EgeLibsDir"
+    Log "Please ensure xege_libs is in the parent directory."
     exit 1
 }
 
@@ -53,32 +89,37 @@ if (-not (Test-Path $OutputPath)) {
     New-Item -ItemType Directory -Path $OutputPath | Out-Null
 }
 
-# 创建临时打包目录
-$TempDir = Join-Path $env:TEMP "ege-installer-build-$(Get-Random)"
+# 创建临时打包目录（在项目内，NSIS 脚本使用相对路径）
+$TempDir = Join-Path $ProjectRoot "temp"
+if (Test-Path $TempDir) {
+    Remove-Item -Recurse -Force $TempDir
+}
 New-Item -ItemType Directory -Path $TempDir | Out-Null
 
-Write-Host ""
-Write-Host "Building package..." -ForegroundColor Cyan
+Log ""
+Log "Building package..."
+Log "Temp directory: $TempDir"
 
 try {
     # 复制安装程序源文件
-    Write-Host "  Copying installer files..."
+    Log "  Copying installer files..."
     $InstallDir = Join-Path $TempDir "installer"
     New-Item -ItemType Directory -Path $InstallDir | Out-Null
     
-    Copy-Item "$SrcDir\setup.hta" $InstallDir
-    Copy-Item "$SrcDir\detector.js" $InstallDir
-    Copy-Item "$SrcDir\installer.js" $InstallDir
+    Copy-Item "$SrcDir\setup.hta" $InstallDir -Force
+    Copy-Item "$SrcDir\detector.js" $InstallDir -Force
+    Copy-Item "$SrcDir\installer.js" $InstallDir -Force
+    
+    # 验证文件
+    $htaSize = (Get-Item "$InstallDir\setup.hta").Length
+    Log "  setup.hta: $htaSize bytes"
     
     # 复制 EGE 库文件
-    Write-Host "  Copying EGE library files..."
+    Log "  Copying EGE library files..."
     $LibsDir = Join-Path $TempDir "libs"
     New-Item -ItemType Directory -Path $LibsDir | Out-Null
     
-    # 复制 include 目录
     Copy-Item "$EgeLibsDir\include" "$LibsDir\include" -Recurse
-    
-    # 复制 lib 目录
     Copy-Item "$EgeLibsDir\lib" "$LibsDir\lib" -Recurse
     
     # 创建版本信息文件
@@ -88,71 +129,46 @@ Version: $Version
 Build Date: $(Get-Date -Format "yyyy-MM-dd HH:mm:ss")
 "@ | Out-File -FilePath "$TempDir\version.txt" -Encoding UTF8
     
-    # 创建自解压配置
-    $SfxConfig = @"
-;!@Install@!UTF-8!
-Title="EGE 图形库安装程序"
-BeginPrompt="是否安装 EGE 图形库？"
-RunProgram="mshta.exe \"%%T\\installer\\setup.hta\""
-;!@InstallEnd@!
-"@
-    $SfxConfig | Out-File -FilePath "$TempDir\sfx.txt" -Encoding UTF8
+    # 调用 NSIS 编译
+    Log "  Compiling with NSIS..."
+    $nsiScript = Join-Path $ScriptDir "installer.nsi"
     
-    # 打包为 7z
-    Write-Host "  Creating archive..."
-    $ArchivePath = Join-Path $TempDir "ege-setup.7z"
-    & $7zPath a -t7z -mx=9 -mf=BCJ2 -r $ArchivePath "$TempDir\installer" "$TempDir\libs" "$TempDir\version.txt" | Out-Null
+    # 切换到脚本目录执行 NSIS（因为 nsi 文件使用相对路径）
+    Push-Location $ScriptDir
     
-    if (-not (Test-Path $ArchivePath)) {
-        throw "Failed to create archive"
+    try {
+        $output = & $nsisPath "/DVERSION=$Version" "/V2" $nsiScript 2>&1
+        $exitCode = $LASTEXITCODE
+        
+        Log "  NSIS output:"
+        $output | ForEach-Object { Log "    $_" }
+        
+        if ($exitCode -ne 0) {
+            throw "NSIS compilation failed with exit code $exitCode"
+        }
+    } finally {
+        Pop-Location
     }
     
-    # 获取 7-Zip SFX 模块
-    $SfxModule = Join-Path (Split-Path $7zPath -Parent) "7z.sfx"
-    if (-not (Test-Path $SfxModule)) {
-        # 尝试使用控制台 SFX
-        $SfxModule = Join-Path (Split-Path $7zPath -Parent) "7zCon.sfx"
+    $FinalPath = Join-Path $OutputPath "ege-setup-$Version.exe"
+    
+    if (-not (Test-Path $FinalPath)) {
+        throw "Output file not created: $FinalPath"
     }
     
-    if (-not (Test-Path $SfxModule)) {
-        Write-Host "Warning: SFX module not found, creating 7z archive only" -ForegroundColor Yellow
-        $FinalPath = Join-Path $OutputPath "ege-setup-$Version.7z"
-        Copy-Item $ArchivePath $FinalPath
-    } else {
-        # 创建自解压 EXE
-        Write-Host "  Creating self-extracting executable..."
-        $FinalPath = Join-Path $OutputPath "ege-setup-$Version.exe"
-        
-        # 合并 SFX + Config + Archive
-        $SfxConfigPath = "$TempDir\sfx.txt"
-        
-        $output = New-Object System.IO.FileStream($FinalPath, [System.IO.FileMode]::Create)
-        
-        # Write SFX module
-        $sfxBytes = [System.IO.File]::ReadAllBytes($SfxModule)
-        $output.Write($sfxBytes, 0, $sfxBytes.Length)
-        
-        # Write config
-        $configBytes = [System.IO.File]::ReadAllBytes($SfxConfigPath)
-        $output.Write($configBytes, 0, $configBytes.Length)
-        
-        # Write archive
-        $archiveBytes = [System.IO.File]::ReadAllBytes($ArchivePath)
-        $output.Write($archiveBytes, 0, $archiveBytes.Length)
-        
-        $output.Close()
-    }
-    
-    Write-Host ""
-    Write-Host "Build completed!" -ForegroundColor Green
-    Write-Host "Output: $FinalPath" -ForegroundColor Cyan
+    Log ""
+    Log "Build completed!"
+    Log "Output: $FinalPath"
     
     # 显示文件大小
     $fileSize = (Get-Item $FinalPath).Length
     $fileSizeKB = [math]::Round($fileSize / 1024, 2)
     $fileSizeMB = [math]::Round($fileSize / 1024 / 1024, 2)
-    Write-Host "Size: $fileSizeMB MB ($fileSizeKB KB)" -ForegroundColor Cyan
+    Log "Size: $fileSizeMB MB ($fileSizeKB KB)"
     
+} catch {
+    Log "ERROR: $_"
+    throw
 } finally {
     # 清理临时目录
     if (Test-Path $TempDir) {

@@ -27,14 +27,14 @@ var Detector = (function () {
     { name: "MinGW32", paths: ["C:\\MinGW", "C:\\mingw32", "D:\\MinGW"] }
   ];
 
-  // Dev-C++ 常见安装路径
+  // Red Panda 独立 IDE（使用 MinGW）
+  var redPandaPaths = [
+    "C:\\Program Files\\RedPanda-Cpp",
+    "C:\\Program Files (x86)\\RedPanda-Cpp"
+  ];
+
+  // Dev-C++ 常见安装路径（不包括 Red Panda）
   var devCppPaths = [
-    {
-      name: "Red Panda Dev-C++", paths: [
-        "C:\\Program Files\\RedPanda-Cpp",
-        "C:\\Program Files (x86)\\RedPanda-Cpp"
-      ]
-    },
     {
       name: "Embarcadero Dev-C++", paths: [
         "C:\\Program Files (x86)\\Embarcadero\\Dev-Cpp",
@@ -57,6 +57,15 @@ var Detector = (function () {
         "C:\\Program Files (x86)\\CodeBlocks"
       ]
     }
+  ];
+
+  // CLion 路径（直接安装和 Toolbox 安装）
+  var clionBasePaths = [
+    // 直接安装版本
+    "C:\\Program Files\\JetBrains",
+    "C:\\Program Files (x86)\\JetBrains",
+    // Toolbox 安装版本 - 使用环境变量展开
+    "%LOCALAPPDATA%\\JetBrains\\Toolbox\\apps"
   ];
 
   /**
@@ -216,6 +225,51 @@ var Detector = (function () {
   }
 
   /**
+   * 检测 Red Panda
+   */
+  function detectRedPanda() {
+    var results = [];
+    var found = false;
+    var foundPath = "";
+
+    for (var i = 0; i < redPandaPaths.length; i++) {
+      if (pathExists(redPandaPaths[i])) {
+        found = true;
+        foundPath = redPandaPaths[i];
+        break;
+      }
+    }
+
+    if (found) {
+      // 查找 MinGW 目录
+      var mingwDir = foundPath + "\\MinGW64";
+      if (!pathExists(mingwDir)) {
+        mingwDir = foundPath + "\\MinGW32";
+      }
+
+      results.push({
+        name: "Red Panda (MinGW)",
+        path: foundPath,
+        type: "redpanda",
+        found: true,
+        includePath: mingwDir + "\\include",
+        libPath: mingwDir + "\\lib"
+      });
+    } else {
+      results.push({
+        name: "Red Panda (MinGW)",
+        path: redPandaPaths[0],
+        type: "redpanda",
+        found: false,
+        includePath: "",
+        libPath: ""
+      });
+    }
+
+    return results;
+  }
+
+  /**
    * 检测 Dev-C++
    */
   function detectDevCpp() {
@@ -300,6 +354,169 @@ var Detector = (function () {
   }
 
   /**
+   * 检测 CLion
+   */
+  function detectCLion() {
+    var results = [];
+
+    // 展开环境变量
+    function expandEnv(path) {
+      return shell.ExpandEnvironmentStrings(path);
+    }
+
+    // 获取目录下的所有子目录
+    function getSubDirs(path) {
+      var dirs = [];
+      try {
+        if (!fso.FolderExists(path)) return dirs;
+        var folder = fso.GetFolder(path);
+        var subFolders = new Enumerator(folder.SubFolders);
+        for (; !subFolders.atEnd(); subFolders.moveNext()) {
+          dirs.push(subFolders.item().Path);
+        }
+      } catch (e) { }
+      return dirs;
+    }
+
+    // 检查 CLion 目录中的 MinGW 路径
+    function findMinGWInCLion(clionPath) {
+      var possiblePaths = [
+        clionPath + "\\bin\\mingw",
+        clionPath + "\\mingw",
+        clionPath + "\\bundled"
+      ];
+
+      for (var i = 0; i < possiblePaths.length; i++) {
+        if (pathExists(possiblePaths[i] + "\\include") &&
+          pathExists(possiblePaths[i] + "\\lib")) {
+          return possiblePaths[i];
+        }
+      }
+      return null;
+    }
+
+    // 1. 检测 Toolbox 新版安装方式 (%LOCALAPPDATA%\Programs\CLion)
+    var toolboxNewPaths = [
+      expandEnv("%LOCALAPPDATA%\\Programs")
+    ];
+
+    for (var t = 0; t < toolboxNewPaths.length; t++) {
+      var programsPath = toolboxNewPaths[t];
+      if (!programsPath || !fso.FolderExists(programsPath)) continue;
+
+      var apps = getSubDirs(programsPath);
+      for (var a = 0; a < apps.length; a++) {
+        var appName = fso.GetFileName(apps[a]).toLowerCase();
+        if (appName.indexOf("clion") === 0) {
+          var mingwPath = findMinGWInCLion(apps[a]);
+          if (mingwPath) {
+            results.push({
+              name: "CLion (MinGW)",
+              path: apps[a],
+              type: "clion",
+              found: true,
+              includePath: mingwPath + "\\include",
+              libPath: mingwPath + "\\lib",
+              installType: "toolbox-programs"
+            });
+          }
+        }
+      }
+    }
+
+    // 2. 检测直接安装的 CLion
+    var directPaths = [
+      "C:\\Program Files\\JetBrains",
+      "C:\\Program Files (x86)\\JetBrains",
+      expandEnv("%PROGRAMFILES%\\JetBrains"),
+      expandEnv("%PROGRAMFILES(X86)%\\JetBrains"),
+      "D:\\Program Files\\JetBrains",
+      "E:\\Program Files\\JetBrains"
+    ];
+
+    for (var i = 0; i < directPaths.length; i++) {
+      var jbPath = directPaths[i];
+      if (!jbPath || !fso.FolderExists(jbPath)) continue;
+
+      var subDirs = getSubDirs(jbPath);
+      for (var j = 0; j < subDirs.length; j++) {
+        var dirName = fso.GetFileName(subDirs[j]);
+        if (dirName.toLowerCase().indexOf("clion") === 0) {
+          var mingwPath2 = findMinGWInCLion(subDirs[j]);
+          if (mingwPath2) {
+            results.push({
+              name: "CLion (MinGW)",
+              path: subDirs[j],
+              type: "clion",
+              found: true,
+              includePath: mingwPath2 + "\\include",
+              libPath: mingwPath2 + "\\lib",
+              installType: "direct"
+            });
+          }
+        }
+      }
+    }
+
+    // 3. 检测 Toolbox 旧版安装方式 (apps/clion/ch-0/<version>)
+    var toolboxOldPaths = [
+      expandEnv("%LOCALAPPDATA%\\JetBrains\\Toolbox\\apps"),
+      expandEnv("%APPDATA%\\JetBrains\\Toolbox\\apps")
+    ];
+
+    for (var tb = 0; tb < toolboxOldPaths.length; tb++) {
+      var toolboxPath = toolboxOldPaths[tb];
+      if (!toolboxPath || !fso.FolderExists(toolboxPath)) continue;
+
+      var appDirs = getSubDirs(toolboxPath);
+      for (var k = 0; k < appDirs.length; k++) {
+        var appName2 = fso.GetFileName(appDirs[k]).toLowerCase();
+        if (appName2 === "clion" || appName2 === "clion-eap") {
+          var channelDirs = getSubDirs(appDirs[k]);
+          for (var l = 0; l < channelDirs.length; l++) {
+            var versionDirs = getSubDirs(channelDirs[l]);
+            for (var m = 0; m < versionDirs.length; m++) {
+              var versionPath = versionDirs[m];
+              var mingwPath3 = findMinGWInCLion(versionPath);
+              if (mingwPath3) {
+                results.push({
+                  name: "CLion (MinGW)",
+                  path: versionPath,
+                  type: "clion",
+                  found: true,
+                  includePath: mingwPath3 + "\\include",
+                  libPath: mingwPath3 + "\\lib",
+                  installType: "toolbox-apps"
+                });
+              }
+            }
+          }
+        }
+      }
+    }
+
+    // 去重：移除路径相同的重复项
+    var deduplicated = [];
+    for (var r = 0; r < results.length; r++) {
+      var isDuplicate = false;
+      var pathLower = results[r].path.toLowerCase();
+
+      for (var d = 0; d < deduplicated.length; d++) {
+        if (deduplicated[d].path.toLowerCase() === pathLower) {
+          isDuplicate = true;
+          break;
+        }
+      }
+
+      if (!isDuplicate) {
+        deduplicated.push(results[r]);
+      }
+    }
+
+    return deduplicated;
+  }
+
+  /**
    * 检测所有 IDE
    */
   function detectAll() {
@@ -333,6 +550,12 @@ var Detector = (function () {
       allIDEs.push(mingwResults[m]);
     }
 
+    // 检测 Red Panda
+    var redPandaResults = detectRedPanda();
+    for (var rp = 0; rp < redPandaResults.length; rp++) {
+      allIDEs.push(redPandaResults[rp]);
+    }
+
     // 检测 Dev-C++
     var devCppResults = detectDevCpp();
     for (var d = 0; d < devCppResults.length; d++) {
@@ -343,6 +566,12 @@ var Detector = (function () {
     var cbResults = detectCodeBlocks();
     for (var c = 0; c < cbResults.length; c++) {
       allIDEs.push(cbResults[c]);
+    }
+
+    // 检测 CLion
+    var clionResults = detectCLion();
+    for (var cl = 0; cl < clionResults.length; cl++) {
+      allIDEs.push(clionResults[cl]);
     }
 
     return allIDEs;
@@ -357,6 +586,7 @@ var Detector = (function () {
     detectMinGW: detectMinGW,
     detectDevCpp: detectDevCpp,
     detectCodeBlocks: detectCodeBlocks,
+    detectCLion: detectCLion,
     pathExists: pathExists
   };
 })();

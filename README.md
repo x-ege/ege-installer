@@ -1,63 +1,253 @@
-﻿# EGE Installer (WIP)
+﻿# EGE Installer
 
 [![GitHub](https://img.shields.io/badge/GitHub-x--ege/xege-blue)](https://github.com/x-ege/xege)
+[![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 
-Installer for [EGE (Easy Graphics Engine)](https://github.com/x-ege/xege) - configures EGE library globally for various IDEs.
+Modern installer for [EGE (Easy Graphics Engine)](https://github.com/x-ege/xege) - automatically detects and configures EGE library for various IDEs and compilers.
 
-## Features
+## ✨ Features
 
-- Auto-detect installed IDEs and compilers
-- Support Visual Studio, MinGW, Dev-C++, Code::Blocks
-- Modern HTA-based GUI installer
-- One-click installation
+- 🔍 **Smart Detection** - Automatically detects installed IDEs using registry, vswhere, and filesystem scanning
+- 🎯 **Wide Compatibility** - Supports Visual Studio, MinGW, Red Panda, Dev-C++, Code::Blocks, CLion
+- 🔄 **Install & Uninstall** - One-click installation and removal with rollback support
+- 🔎 **Manual Scan** - Recursively scan directories to find MinGW installations (depth: 7 layers)
+- 📊 **Detailed Progress** - Real-time installation logs and progress tracking
+- 🖥️ **DPI Aware** - Adaptive UI scaling for high-DPI displays
+- ⚡ **Lightweight** - ~20MB package with silent extraction and fast deployment
+- 🎨 **Modern UI** - Clean single-page interface based on EasyX design
 
-## Supported IDEs
+## 🎯 Supported IDEs
 
-| IDE | Versions | Architecture |
-|-----|----------|--------------|
-| Visual Studio | 2010-2026 | x86, x64 |
-| MinGW-w64 | MSYS2, Standalone | x86, x64 |
-| Dev-C++ | Embarcadero, Red Panda | x86, x64 |
-| Code::Blocks | Latest | x64 |
+| IDE | Detection Methods | Library Support | Notes |
+|-----|------------------|-----------------|-------|
+| **Visual Studio** | vswhere + Registry | VS 2010-2026 | x86/x64 architecture auto-detection |
+| **MinGW-w64** | Filesystem Scan | MSYS2, Standalone | Support for 32/64-bit variants |
+| **Red Panda C++** | Predefined Paths | Dedicated Library | Independent IDE with built-in MinGW |
+| **CLion** | Toolbox + Direct Install | Shared with Red Panda | 3 detection modes (see below) |
+| **Dev-C++** | Predefined Paths | Embarcadero, Legacy | Standard Dev-C++ variants |
+| **Code::Blocks** | Predefined Paths | Latest | MinGW bundled version |
 
-## Usage
+### CLion Detection Modes
 
-### Development
+1. **Toolbox Programs** - `%LOCALAPPDATA%\Programs\CLion`
+2. **Direct Installation** - `C:\Program Files\JetBrains\CLion*`
+3. **Toolbox Apps** - `%LOCALAPPDATA%\JetBrains\Toolbox\apps\clion`
+
+All modes validate MinGW presence at `bin\mingw\`, `mingw\`, or `bundled\`.
+
+## 📦 Tech Stack
+
+- **UI Framework**: HTA (HTML Application) with JScript
+- **Packaging**: NSIS 3.11 with DPI manifest
+- **Build Tool**: PowerShell automation script
+- **Detection**: COM objects (WScript.Shell, Scripting.FileSystemObject)
+
+## 🚀 Quick Start
+
+### For Users
+
+1. Download `ege-setup-x.x.x.exe` from [Releases](https://github.com/x-ege/ege-installer/releases)
+2. Run installer with administrator privileges
+3. Select IDEs to install EGE library
+4. Click "Install" button for each IDE
+
+### For Developers
+
+#### Prerequisites
+
+- Windows 10/11
+- PowerShell 5.1+
+- Git (for cloning dependencies)
+- NSIS 3.11+ (build only, [Download](https://nsis.sourceforge.io/Download))
+
+#### Quick Setup
+
+Run the setup script to prepare the development environment:
 
 ```powershell
-# Run installer directly
+# Interactive mode - prompts for confirmation
+.\scripts\setup.ps1
+
+# Auto mode - no prompts, ideal for CI
+.\scripts\setup.ps1 -Auto
+```
+
+The script will:
+- Check if `../xege_libs/` exists
+- Offer to clone [xege-sdk](https://github.com/x-ege/xege-sdk) if missing
+- Verify NSIS installation (optional)
+
+#### Development Mode
+
+Run installer directly without building:
+
+```powershell
+# Method 1: Using mshta
 mshta.exe .\src\setup.hta
+
+# Method 2: Using VSCode task
+# Ctrl+Shift+B → Run Installer
 ```
 
-Or press `F5` in VSCode.
-
-### Build Package
+#### Build Package
 
 ```powershell
+# Build with default version (1.0.0)
 .\scripts\build.ps1
+
+# Build with specific version
+.\scripts\build.ps1 -Version "1.2.3"
+
+# Build with custom library path (CI)
+.\scripts\build.ps1 -XegeLibsPath "C:\path\to\xege_libs" -Version "1.2.3"
 ```
 
-Output: `dist/ege-setup-<version>.exe`
+**Output**: `dist/ege-setup-<version>.exe` (~20 MB)
 
-## Project Structure
+#### Build Tasks (VSCode)
+
+- **Run Installer** - `Ctrl+Shift+B` → Run Installer
+- **Build Package** - `Ctrl+Shift+B` → Build Package (default)
+- **Clean Build** - `Ctrl+Shift+B` → Clean Build
+
+## 📁 Project Structure
 
 ```
 ege-installer/
 ├── src/
-│   ├── setup.hta        # Main UI
-│   ├── detector.js      # IDE detection
-│   └── installer.js     # Installation logic
+│   ├── setup.hta           # Main UI with embedded styles and logic
+│   ├── detector.js         # IDE detection module
+│   │   ├── detectVSWithVswhere()      # VS 2017+ detection
+│   │   ├── detectVSFromRegistry()     # VS 2010-2015 detection
+│   │   ├── detectMinGW()              # MinGW installations
+│   │   ├── detectRedPanda()           # Red Panda C++ (independent)
+│   │   ├── detectDevCpp()             # Other Dev-C++ variants
+│   │   ├── detectCodeBlocks()         # Code::Blocks
+│   │   └── detectCLion()              # CLion (3 modes)
+│   └── installer.js        # Installation/uninstall logic
+│       ├── installHeaders()           # Header files installation
+│       ├── installLibs()              # Library files installation
+│       └── libDirMapping              # IDE-to-library mapping
 ├── scripts/
-│   └── build.ps1        # Build script
-└── .vscode/             # VSCode config
+│   ├── setup.ps1           # Development environment setup
+│   ├── build.ps1           # Build script (NSIS)
+│   └── installer.nsi       # NSIS packaging configuration
+├── .github/
+│   └── workflows/
+│       └── build.yml       # GitHub Actions CI/CD
+├── .vscode/
+│   ├── tasks.json          # Build tasks configuration
+│   └── launch.json         # Debug configuration
+├── LICENSE                 # MIT License
+├── dist/                   # Build output directory
+└── logs/                   # Build logs
 ```
 
-## Requirements
+## 🔧 Configuration
 
-- Windows 7+
-- 7-Zip (for building)
-- EGE library files in `../xege_libs/`
+### Library Directory Mapping
 
-## License
+```javascript
+{
+  "vs": "vs<year>",           // Visual Studio (e.g., vs2022)
+  "mingw": "mingw32/mingw64", // MinGW by architecture
+  "redpanda": "redpanda",     // Red Panda dedicated
+  "clion": "redpanda",        // Shared with Red Panda
+  "devcpp": "devcpp",         // Other Dev-C++ versions
+  "codeblocks": "codeblocks"  // Code::Blocks
+}
+```
 
-MIT License
+### EGE Library Structure
+
+Expected library structure in `../xege_libs/`:
+
+```
+xege_libs/
+├── include/
+│   ├── ege.h
+│   ├── graphics.h
+│   └── ege/              # EGE internal headers
+├── lib/
+│   ├── vs2010/           # Visual Studio libraries
+│   ├── vs2022/
+│   ├── mingw32/          # MinGW 32-bit
+│   ├── mingw64/          # MinGW 64-bit
+│   ├── redpanda/         # Red Panda & CLion
+│   ├── devcpp/           # Dev-C++
+│   └── codeblocks/       # Code::Blocks
+```
+
+## 🎨 UI Design
+
+- **Base Window**: 720×600 px (DPI-scaled)
+- **Color Scheme**: Professional gradient (purple to blue)
+- **Layout**: Single-page with expandable sections
+- **Components**:
+  - Header with version badge
+  - IDE list with install/uninstall buttons
+  - Status indicators (installed/not installed/not found)
+  - Progress modal with detailed logs
+  - Footer with scan and close actions
+
+## 🔍 Manual Scan Feature
+
+The "Scan MinGW" button performs intelligent directory scanning:
+
+- **Max Depth**: 7 layers (covers deep AppData installations)
+- **Keywords**: mingw, msys, gcc, tdm, clion, jetbrains, redpanda, devcpp, dev-cpp, codeblocks, programs, appdata, local
+- **Strategy**: Full scan for first 3 layers, keyword-driven for deeper levels
+- **Validation**: Checks for `bin\gcc.exe`, `include\`, and `lib\` directories
+- **Deduplication**: Skips paths already detected or parent directories
+
+## 🐛 Troubleshooting
+
+### Build Issues
+
+**Error**: "Can't open output file"
+
+- **Cause**: NSIS cannot write to `dist/` directory
+- **Solution**: Close any running installer processes, ensure `dist/` is writable
+
+**Error**: "NSIS not found"
+
+- **Solution**: Install NSIS 3.11+ and ensure it's in system PATH
+
+### Detection Issues
+
+**IDE not detected**
+
+- Try "Scan MinGW" button to manually search directories
+- Check IDE installation path matches expected patterns
+- For CLion: Ensure MinGW is bundled at `bin\mingw\`
+
+**DPI Scaling Issues**
+
+- Installer automatically detects DPI via registry
+- If UI appears too large/small, check Windows display scaling settings
+
+## 📝 Changelog
+
+### Latest Changes (2026-02-01)
+
+- ✨ Separated Red Panda as independent IDE
+- ✨ Added CLion support with 3 detection modes
+- 🔧 Enhanced MinGW scan (7 layers, expanded keywords)
+- 🔧 Unified CLion display to "CLion (MinGW)"
+- 🐛 Fixed CLion duplicate detection
+- 🐛 Improved error handling and logging
+- 📝 Updated UI text and warnings
+
+## 🤝 Contributing
+
+Contributions are welcome! Please feel free to submit pull requests or open issues.
+
+## 📄 License
+
+[MIT License](LICENSE) - Copyright (c) 2026 EGE Project
+
+## 🔗 Links
+
+- **EGE Library**: <https://github.com/x-ege/xege>
+- **Documentation**: <https://xege.org/>
+- **Issues**: <https://github.com/x-ege/ege-installer/issues>

@@ -15,3 +15,12 @@ dist/
 Thumbs.db
 Desktop.ini
 .DS_Store
+
+# temp
+temp/
+
+# logs
+logs/
+
+# tools (no longer used, but keep for safety)
+tools/

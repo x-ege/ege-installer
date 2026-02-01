@@ -65,11 +65,20 @@ var Installer = (function () {
         return { "x86": "mingw32" };
       }
     },
+    "redpanda": function (ide) {
+      // Red Panda 使用专用的 redpanda 目录
+      return { "default": "redpanda" };
+    },
     "devcpp": function (ide) {
+      // 其他 Dev-C++ 版本
       return { "default": "devcpp" };
     },
     "codeblocks": function (ide) {
       return { "default": "codeblocks" };
+    },
+    "clion": function (ide) {
+      // CLion 使用与 Red Panda 相同的库版本
+      return { "default": "redpanda" };
     }
   };
 
@@ -177,6 +186,8 @@ var Installer = (function () {
       return false;
     }
 
+    var hasError = false;
+
     // 复制主头文件
     var headerFiles = ["ege.h", "graphics.h"];
     for (var i = 0; i < headerFiles.length; i++) {
@@ -184,8 +195,13 @@ var Installer = (function () {
       var dest = destInclude + "\\" + headerFiles[i];
       if (fso.FileExists(src)) {
         if (copyFile(src, dest)) {
-          log("  复制: " + headerFiles[i], "success");
+          log("  复制: " + src + " -> " + dest, "success");
+        } else {
+          hasError = true;
         }
+      } else {
+        log("  源文件不存在: " + src, "error");
+        hasError = true;
       }
     }
 
@@ -194,11 +210,13 @@ var Installer = (function () {
     if (fso.FolderExists(egeSubDir)) {
       var destEgeDir = destInclude + "\\ege";
       if (copyFolder(egeSubDir, destEgeDir)) {
-        log("  复制: ege\\ 目录", "success");
+        log("  复制: " + egeSubDir + " -> " + destEgeDir, "success");
+      } else {
+        hasError = true;
       }
     }
 
-    return true;
+    return !hasError;
   }
 
   /**
@@ -217,6 +235,8 @@ var Installer = (function () {
     }
 
     var libDirs = mapping(ide);
+    var hasError = false;
+    var foundAnyLib = false;
 
     for (var arch in libDirs) {
       var srcLibDir = srcLib + "\\" + libDirs[arch];
@@ -225,8 +245,11 @@ var Installer = (function () {
         srcLibDir += "\\" + arch;
       }
 
+      log("  使用库目录: " + srcLibDir + " (" + libDirs[arch] + ")", "info");
+
       if (!fso.FolderExists(srcLibDir)) {
         log("  库目录不存在: " + srcLibDir, "error");
+        hasError = true;
         continue;
       }
 
@@ -243,16 +266,25 @@ var Installer = (function () {
 
       // 复制库文件
       var libFiles = getFiles(srcLibDir);
+      if (libFiles.length === 0) {
+        log("  库目录为空: " + srcLibDir, "error");
+        hasError = true;
+      } else {
+        foundAnyLib = true;
+      }
+
       for (var i = 0; i < libFiles.length; i++) {
         var fileName = fso.GetFileName(libFiles[i]);
         var dest = destLibDir + "\\" + fileName;
         if (copyFile(libFiles[i], dest)) {
-          log("  复制: " + fileName + " -> " + arch, "success");
+          log("  复制: " + libFiles[i] + " -> " + dest, "success");
+        } else {
+          hasError = true;
         }
       }
     }
 
-    return true;
+    return foundAnyLib && !hasError;
   }
 
   /**
@@ -265,21 +297,28 @@ var Installer = (function () {
 
     var baseProgress = (currentIndex / totalCount) * 100;
     var stepProgress = (1 / totalCount) * 100;
+    var success = true;
 
     // 安装头文件
     progressCallback(baseProgress + stepProgress * 0.3, "正在安装头文件到 " + ide.name + "...");
     if (!installHeaders(ide, egeLibsPath)) {
       log("头文件安装失败", "error");
+      success = false;
     }
 
     // 安装库文件
     progressCallback(baseProgress + stepProgress * 0.7, "正在安装库文件到 " + ide.name + "...");
     if (!installLibs(ide, egeLibsPath)) {
       log("库文件安装失败", "error");
+      success = false;
     }
 
-    log(ide.name + " 安装完成", "success");
-    return true;
+    if (success) {
+      log(ide.name + " 安装完成", "success");
+    } else {
+      log(ide.name + " 安装失败", "error");
+    }
+    return success;
   }
 
   /**
@@ -314,14 +353,15 @@ var Installer = (function () {
   /**
    * 主安装函数
    */
-  function install(selectedIDEs, progressCallback, completeCallback) {
+  function install(selectedIDEs, progressCallback, completeCallback, customLibsPath) {
     logFunc = function (msg, type) {
       if (typeof log !== "undefined" && window.log) {
         window.log(msg, type);
       }
     };
 
-    var egeLibsPath = getEgeLibsPath();
+    // 优先使用传入的 libsPath，否则自动检测
+    var egeLibsPath = customLibsPath || getEgeLibsPath();
 
     log("EGE 库路径: " + egeLibsPath, "info");
 
