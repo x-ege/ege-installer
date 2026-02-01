@@ -9,7 +9,9 @@ Modern installer for [EGE (Easy Graphics Engine)](https://github.com/x-ege/xege)
 
 - 🔍 **Smart Detection** - Automatically detects installed IDEs using registry, vswhere, and filesystem scanning
 - 🎯 **Wide Compatibility** - Supports Visual Studio, MinGW, Red Panda, Dev-C++, Code::Blocks, CLion
-- 🔄 **Install & Uninstall** - One-click installation and removal with rollback support
+- 🔄 **Install & Uninstall** - One-click installation and removal with complete cleanup support
+- 📦 **Project Templates** - Pre-configured CodeBlocks project templates with automatic linker setup
+- 📚 **Usage Guide** - Interactive usage instructions displayed after installation
 - 🔎 **Manual Scan** - Recursively scan directories to find MinGW installations (depth: 7 layers)
 - 📊 **Detailed Progress** - Real-time installation logs and progress tracking
 - 🖥️ **DPI Aware** - Adaptive UI scaling for high-DPI displays
@@ -121,12 +123,23 @@ ege-installer/
 │   │   ├── detectMinGW()              # MinGW installations
 │   │   ├── detectRedPanda()           # Red Panda C++ (independent)
 │   │   ├── detectDevCpp()             # Other Dev-C++ variants
-│   │   ├── detectCodeBlocks()         # Code::Blocks
+│   │   ├── detectCodeBlocks()         # Code::Blocks + template detection
 │   │   └── detectCLion()              # CLion (3 modes)
 │   └── installer.js        # Installation/uninstall logic
 │       ├── installHeaders()           # Header files installation
 │       ├── installLibs()              # Library files installation
+│       ├── installCodeBlocksTemplate()     # Project template installation
+│       ├── uninstallCodeBlocksTemplate()   # Template cleanup
+│       ├── showCodeBlocksUsageGuide()      # Display usage instructions
 │       └── libDirMapping              # IDE-to-library mapping
+├── assets/
+│   ├── templates/          # IDE project templates
+│   │   └── codeblocks/     # CodeBlocks project template
+│   │       ├── EGE_Project.cbp   # Pre-configured project file
+│   │       └── main.cpp          # Hello World example
+│   ├── docs/               # User documentation
+│   │   └── codeblocks-usage.md   # CodeBlocks usage guide
+│   └── ege-icon.ico        # Application icon
 ├── scripts/
 │   ├── setup.ps1           # Development environment setup
 │   ├── build.ps1           # Build script (NSIS)
@@ -196,9 +209,14 @@ If your MinGW installation is not automatically detected, use the "Scan MinGW" b
 
 ### Latest Changes (2026-02-02)
 
+- � **Project Templates**: Added CodeBlocks project template with pre-configured linker settings
+- 📚 **Usage Guide**: Interactive usage instructions displayed after installation
+- 🔧 **Uninstall Enhancement**: Complete cleanup including templates and all installed files
+- 🔍 **Template Detection**: Improved CodeBlocks detection to check for installed templates
+- 📁 **Project Restructure**: Moved templates to `assets/` directory for better organization
+- 📝 **Documentation**: Added comprehensive CodeBlocks usage guide with examples
 - 🔧 **Version Management**: Installer now uses EGE library version from `xege_libs/version.txt`
 - 🪟 **Window Behavior**: Support resizable window with minimum size constraint
-- 📝 Updated build script and CI/CD workflow
 
 ### Changes (2026-02-01)
 

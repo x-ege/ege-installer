@@ -1048,69 +1048,27 @@
      * 卸载EGE
      */
     function uninstallFromIDE(ide, callback) {
-      modalLog('开始卸载 EGE 库...', 'info');
-
-      var filesToDelete = ['ege.h', 'graphics.h'];
-      var libFilesToDelete = ['libgraphics.a', 'graphics.lib', 'graphics64.lib'];
-
-      var deletedCount = 0;
-      var errorCount = 0;
-
-      // 删除头文件
-      modalLog('删除头文件...', 'info');
-      for (var i = 0; i < filesToDelete.length; i++) {
-        var headerPath = ide.includePath + '\\' + filesToDelete[i];
-        if (fso.FileExists(headerPath)) {
-          try {
-            fso.DeleteFile(headerPath, true);
-            modalLog('  删除: ' + filesToDelete[i], 'success');
-            deletedCount++;
-          } catch (e) {
-            modalLog('  删除失败: ' + filesToDelete[i] + ' - ' + e.message, 'error');
-            errorCount++;
-          }
-        }
-      }
-
-      // 删除ege目录
-      var egeDir = ide.includePath + '\\ege';
-      if (fso.FolderExists(egeDir)) {
-        try {
-          fso.DeleteFolder(egeDir, true);
-          modalLog('  删除: ege\\ 目录', 'success');
-          deletedCount++;
-        } catch (e) {
-          modalLog('  删除失败: ege\\ 目录 - ' + e.message, 'error');
-          errorCount++;
-        }
-      }
-
-      // 删除库文件
-      modalLog('删除库文件...', 'info');
-      if (ide.libPath) {
-        for (var j = 0; j < libFilesToDelete.length; j++) {
-          var libPath = ide.libPath + '\\' + libFilesToDelete[j];
-          if (fso.FileExists(libPath)) {
-            try {
-              fso.DeleteFile(libPath, true);
-              modalLog('  删除: ' + libFilesToDelete[j], 'success');
-              deletedCount++;
-            } catch (e) {
-              modalLog('  删除失败: ' + libFilesToDelete[j] + ' - ' + e.message, 'error');
-              errorCount++;
+      try {
+        Installer.uninstall(
+          [ide],
+          function (progress, message) {
+            updateModalProgress(progress, message);
+          },
+          function (success, message) {
+            if (success) {
+              modalLog('', '');
+              modalLog('========================================', 'success');
+              modalLog('  ✓ 卸载成功！', 'success');
+              modalLog('========================================', 'success');
+              callback(true, message);
+            } else {
+              callback(false, message);
             }
           }
-        }
-      }
-
-      updateModalProgress(100, '卸载完成');
-
-      if (errorCount > 0) {
-        callback(false, '部分文件删除失败');
-      } else if (deletedCount === 0) {
-        callback(false, '未找到需要删除的文件');
-      } else {
-        callback(true, '成功删除 ' + deletedCount + ' 个文件');
+        );
+      } catch (e) {
+        modalLog('卸载出错: ' + e.message, 'error');
+        callback(false, e.message);
       }
     }
 

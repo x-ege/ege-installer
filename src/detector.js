@@ -344,6 +344,11 @@ var Detector = (function () {
   function detectCodeBlocks() {
     var results = [];
 
+    // 检测用户模板是否已安装
+    var appData = shell.ExpandEnvironmentStrings("%APPDATA%");
+    var userTemplateDir = appData + "\\CodeBlocks\\UserTemplates\\EGE_Project";
+    var templateInstalled = pathExists(userTemplateDir + "\\EGE_Project.cbp");
+
     for (var i = 0; i < codeBlocksPaths.length; i++) {
       var cb = codeBlocksPaths[i];
       var found = false;
@@ -363,7 +368,8 @@ var Detector = (function () {
         type: "codeblocks",
         found: found,
         includePath: found ? foundPath + "\\MinGW\\include" : "",
-        libPath: found ? foundPath + "\\MinGW\\lib" : ""
+        libPath: found ? foundPath + "\\MinGW\\lib" : "",
+        templateInstalled: templateInstalled
       });
     }
 

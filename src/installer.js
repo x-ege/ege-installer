@@ -44,6 +44,26 @@ var Installer = (function () {
     return egeLibsPath;
   }
 
+  // 获取模板目录路径
+  function getTemplatePath(ideType) {
+    var scriptDir = getScriptDir();
+    var parentDir = fso.GetParentFolderName(scriptDir);
+    return parentDir + "\\assets\\templates\\" + ideType;
+  }
+
+  // 获取文档目录路径
+  function getDocsPath() {
+    var scriptDir = getScriptDir();
+    var parentDir = fso.GetParentFolderName(scriptDir);
+    return parentDir + "\\assets\\docs";
+  }
+
+  // 获取 CodeBlocks 用户模板目录
+  function getCodeBlocksUserTemplateDir() {
+    var appData = shell.ExpandEnvironmentStrings("%APPDATA%");
+    return appData + "\\CodeBlocks\\UserTemplates\\EGE_Project";
+  }
+
   // IDE 类型到库目录的映射
   var libDirMapping = {
     "vs": function (ide) {
@@ -288,6 +308,97 @@ var Installer = (function () {
   }
 
   /**
+   * 安装 CodeBlocks 项目模板
+   */
+  function installCodeBlocksTemplate(ide) {
+    var templateSrc = getTemplatePath("codeblocks");
+
+    if (!fso.FolderExists(templateSrc)) {
+      log("  模板目录不存在: " + templateSrc, "warning");
+      return true; // 不影响主安装流程
+    }
+
+    // 获取用户的 CodeBlocks 配置目录
+    var appData = shell.ExpandEnvironmentStrings("%APPDATA%");
+    var userTemplateDir = appData + "\\CodeBlocks\\UserTemplates\\EGE_Project";
+
+    log("安装 CodeBlocks 项目模板...", "info");
+
+    // 创建目标目录
+    if (!createFolder(userTemplateDir)) {
+      log("  创建模板目录失败: " + userTemplateDir, "error");
+      return false;
+    }
+
+    var hasError = false;
+
+    // 复制模板文件
+    var templateFiles = getFiles(templateSrc);
+    for (var i = 0; i < templateFiles.length; i++) {
+      var fileName = fso.GetFileName(templateFiles[i]);
+      var dest = userTemplateDir + "\\" + fileName;
+      if (copyFile(templateFiles[i], dest)) {
+        log("  复制模板: " + fileName + " -> " + dest, "success");
+      } else {
+        hasError = true;
+      }
+    }
+
+    if (!hasError) {
+      log("  项目模板已安装到: " + userTemplateDir, "success");
+      showCodeBlocksUsageGuide();
+    }
+
+    return !hasError;
+  }
+
+  /**
+   * 显示 CodeBlocks 使用说明
+   */
+  function showCodeBlocksUsageGuide() {
+    log("", "");
+    log("=====================================================", "success");
+    log("  ✓ Code::Blocks 项目模板安装成功！", "success");
+    log("=====================================================", "success");
+    log("", "");
+    log("📝 如何创建新的 EGE 项目：", "info");
+    log("", "");
+    log("  1. 打开 Code::Blocks", "info");
+    log("  2. 点击菜单：文件 → 从用户模板新建...", "info");
+    log("  3. 选择：EGE_Project", "info");
+    log("  4. 输入项目名称和位置，完成！", "info");
+    log("", "");
+    log("💡 模板已自动配置所有链接选项，无需手动设置。", "info");
+    log("", "");
+    log("📚 更多信息请访问：https://xege.org/", "info");
+    log("=====================================================", "success");
+    log("", "");
+  }
+
+  /**
+   * 卸载 CodeBlocks 项目模板
+   */
+  function uninstallCodeBlocksTemplate() {
+    var userTemplateDir = getCodeBlocksUserTemplateDir();
+
+    log("卸载 CodeBlocks 项目模板...", "info");
+
+    if (!fso.FolderExists(userTemplateDir)) {
+      log("  模板未安装或已删除", "info");
+      return true;
+    }
+
+    try {
+      fso.DeleteFolder(userTemplateDir, true);
+      log("  ✓ 项目模板已卸载: " + userTemplateDir, "success");
+      return true;
+    } catch (e) {
+      log("  卸载模板失败: " + e.message, "error");
+      return false;
+    }
+  }
+
+  /**
    * 安装 EGE 到指定 IDE
    */
   function installToIDE(ide, egeLibsPath, progressCallback, currentIndex, totalCount) {
@@ -311,6 +422,14 @@ var Installer = (function () {
     if (!installLibs(ide, egeLibsPath)) {
       log("库文件安装失败", "error");
       success = false;
+    }
+
+    // 为 CodeBlocks 安装项目模板
+    if (ide.type === "codeblocks" && success) {
+      progressCallback(baseProgress + stepProgress * 0.9, "正在安装项目模板...");
+      if (!installCodeBlocksTemplate(ide)) {
+        log("项目模板安装失败（不影响库文件安装）", "warning");
+      }
     }
 
     if (success) {
@@ -409,10 +528,109 @@ var Installer = (function () {
     }
   }
 
+  /**
+   * 主卸载函数
+   */
+  function uninstall(selectedIDEs, progressCallback, completeCallback) {
+    logFunc = function (msg, type) {
+      if (typeof log !== "undefined" && window.log) {
+        window.log(msg, type);
+      }
+    };
+
+    log("=== 开始卸载 EGE ===", "info");
+    log("", "");
+
+    var totalCount = selectedIDEs.length;
+    var successCount = 0;
+    var failCount = 0;
+
+    for (var i = 0; i < selectedIDEs.length; i++) {
+      var ide = selectedIDEs[i];
+
+      log("", "");
+      log("=== 从 " + ide.name + " 卸载 ===", "info");
+
+      var ideSuccess = true;
+
+      // 卸载头文件
+      progressCallback((i / totalCount) * 100, "正在卸载 " + ide.name + "...");
+
+      try {
+        var headerFiles = ["ege.h", "graphics.h"];
+        for (var j = 0; j < headerFiles.length; j++) {
+          var headerPath = ide.includePath + "\\" + headerFiles[j];
+          if (fso.FileExists(headerPath)) {
+            fso.DeleteFile(headerPath, true);
+            log("  删除头文件: " + headerPath, "success");
+          }
+        }
+
+        // 删除 ege 子目录
+        var egeSubDir = ide.includePath + "\\ege";
+        if (fso.FolderExists(egeSubDir)) {
+          fso.DeleteFolder(egeSubDir, true);
+          log("  删除目录: " + egeSubDir, "success");
+        }
+
+        // 卸载库文件（根据 IDE 类型）
+        var mapping = libDirMapping[ide.type];
+        if (mapping) {
+          var libDirs = mapping(ide);
+          for (var arch in libDirs) {
+            var destLibDir = ide.libPath;
+            if (arch === "x64" && ide.type.indexOf("vs") >= 0) {
+              if (fso.FolderExists(ide.libPath + "\\x64")) {
+                destLibDir = ide.libPath + "\\x64";
+              } else if (fso.FolderExists(ide.libPath + "\\amd64")) {
+                destLibDir = ide.libPath + "\\amd64";
+              }
+            }
+
+            // 删除 graphics.lib/libgraphics.a
+            var libPatterns = ["graphics.lib", "graphicsd.lib", "libgraphics.a"];
+            for (var k = 0; k < libPatterns.length; k++) {
+              var libPath = destLibDir + "\\" + libPatterns[k];
+              if (fso.FileExists(libPath)) {
+                fso.DeleteFile(libPath, true);
+                log("  删除库文件: " + libPath, "success");
+              }
+            }
+          }
+        }
+
+        // 为 CodeBlocks 卸载项目模板
+        if (ide.type === "codeblocks") {
+          uninstallCodeBlocksTemplate();
+        }
+
+        log(ide.name + " 卸载完成", "success");
+        successCount++;
+      } catch (e) {
+        log("从 " + ide.name + " 卸载时出错: " + e.message, "error");
+        failCount++;
+      }
+
+      progressCallback(((i + 1) / totalCount) * 100, "已完成 " + (i + 1) + "/" + totalCount);
+    }
+
+    log("", "");
+    log("=== 卸载结束 ===", "info");
+    log("成功: " + successCount + ", 失败: " + failCount, successCount > 0 ? "success" : "error");
+
+    if (successCount > 0) {
+      completeCallback(true, "成功从 " + successCount + " 个 IDE 卸载");
+    } else {
+      completeCallback(false, "所有卸载均失败，请检查日志");
+    }
+  }
+
   // 公开 API
   return {
     install: install,
+    uninstall: uninstall,
     getEgeLibsPath: getEgeLibsPath,
+    getCodeBlocksUserTemplateDir: getCodeBlocksUserTemplateDir,
     copyFile: copyFile,
     copyFolder: copyFolder
   };
