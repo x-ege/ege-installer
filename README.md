@@ -22,7 +22,7 @@ Modern installer for [EGE (Easy Graphics Engine)](https://github.com/x-ege/xege)
 
 | IDE | Detection Methods | Library Support | Notes |
 | ----- | ------------------ | ----------------- | ------- |
-| **Visual Studio** | vswhere + Registry | VS 2010-2026 | x86/x64 architecture auto-detection |
+| **Visual Studio** | vswhere + Registry | VS 2010-2026 | x86/x64 auto-detection, multi-toolset support |
 | **MinGW-w64** | Filesystem Scan | MSYS2, Standalone | Support for 32/64-bit variants |
 | **Red Panda C++** | Predefined Paths | Dedicated Library | Independent IDE with built-in MinGW |
 | **CLion** | Toolbox + Direct Install | Shared with Red Panda | Toolbox/Direct installation |
@@ -119,7 +119,9 @@ ege-installer/
 │   ├── setup.hta           # Main UI with HTML/CSS structure
 │   ├── ui.js               # UI interaction logic (extracted from HTA)
 │   ├── detector.js         # IDE detection module
-│   │   ├── detectVSWithVswhere()      # VS 2017+ detection
+│   │   ├── msvcToolsetMapping         # MSVC version to toolset mapping
+│   │   ├── getMsvcToolsetInfo()       # Parse MSVC version (14.xx.xxxxx)
+│   │   ├── detectVSWithVswhere()      # VS 2017+ multi-toolset detection
 │   │   ├── detectVSFromRegistry()     # VS 2010-2015 detection
 │   │   ├── detectMinGW()              # MinGW installations
 │   │   ├── detectRedPanda()           # Red Panda C++ (independent)
@@ -217,6 +219,8 @@ If your MinGW installation is not automatically detected, use the "Scan MinGW" b
 - 🔍 **Template Detection**: Improved CodeBlocks detection to check for installed templates
 - 📁 **Project Restructure**: Moved templates to `assets/` directory for better organization
 - 📝 **Documentation**: Added comprehensive CodeBlocks usage guide with examples
+- ✨ **Multiple MSVC Toolset Support**: VS 2017+ installations now detect all installed MSVC toolsets (v141/v142/v143)
+- 🔧 Automatically identifies and lists individual toolsets (e.g., VS2026 with VS2017/2019/2022 compilers)
 - 🔧 **Version Management**: Installer now uses EGE library version from `xege_libs/version.txt`
 - 🪟 **Window Behavior**: Support resizable window with minimum size constraint
 

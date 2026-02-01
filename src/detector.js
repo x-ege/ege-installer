@@ -19,6 +19,47 @@ var Detector = (function () {
     { name: "Visual Studio 2010", version: "10.0", regKey: "10.0", year: "2010" }
   ];
 
+  // MSVC 工具集版本映射 (根据 MSVC 版本号主版本推断对应的 VS 年份)
+  // MSVC 目录格式: 14.xx.xxxxx，其中 xx 决定工具集版本
+  var msvcToolsetMapping = {
+    // 14.4x = v143 (VS2022/VS2026)
+    "44": { toolset: "v143", year: "2022", label: "VS2022/2026" },
+    "43": { toolset: "v143", year: "2022", label: "VS2022" },
+    "42": { toolset: "v143", year: "2022", label: "VS2022" },
+    "41": { toolset: "v143", year: "2022", label: "VS2022" },
+    "40": { toolset: "v143", year: "2022", label: "VS2022" },
+    // 14.3x = v143 (VS2022 早期版本)
+    "39": { toolset: "v143", year: "2022", label: "VS2022" },
+    "38": { toolset: "v143", year: "2022", label: "VS2022" },
+    "37": { toolset: "v143", year: "2022", label: "VS2022" },
+    "36": { toolset: "v143", year: "2022", label: "VS2022" },
+    "35": { toolset: "v143", year: "2022", label: "VS2022" },
+    "34": { toolset: "v143", year: "2022", label: "VS2022" },
+    "33": { toolset: "v143", year: "2022", label: "VS2022" },
+    "32": { toolset: "v143", year: "2022", label: "VS2022" },
+    "31": { toolset: "v143", year: "2022", label: "VS2022" },
+    "30": { toolset: "v143", year: "2022", label: "VS2022" },
+    // 14.2x = v142 (VS2019)
+    "29": { toolset: "v142", year: "2019", label: "VS2019" },
+    "28": { toolset: "v142", year: "2019", label: "VS2019" },
+    "27": { toolset: "v142", year: "2019", label: "VS2019" },
+    "26": { toolset: "v142", year: "2019", label: "VS2019" },
+    "25": { toolset: "v142", year: "2019", label: "VS2019" },
+    "24": { toolset: "v142", year: "2019", label: "VS2019" },
+    "23": { toolset: "v142", year: "2019", label: "VS2019" },
+    "22": { toolset: "v142", year: "2019", label: "VS2019" },
+    "21": { toolset: "v142", year: "2019", label: "VS2019" },
+    "20": { toolset: "v142", year: "2019", label: "VS2019" },
+    // 14.1x = v141 (VS2017)
+    "16": { toolset: "v141", year: "2017", label: "VS2017" },
+    "15": { toolset: "v141", year: "2017", label: "VS2017" },
+    "14": { toolset: "v141", year: "2017", label: "VS2017" },
+    "13": { toolset: "v141", year: "2017", label: "VS2017" },
+    "12": { toolset: "v141", year: "2017", label: "VS2017" },
+    "11": { toolset: "v141", year: "2017", label: "VS2017" },
+    "10": { toolset: "v141", year: "2017", label: "VS2017" }
+  };
+
   // MinGW 常见安装路径
   var mingwPaths = [
     { name: "MSYS2 MinGW64", paths: ["C:\\msys64\\mingw64", "D:\\msys64\\mingw64"] },
@@ -91,7 +132,44 @@ var Detector = (function () {
   }
 
   /**
+   * 获取目录下的所有子目录名
+   */
+  function getSubDirNames(path) {
+    var dirs = [];
+    try {
+      if (!fso.FolderExists(path)) return dirs;
+      var folder = fso.GetFolder(path);
+      var subFolders = new Enumerator(folder.SubFolders);
+      for (; !subFolders.atEnd(); subFolders.moveNext()) {
+        dirs.push({
+          name: subFolders.item().Name,
+          path: subFolders.item().Path
+        });
+      }
+    } catch (e) { }
+    return dirs;
+  }
+
+  /**
+   * 根据 MSVC 版本号获取工具集信息
+   * @param {string} msvcVersion - MSVC 版本号，如 "14.44.34920"
+   * @returns {object|null} 工具集信息 { toolset, year, label }
+   */
+  function getMsvcToolsetInfo(msvcVersion) {
+    // 解析版本号 14.xx.xxxxx
+    var parts = msvcVersion.split(".");
+    if (parts.length < 2) return null;
+
+    var minorVersion = parts[1];
+    // 取前两位作为 key
+    var key = minorVersion.substring(0, 2);
+
+    return msvcToolsetMapping[key] || null;
+  }
+
+  /**
    * 使用 vswhere 检测 Visual Studio 2017+
+   * 会扫描每个 VS 实例中安装的所有 MSVC 工具集版本
    */
   function detectVSWithVswhere() {
     var results = [];
@@ -135,27 +213,77 @@ var Detector = (function () {
 
           // 从名称中提取年份（如 "Visual Studio Community 2022"）
           var yearMatch = name.match(/20\d{2}/);
-          var year = yearMatch ? yearMatch[0] : "";
+          var vsYear = yearMatch ? yearMatch[0] : "";
 
           // 如果无法从名称提取，根据版本号推断
-          if (!year && version) {
+          if (!vsYear && version) {
             var majorVersion = parseInt(version.split(".")[0], 10);
-            if (majorVersion >= 18) year = "2026";
-            else if (majorVersion === 17) year = "2022";
-            else if (majorVersion === 16) year = "2019";
-            else if (majorVersion === 15) year = "2017";
+            if (majorVersion >= 18) vsYear = "2026";
+            else if (majorVersion === 17) vsYear = "2022";
+            else if (majorVersion === 16) vsYear = "2019";
+            else if (majorVersion === 15) vsYear = "2017";
           }
 
-          if (pathExists(path)) {
+          if (!pathExists(path)) continue;
+
+          // 扫描 VC\Tools\MSVC 目录下的所有 MSVC 版本
+          var msvcBasePath = path + "\\VC\\Tools\\MSVC";
+          if (pathExists(msvcBasePath)) {
+            var msvcVersions = getSubDirNames(msvcBasePath);
+
+            // 按版本号排序（降序，最新的在前）
+            msvcVersions.sort(function (a, b) {
+              return b.name.localeCompare(a.name);
+            });
+
+            for (var k = 0; k < msvcVersions.length; k++) {
+              var msvcVer = msvcVersions[k];
+              var toolsetInfo = getMsvcToolsetInfo(msvcVer.name);
+
+              // 构建显示名称
+              var displayName;
+              var effectiveYear;
+
+              if (toolsetInfo) {
+                effectiveYear = toolsetInfo.year;
+                // 如果工具集年份与 VS 实例年份相同，不显示额外标签
+                if (toolsetInfo.year === vsYear) {
+                  displayName = name + " (MSVC " + toolsetInfo.toolset + ")";
+                } else {
+                  displayName = name + " (MSVC " + toolsetInfo.toolset + " - " + toolsetInfo.label + " 工具集)";
+                }
+              } else {
+                // 未知工具集版本，使用 VS 实例的年份
+                effectiveYear = vsYear;
+                displayName = name + " (MSVC " + msvcVer.name + ")";
+              }
+
+              results.push({
+                name: displayName,
+                path: path,
+                version: version,
+                year: effectiveYear,
+                vsYear: vsYear,
+                type: "vs",
+                found: true,
+                msvcVersion: msvcVer.name,
+                msvcPath: msvcVer.path,
+                toolset: toolsetInfo ? toolsetInfo.toolset : null,
+                includePath: msvcVer.path + "\\include",
+                libPath: msvcVer.path + "\\lib"
+              });
+            }
+          } else {
+            // 没有找到 MSVC 目录，可能是旧版 VS 或不完整安装
             results.push({
               name: name,
               path: path,
               version: version,
-              year: year,
+              year: vsYear,
               type: "vs",
               found: true,
-              includePath: path + "\\VC\\Tools\\MSVC",
-              libPath: path + "\\VC\\Tools\\MSVC"
+              includePath: path + "\\VC\\include",
+              libPath: path + "\\VC\\lib"
             });
           }
         }

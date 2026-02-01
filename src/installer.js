@@ -506,8 +506,22 @@ var Installer = (function () {
 
   /**
    * 查找 VS 的实际 include/lib 目录
+   * 对于新版检测器（已包含 msvcPath），直接使用已解析的路径
+   * 对于旧版结构或 vs-legacy，仍需解析
    */
   function resolveVSPaths(ide) {
+    // 如果已经有 msvcPath，说明是新版检测器返回的结果，路径已正确设置
+    if (ide.msvcPath) {
+      // 检查 x86/x64 子目录
+      if (fso.FolderExists(ide.libPath + "\\x86")) {
+        ide.libPathX86 = ide.libPath + "\\x86";
+      }
+      if (fso.FolderExists(ide.libPath + "\\x64")) {
+        ide.libPathX64 = ide.libPath + "\\x64";
+      }
+      return ide;
+    }
+
     if (ide.type !== "vs") return ide;
 
     // VS 2017+ 的目录结构: VC\Tools\MSVC\<version>\
