@@ -9,7 +9,7 @@ var Detector = (function () {
 
   // Visual Studio 版本配置
   var vsVersions = [
-    { name: "Visual Studio 2026", version: "17.0", regKey: "17.0", year: "2026" },
+    { name: "Visual Studio 2026", version: "18.0", regKey: "18.0", year: "2026" },
     { name: "Visual Studio 2022", version: "17.0", regKey: "17.0", year: "2022" },
     { name: "Visual Studio 2019", version: "16.0", regKey: "16.0", year: "2019" },
     { name: "Visual Studio 2017", version: "15.0", regKey: "15.0", year: "2017" },
@@ -140,7 +140,8 @@ var Detector = (function () {
           // 如果无法从名称提取，根据版本号推断
           if (!year && version) {
             var majorVersion = parseInt(version.split(".")[0], 10);
-            if (majorVersion >= 17) year = "2022";
+            if (majorVersion >= 18) year = "2026";
+            else if (majorVersion === 17) year = "2022";
             else if (majorVersion === 16) year = "2019";
             else if (majorVersion === 15) year = "2017";
           }
