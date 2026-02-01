@@ -247,13 +247,16 @@ var Detector = (function () {
         mingwDir = foundPath + "\\MinGW32";
       }
 
+      // 验证 MinGW 目录是否包含有效的 include/lib
+      var hasValidMinGW = pathExists(mingwDir + "\\include") && pathExists(mingwDir + "\\lib");
+
       results.push({
         name: "Red Panda (MinGW)",
         path: foundPath,
         type: "redpanda",
-        found: true,
-        includePath: mingwDir + "\\include",
-        libPath: mingwDir + "\\lib"
+        found: hasValidMinGW,
+        includePath: hasValidMinGW ? mingwDir + "\\include" : "",
+        libPath: hasValidMinGW ? mingwDir + "\\lib" : ""
       });
     } else {
       results.push({

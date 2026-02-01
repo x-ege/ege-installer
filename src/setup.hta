@@ -469,18 +469,19 @@
       currentPath = fso.GetParentFolderName(htaPath);
       libsPath = fso.GetParentFolderName(currentPath) + '\\libs';
 
-      // 读取版本号（处理UTF-8 BOM）
+      // 读取版本号（处理UTF-8 BOM，从 version.txt 提取 "Version: x.x.x"）
       var versionFile = fso.GetParentFolderName(currentPath) + '\\version.txt';
       if (fso.FileExists(versionFile)) {
         var ts = fso.OpenTextFile(versionFile, 1);
-        egeVersion = ts.ReadLine();
+        var content = ts.ReadAll();
         ts.Close();
         // 移除可能的BOM字符 (\uFEFF 或 \xEF\xBB\xBF)
-        if (egeVersion.charCodeAt(0) === 0xFEFF || egeVersion.charCodeAt(0) === 0xEF) {
-          egeVersion = egeVersion.substring(1);
+        if (content.charCodeAt(0) === 0xFEFF || content.charCodeAt(0) === 0xEF) {
+          content = content.substring(1);
         }
-        // 移除非版本号字符，只保留数字和点
-        egeVersion = egeVersion.replace(/[^0-9.]/g, '');
+        // 从 "Version: x.x.x" 格式中提取版本号
+        var match = content.match(/Version:\s*([0-9][0-9.\-a-zA-Z]*)/i);
+        egeVersion = match ? match[1] : '';
       } else {
         egeVersion = '1.0.0';
       }

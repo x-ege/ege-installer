@@ -17,7 +17,7 @@ SilentInstall silent
 ;--------------------------------
 ; 版本信息
 
-VIProductVersion "${VERSION}.0"
+VIProductVersion "${PRODUCT_VERSION}"
 VIAddVersionKey "ProductName" "EGE 图形库安装程序"
 VIAddVersionKey "CompanyName" "EGE Project"
 VIAddVersionKey "FileDescription" "EGE (Easy Graphics Engine) 安装程序"
@@ -49,7 +49,10 @@ Section "Main"
     System::Call 'Kernel32::SetEnvironmentVariable(t "__COMPAT_LAYER", t "~HIGHDPIAWARE")'
     
     ; 启动 HTA 安装界面并等待完成
-    ExecWait 'mshta.exe "$0\installer\setup.hta"'
+    ExecWait 'mshta.exe "$0\installer\setup.hta"' $1
+    IntCmp $1 0 +3
+        SetErrorLevel $1
+        Abort "安装程序异常退出 (code: $1)"
     
     ; HTA 关闭后清理临时文件
     SetOutPath $TEMP

@@ -15,6 +15,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
+          fetch-depth: 0
           fetch-tags: true
 
       - name: Setup development environment
@@ -30,25 +31,49 @@ jobs:
         run: |
           $version = Get-Date -Format "yyyy.MM.dd"
           
-          # Try to get version from git tag
-          $tag = git describe --tags --abbrev=0 2>$null
-          if ($LASTEXITCODE -eq 0 -and $tag) {
-            $version = $tag -replace "^v", ""
+          # Try to get version from git tag (ignore errors)
+          $tag = $null
+          try {
+            $tag = git describe --tags --abbrev=0 2>$null
+            if ($LASTEXITCODE -eq 0 -and $tag) {
+              $version = $tag -replace "^v", ""
+            }
+          } catch { }
+          
+          # Create product version for NSIS VIProductVersion (X.X.X.X format, digits only, no leading zeros)
+          $productVersion = $version -replace "[^0-9.]", "" -replace "\.+", "."
+          # Remove leading zeros from each segment
+          $productVersion = ($productVersion.Split('.') | ForEach-Object { [int]$_ }) -join '.'
+          if ($productVersion -notmatch "^\d+\.\d+\.\d+") {
+            $productVersion = "2026.2.1"
+          }
+          # Ensure exactly 4 parts for NSIS (append .0 if needed)
+          $parts = $productVersion.Split('.')
+          if ($parts.Length -eq 3) {
+            $productVersion = "$productVersion.0"
+          } elseif ($parts.Length -lt 3) {
+            $productVersion = "2026.2.1.0"
           }
           
-          # For PR builds, add PR number
+          # For PR builds, add PR suffix to display version
           if ("${{ github.event_name }}" -eq "pull_request") {
             $version = "$version-pr${{ github.event.pull_request.number }}"
           }
           
-          Write-Host "Version: $version"
-          echo "VERSION=$version" >> $env:GITHUB_OUTPUT
+          Write-Host "Display Version: $version"
+          Write-Host "Product Version: $productVersion"
+          "VERSION=$version" >> $env:GITHUB_OUTPUT
+          "PRODUCT_VERSION=$productVersion" >> $env:GITHUB_OUTPUT
+          
+          # Ensure exit code is 0
+          exit 0
 
       - name: Build installer package
         run: |
           .\scripts\build.ps1 `
             -XegeLibsPath "${{ github.workspace }}\xege_libs" `
             -Version "${{ steps.version.outputs.VERSION }}" `
+            -ProductVersion "${{ steps.version.outputs.PRODUCT_VERSION }}" `
             -OutputDir "dist"
 
       - name: Verify build output

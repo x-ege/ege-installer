@@ -9,6 +9,7 @@
 param(
     [string]$OutputDir = "dist",
     [string]$Version = "1.0.0",
+    [string]$ProductVersion,                       # NSIS-compatible version (X.X.X.X)
     [string]$XegeLibsPath                          # 可选：自定义 xege_libs 路径
 )
 
@@ -22,7 +23,7 @@ if ($XegeLibsPath) {
     # 处理 Unix 风格路径 (如 /c/Users/...)
     if ($XegeLibsPath -match "^/([a-zA-Z])/") {
         $driveLetter = $matches[1].ToUpper()
-        $XegeLibsPath = $XegeLibsPath -replace "^/[a-zA-Z]/", "${driveLetter}:\"
+        $XegeLibsPath = $XegeLibsPath -replace "^/[a-zA-Z]/", "${driveLetter}:\\"
         $XegeLibsPath = $XegeLibsPath.Replace("/", "\")
     }
     $EgeLibsDir = $XegeLibsPath
@@ -37,6 +38,25 @@ $LogFile = Join-Path $ProjectRoot "logs\build.log"
 New-Item -ItemType Directory -Path (Join-Path $ProjectRoot "logs") -Force | Out-Null
 "=== Build started at $(Get-Date -Format 'yyyy-MM-dd HH:mm:ss') ===" | Out-File $LogFile
 
+# 如果未提供产品版本，从 Version 中生成
+if (-not $ProductVersion) {
+    $ProductVersion = $Version -replace "[^0-9.]", "" -replace "\.+", "."
+    # 移除前导零
+    try {
+        $ProductVersion = ($ProductVersion.Split('.') | ForEach-Object { [int]$_ }) -join '.'
+    } catch { }
+    if ($ProductVersion -notmatch "^\d+\.\d+\.\d+") {
+        $ProductVersion = "1.0.0"
+    }
+    # 确保是 4 段版本号
+    $parts = $ProductVersion.Split('.')
+    if ($parts.Length -eq 3) {
+        $ProductVersion = "$ProductVersion.0"
+    } elseif ($parts.Length -lt 3) {
+        $ProductVersion = "1.0.0.0"
+    }
+}
+
 function Log($msg) {
     Write-Host $msg
     $msg | Out-File $LogFile -Append
@@ -46,6 +66,8 @@ Log "=== EGE Installer Build Script (NSIS) ==="
 Log "Project Root: $ProjectRoot"
 Log "Source Dir: $SrcDir"
 Log "EGE Libs Dir: $EgeLibsDir"
+Log "Display Version: $Version"
+Log "Product Version: $ProductVersion"
 Log ""
 
 # 检查 NSIS
@@ -137,7 +159,14 @@ Build Date: $(Get-Date -Format "yyyy-MM-dd HH:mm:ss")
     Push-Location $ScriptDir
     
     try {
-        $output = & $nsisPath "/DVERSION=$Version" "/V2" $nsiScript 2>&1
+        $nsisArgs = @(
+            "/DVERSION=$Version",
+            "/DPRODUCT_VERSION=$ProductVersion",
+            "/V2",
+            $nsiScript
+        )
+        Log "  NSIS arguments: $($nsisArgs -join ' ')"
+        $output = & $nsisPath $nsisArgs 2>&1
         $exitCode = $LASTEXITCODE
         
         Log "  NSIS output:"

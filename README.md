@@ -73,6 +73,7 @@ Run the setup script to prepare the development environment:
 ```
 
 The script will:
+
 - Check if `../xege_libs/` exists
 - Offer to clone [xege-sdk](https://github.com/x-ege/xege-sdk) if missing
 - Verify NSIS installation (optional)
