@@ -567,8 +567,8 @@
     window.moveTo(Math.round((screen.width - initWidth) / 2), Math.round((screen.height - initHeight) / 2));
 
     // 支持 resize 但限制最小尺寸（方案1）
-    var minWidth = initWidth;
-    var minHeight = initHeight;
+    var minWidth = initWidth / 2;
+    var minHeight = initHeight / 2;
     var resizeTimer = null;
 
     document.body.onresize = function () {
