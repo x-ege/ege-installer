@@ -437,6 +437,130 @@
     .empty-message p {
       margin-bottom: 8px;
     }
+
+    /* CodeBlocks Guide Modal - 更大更醒目 */
+    .codeblocks-guide-modal {
+      width: 640px;
+      max-height: 90%;
+      animation: slideIn 0.3s ease-out;
+    }
+
+    @keyframes slideIn {
+      from {
+        transform: translateY(-30px);
+        opacity: 0;
+      }
+      to {
+        transform: translateY(0);
+        opacity: 1;
+      }
+    }
+
+    .codeblocks-guide-modal .modal-header {
+      background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+      color: white;
+      padding: 20px 24px;
+      font-size: 20px;
+      font-weight: 600;
+    }
+
+    .codeblocks-guide-modal .modal-body {
+      padding: 24px;
+      max-height: 500px;
+      overflow-y: auto;
+      line-height: 1.6;
+    }
+
+    .guide-section {
+      margin-bottom: 20px;
+    }
+
+    .guide-section .section-icon {
+      font-size: 24px;
+      margin-right: 8px;
+    }
+
+    .guide-section h3 {
+      font-size: 16px;
+      color: #1f2937;
+      margin-bottom: 12px;
+      font-weight: 600;
+    }
+
+    .guide-section p {
+      color: #4b5563;
+      margin-bottom: 8px;
+      font-size: 14px;
+    }
+
+    .guide-steps {
+      background: #f9fafb;
+      border-left: 3px solid #10b981;
+      padding: 16px;
+      border-radius: 6px;
+      margin: 12px 0;
+    }
+
+    .guide-steps ol {
+      margin: 0;
+      padding-left: 24px;
+    }
+
+    .guide-steps li {
+      color: #374151;
+      margin-bottom: 8px;
+      font-size: 14px;
+    }
+
+    .guide-tips {
+      background: #fef3c7;
+      border-left: 3px solid #f59e0b;
+      padding: 12px 16px;
+      border-radius: 6px;
+      margin: 12px 0;
+    }
+
+    .guide-tips ul {
+      margin: 8px 0 0 0;
+      padding-left: 24px;
+    }
+
+    .guide-tips li {
+      color: #78350f;
+      margin-bottom: 6px;
+      font-size: 13px;
+    }
+
+    .guide-link {
+      color: #3b82f6;
+      text-decoration: none;
+      font-weight: 500;
+    }
+
+    .guide-link:hover {
+      text-decoration: underline;
+    }
+
+    .codeblocks-guide-modal .modal-footer {
+      padding: 16px 24px;
+      text-align: center;
+    }
+
+    .btn-got-it {
+      padding: 10px 32px;
+      background: #10b981;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      font-size: 15px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .btn-got-it:hover {
+      background: #059669;
+    }
   </style>
 </head>
 
@@ -497,7 +621,60 @@
         <div id="modalLog" class="log-area"></div>
       </div>
       <div class="modal-footer">
+        <button id="modalGuideBtn" class="btn btn-install" onclick="openGuideFromModal()" style="display:none; margin-right: 8px;">查看使用说明</button>
         <button id="modalCloseBtn" class="btn btn-install" onclick="closeModal()" disabled>完成</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- CodeBlocks 使用说明模态窗口 -->
+  <div id="codeBlocksGuideModal" class="modal-overlay">
+    <div class="modal codeblocks-guide-modal">
+      <div class="modal-header">
+        <span class="section-icon">🎉</span>
+        Code::Blocks 安装成功！
+      </div>
+      <div class="modal-body">
+        <div class="guide-section">
+          <p style="font-size: 15px; color: #059669; font-weight: 500; margin-bottom: 16px;">
+            EGE 图形库和项目模板已成功安装到您的 Code::Blocks！
+          </p>
+        </div>
+
+        <div class="guide-section">
+          <h3><span class="section-icon">📝</span>如何创建新的 EGE 项目</h3>
+          <div class="guide-steps">
+            <ol>
+              <li>打开 <strong>Code::Blocks</strong></li>
+              <li>点击菜单：<strong>文件 → 从用户模板新建...</strong></li>
+              <li>在弹出的对话框中选择：<strong>EGE_Project</strong></li>
+              <li>输入项目名称和保存位置，点击确定</li>
+              <li>项目创建完成，可以直接开始编写代码！</li>
+            </ol>
+          </div>
+        </div>
+
+        <div class="guide-section">
+          <div class="guide-tips">
+            <h3 style="margin: 0 0 8px 0; font-size: 15px; color: #92400e;">💡 重要提示</h3>
+            <ul>
+              <li>模板已自动配置所有链接选项，<strong>无需手动设置</strong></li>
+              <li>可以直接使用 <code>#include &lt;graphics.h&gt;</code> 头文件</li>
+              <li>按 <strong>F9</strong> 即可编译并运行项目</li>
+              <li>首次编译可能需要几秒钟，请耐心等待</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="guide-section">
+          <h3><span class="section-icon">📚</span>获取更多帮助</h3>
+          <p>
+            访问 <a href="https://xege.org/" class="guide-link" target="_blank">https://xege.org/</a> 查看详细文档和示例教程。
+          </p>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-got-it" onclick="closeCodeBlocksGuide()">知道了，开始使用 EGE！</button>
       </div>
     </div>
   </div>
@@ -569,870 +746,7 @@
 
   <script language="JScript" src="detector.js"></script>
   <script language="JScript" src="installer.js"></script>
-
-  <script language="JScript">
-    // 获取DPI缩放比例（通过多种方式尝试）
-    function getDpiScale() {
-      try {
-        // 方案一：通过注册表读取系统DPI设置
-        var regDpi = null;
-        try {
-          // Windows 10/11 缩放设置
-          regDpi = shell.RegRead('HKCU\\Control Panel\\Desktop\\WindowMetrics\\AppliedDPI');
-        } catch (e1) {
-          try {
-            // 备用位置
-            regDpi = shell.RegRead('HKCU\\Control Panel\\Desktop\\LogPixels');
-          } catch (e2) { }
-        }
-        if (regDpi && regDpi > 96) {
-          return regDpi / 96;
-        }
-
-        // 方案二：IE/HTA 获取DPI方式
-        if (screen.deviceXDPI && screen.logicalXDPI && screen.deviceXDPI > screen.logicalXDPI) {
-          return screen.deviceXDPI / screen.logicalXDPI;
-        }
-
-        // 方案三：根据屏幕分辨率推断（如果分辨率很高但逻辑尺寸小，可能是高DPI）
-        // 如果屏幕物理宽度大于2560但screen.width小于2560，则可能有缩放
-        if (screen.width <= 1920 && window.screen.availWidth <= 1920) {
-          // 可能是高DPI屏幕，使用稍大的窗口
-          return 1.25;  // 默认假设125%缩放作为安全值
-        }
-
-        return 1;
-      } catch (e) {
-        return 1;
-      }
-    }
-
-    // 初始化窗口（考虑DPI缩放）
-    var dpiScale = getDpiScale();
-    var baseWidth = 750;
-    var baseHeight = 620;
-    var initWidth = Math.round(baseWidth * dpiScale);
-    var initHeight = Math.round(baseHeight * dpiScale);
-
-    // 确保窗口不会超过屏幕
-    if (initWidth > screen.availWidth * 0.95) {
-      initWidth = Math.round(screen.availWidth * 0.9);
-    }
-    if (initHeight > screen.availHeight * 0.95) {
-      initHeight = Math.round(screen.availHeight * 0.9);
-    }
-
-    window.resizeTo(initWidth, initHeight);
-    window.moveTo(Math.round((screen.width - initWidth) / 2), Math.round((screen.height - initHeight) / 2));
-
-    // 支持 resize 但限制最小尺寸（方案1）
-    var minWidth = initWidth / 2;
-    var minHeight = initHeight / 2;
-    var resizeTimer = null;
-
-    document.body.onresize = function () {
-      // 使用 setTimeout 避免频繁触发
-      if (resizeTimer) {
-        clearTimeout(resizeTimer);
-      }
-      resizeTimer = setTimeout(function () {
-        var currentWidth = window.outerWidth;
-        var currentHeight = window.outerHeight;
-
-        // 如果窗口小于最小尺寸，调整回最小尺寸
-        if (currentWidth < minWidth || currentHeight < minHeight) {
-          var newWidth = currentWidth < minWidth ? minWidth : currentWidth;
-          var newHeight = currentHeight < minHeight ? minHeight : currentHeight;
-          window.resizeTo(newWidth, newHeight);
-        }
-      }, 50);
-    };
-
-    // 检查脚本加载
-    if (typeof Detector === 'undefined' || typeof Installer === 'undefined') {
-      document.getElementById('ideList').innerHTML =
-        '<div class="empty-message"><p style="color:#dc2626;">加载错误：无法加载检测或安装模块</p></div>';
-    } else {
-      // 立即启动检测（不延迟，让用户尽快看到进度）
-      detectAllIDEs();
-    }
-
-    /**
-     * 检测日志
-     */
-    function detectionLog(message, type) {
-      var logEl = document.getElementById('detectionLog');
-      if (logEl) {
-        var className = type ? 'log-line ' + type : 'log-line';
-        logEl.innerHTML += '<div class="' + className + '">' + message + '</div>';
-        logEl.scrollTop = logEl.scrollHeight;
-      }
-    }
-
-    /**
-     * 更新检测进度
-     */
-    function updateDetectionProgress(percent, message) {
-      var progressBar = document.getElementById('detectionProgressBar');
-      var statusEl = document.getElementById('detectionStatus');
-      if (progressBar) {
-        progressBar.style.width = percent + '%';
-      }
-      if (statusEl && message) {
-        statusEl.innerText = message;
-      }
-    }
-
-    /**
-     * 异步检测所有IDE（拆分任务避免界面卡死）
-     */
-    function detectAllIDEs() {
-      var allIDEs = [];
-      var detectionSteps = [
-        {
-          name: 'MinGW',
-          func: function () { return Detector.detectMinGW(); }
-        },
-        {
-          name: 'Red Panda',
-          func: function () { return Detector.detectRedPanda ? Detector.detectRedPanda() : []; }
-        },
-        {
-          name: 'Dev-C++',
-          func: function () { return Detector.detectDevCpp ? Detector.detectDevCpp() : []; }
-        },
-        {
-          name: 'Code::Blocks',
-          func: function () { return Detector.detectCodeBlocks ? Detector.detectCodeBlocks() : []; }
-        },
-        {
-          name: 'CLion',
-          func: function () { return Detector.detectCLion ? Detector.detectCLion() : []; }
-        },
-        {
-          name: 'Visual Studio',
-          func: function () { return Detector.detectVS ? Detector.detectVS() : []; }
-        }
-      ];
-
-      var currentStep = 0;
-      var totalSteps = detectionSteps.length;
-
-      function runNextStep() {
-        if (currentStep >= totalSteps) {
-          // 所有检测完成，处理结果
-          finishDetection(allIDEs);
-          return;
-        }
-
-        var step = detectionSteps[currentStep];
-        var progress = (currentStep / totalSteps) * 100;
-
-        // 先更新 UI
-        updateDetectionProgress(progress, '正在检测 ' + step.name + '...');
-        detectionLog('检测 ' + step.name + '...', 'info');
-
-        // 使用两层 setTimeout 确保 UI 先渲染再执行检测
-        window.setTimeout(function () {
-          window.setTimeout(function () {
-            try {
-              var results = step.func();
-              if (results && results.length > 0) {
-                var foundCount = 0;
-                for (var i = 0; i < results.length; i++) {
-                  allIDEs.push(results[i]);
-                  if (results[i].found) foundCount++;
-                }
-                detectionLog('  找到 ' + foundCount + ' 个 ' + step.name, foundCount > 0 ? 'success' : '');
-              } else {
-                detectionLog('  未找到 ' + step.name, '');
-              }
-            } catch (e) {
-              detectionLog('  检测 ' + step.name + ' 出错: ' + e.message, 'error');
-            }
-
-            currentStep++;
-            // 继续下一步
-            window.setTimeout(runNextStep, 100);
-          }, 100);
-        }, 50);
-      }
-
-      // 开始检测 - 立即显示日志，然后异步开始
-      detectionLog('开始检测已安装的开发环境...', 'info');
-      updateDetectionProgress(0, '准备开始检测...');
-
-      // 使用 setTimeout 让初始日志先渲染
-      window.setTimeout(function () {
-        runNextStep();
-      }, 50);
-    }
-
-    /**
-     * 完成检测，处理结果
-     */
-    function finishDetection(allIDEs) {
-      updateDetectionProgress(100, '检测完成');
-      detectionLog('检测完成，正在整理结果...', 'success');
-
-      // 分离已检测到和未检测到的
-      detectedIDEs = [];
-      notFoundIDEs = [];
-
-      for (var i = 0; i < allIDEs.length; i++) {
-        var ide = allIDEs[i];
-        // 检查是否已安装EGE
-        ide.egeInstalled = checkEgeInstalled(ide);
-
-        if (ide.found) {
-          detectedIDEs.push(ide);
-        } else {
-          notFoundIDEs.push(ide);
-        }
-      }
-
-      // 去重：移除父子目录关系的重复项
-      detectedIDEs = deduplicateIDEs(detectedIDEs);
-
-      detectionLog('找到 ' + detectedIDEs.length + ' 个已安装的开发环境', detectedIDEs.length > 0 ? 'success' : '');
-
-      // 延迟一点再渲染，让用户看到完成消息
-      window.setTimeout(function () {
-        renderIDEList();
-      }, 300);
-    }
-
-    /**
-     * 去除IDE列表中的重复项（主要是父子目录关系）
-     * 策略：保留更具体的路径（子目录），移除模糊的路径（父目录）
-     */
-    function deduplicateIDEs(ides) {
-      if (ides.length <= 1) return ides;
-
-      // 首先规范化所有路径（移除尾部反斜杠，统一大小写）
-      for (var n = 0; n < ides.length; n++) {
-        if (ides[n].path) {
-          ides[n].path = ides[n].path.replace(/\\+$/, ''); // 移除尾部的反斜杠
-        }
-      }
-
-      var toRemove = [];
-
-      // 标记需要移除的项
-      for (var i = 0; i < ides.length; i++) {
-        var ide1 = ides[i];
-        var path1 = ide1.path.toLowerCase();
-
-        for (var j = 0; j < ides.length; j++) {
-          if (i === j) continue;
-
-          var ide2 = ides[j];
-          var path2 = ide2.path.toLowerCase();
-
-          // 如果 path1 是 path2 的父目录，标记移除 path1（保留更具体的子目录）
-          if (path2.indexOf(path1 + '\\') === 0) {
-            if (toRemove.indexOf(i) === -1) {
-              toRemove.push(i);
-            }
-          }
-        }
-      }
-
-      // 移除标记的项
-      var deduplicated = [];
-      for (var k = 0; k < ides.length; k++) {
-        if (toRemove.indexOf(k) === -1) {
-          deduplicated.push(ides[k]);
-        }
-      }
-
-      return deduplicated;
-    }
-
-    /**
-     * 检查IDE是否已安装EGE
-     */
-    function checkEgeInstalled(ide) {
-      if (!ide.found || !ide.includePath) return false;
-      try {
-        var headerPath = ide.includePath + '\\graphics.h';
-        return fso.FileExists(headerPath);
-      } catch (e) {
-        return false;
-      }
-    }
-
-    /**
-     * 渲染IDE列表
-     */
-    function renderIDEList() {
-      var listEl = document.getElementById('ideList');
-
-      if (detectedIDEs.length === 0) {
-        listEl.innerHTML = '<div class="empty-message">' +
-          '<p>未检测到任何已安装的开发环境</p>' +
-          '<p style="font-size:12px;">请先安装 Visual Studio、MinGW 或 Red Panda 等开发工具</p></div>';
-      } else {
-        var html = '';
-        for (var i = 0; i < detectedIDEs.length; i++) {
-          html += renderIDEItem(detectedIDEs[i], i, true);
-        }
-        listEl.innerHTML = html;
-      }
-
-      // 渲染未检测到的
-      if (notFoundIDEs.length > 0) {
-        document.getElementById('notFoundSection').className = 'toggle-section';
-        var notFoundHtml = '';
-        for (var j = 0; j < notFoundIDEs.length; j++) {
-          notFoundHtml += renderIDEItem(notFoundIDEs[j], j, false);
-        }
-        document.getElementById('notFoundList').innerHTML = notFoundHtml;
-      }
-
-      updateStatus();
-    }
-
-    /**
-     * 渲染单个IDE项
-     */
-    function renderIDEItem(ide, index, isFound) {
-      var statusClass, statusText;
-      var prefix = isFound ? 'found' : 'notfound';
-
-      if (!ide.found) {
-        statusClass = 'not-found';
-        statusText = '未找到';
-      } else if (ide.egeInstalled) {
-        statusClass = 'installed';
-        statusText = '已安装';
-      } else {
-        statusClass = 'not-installed';
-        statusText = '未安装';
-      }
-
-      var installDisabled = !ide.found ? 'disabled' : '';
-      var uninstallDisabled = (!ide.found || !ide.egeInstalled) ? 'disabled' : '';
-
-      var html = '<div class="ide-item" id="' + prefix + '_' + index + '">';
-      html += '<div class="ide-info">';
-      html += '<div class="ide-name">' + ide.name + '</div>';
-      html += '<div class="ide-path">' + (ide.path || '未安装') + '</div>';
-      html += '</div>';
-      html += '<span class="ide-status ' + statusClass + '">' + statusText + '</span>';
-      html += '<div class="ide-actions">';
-      html += '<button class="btn btn-install" onclick="doInstall(' + index + ', ' + isFound + ')" ' + installDisabled + '>安装</button>';
-      html += '<button class="btn btn-uninstall" onclick="doUninstall(' + index + ', ' + isFound + ')" ' + uninstallDisabled + '>卸载</button>';
-      html += '</div>';
-      html += '</div>';
-
-      return html;
-    }
-
-    /**
-     * 切换显示未检测到的环境
-     */
-    function toggleNotFound() {
-      notFoundExpanded = !notFoundExpanded;
-      var btn = document.getElementById('notFoundSection').getElementsByTagName('button')[0];
-      var list = document.getElementById('notFoundList');
-
-      if (notFoundExpanded) {
-        btn.innerText = '▼ 隐藏未检测到的环境';
-        list.style.display = 'block';
-      } else {
-        btn.innerText = '▶ 显示未检测到的环境';
-        list.style.display = 'none';
-      }
-    }
-
-    /**
-     * 检查是否是内置EGE的IDE（仅 Red Panda）
-     */
-    function isBuiltinEgeIDE(ide) {
-      var name = ide.name.toLowerCase();
-      return name.indexOf('red panda') >= 0 ||
-        name.indexOf('redpanda') >= 0;
-    }
-
-    /**
-     * 获取内置EGE IDE的提示信息
-     */
-    function getBuiltinEgeWarning(ide, isInstall) {
-      var ideName = 'Red Panda';
-      if (isInstall) {
-        return ideName + ' 已内置 EGE 图形库。\n\n' +
-          '通常无需手动安装，您可以直接通过「新建 EGE 项目」的方式使用 EGE。\n\n' +
-          '只有在需要更新到最新版 EGE 时才需要执行此安装。\n\n' +
-          '确定要继续安装吗？';
-      } else {
-        return ideName + ' 已内置 EGE 图形库。\n\n' +
-          '卸载后可能影响 ' + ideName + ' 的正常使用。\n\n' +
-          '如需恢复，请重新安装 ' + ideName + ' 或重新运行本安装程序。\n\n' +
-          '确定要继续卸载吗？';
-      }
-    }
-
-    /**
-     * 执行安装
-     */
-    function doInstall(index, isFound) {
-      var ide = isFound ? detectedIDEs[index] : notFoundIDEs[index];
-      if (!ide || !ide.found) return;
-
-      // 对于内置EGE的IDE，显示额外提示
-      if (isBuiltinEgeIDE(ide)) {
-        var confirmed = confirm(getBuiltinEgeWarning(ide, true));
-        if (!confirmed) return;
-      }
-
-      showModal('正在安装到 ' + ide.name + '...');
-
-      window.setTimeout(function () {
-        try {
-          Installer.install([ide], updateModalProgress, function (success, message) {
-            if (success) {
-              modalLog('安装完成！', 'success');
-              ide.egeInstalled = true;
-            } else {
-              modalLog('安装失败: ' + message, 'error');
-            }
-            enableModalClose();
-            renderIDEList();
-          }, libsPath);
-        } catch (e) {
-          modalLog('安装出错: ' + e.message, 'error');
-          enableModalClose();
-        }
-      }, 100);
-    }
-
-    /**
-     * 执行卸载
-     */
-    function doUninstall(index, isFound) {
-      var ide = isFound ? detectedIDEs[index] : notFoundIDEs[index];
-      if (!ide || !ide.found || !ide.egeInstalled) return;
-
-      // 对于内置EGE的IDE，显示特殊提示
-      if (isBuiltinEgeIDE(ide)) {
-        var confirmed = confirm(getBuiltinEgeWarning(ide, false));
-        if (!confirmed) return;
-      } else {
-        var confirmed = confirm('确定要从 ' + ide.name + ' 卸载 EGE 库吗？');
-        if (!confirmed) return;
-      }
-
-      showModal('正在从 ' + ide.name + ' 卸载...');
-
-      window.setTimeout(function () {
-        try {
-          uninstallFromIDE(ide, function (success, message) {
-            if (success) {
-              modalLog('卸载完成！', 'success');
-              ide.egeInstalled = false;
-            } else {
-              modalLog('卸载失败: ' + message, 'error');
-            }
-            enableModalClose();
-            renderIDEList();
-          });
-        } catch (e) {
-          modalLog('卸载出错: ' + e.message, 'error');
-          enableModalClose();
-        }
-      }, 100);
-    }
-
-    /**
-     * 卸载EGE
-     */
-    function uninstallFromIDE(ide, callback) {
-      try {
-        Installer.uninstall(
-          [ide],
-          function (progress, message) {
-            updateModalProgress(progress, message);
-          },
-          function (success, message) {
-            if (success) {
-              modalLog('', '');
-              modalLog('========================================', 'success');
-              modalLog('  ✓ 卸载成功！', 'success');
-              modalLog('========================================', 'success');
-              callback(true, message);
-            } else {
-              callback(false, message);
-            }
-          }
-        );
-      } catch (e) {
-        modalLog('卸载出错: ' + e.message, 'error');
-        callback(false, e.message);
-      }
-    }
-
-    /**
-     * 显示模态框
-     */
-    function showModal(title) {
-      document.getElementById('modalTitle').innerText = title;
-      document.getElementById('modalLog').innerHTML = '';
-      document.getElementById('modalProgress').style.width = '0%';
-      document.getElementById('modalCloseBtn').disabled = true;
-      document.getElementById('operationModal').className = 'modal-overlay show';
-    }
-
-    /**
-     * 关闭模态框
-     */
-    function closeModal() {
-      document.getElementById('operationModal').className = 'modal-overlay';
-    }
-
-    /**
-     * 启用模态框关闭按钮
-     */
-    function enableModalClose() {
-      document.getElementById('modalCloseBtn').disabled = false;
-    }
-
-    /**
-     * 更新模态框进度
-     */
-    function updateModalProgress(percent, message) {
-      document.getElementById('modalProgress').style.width = percent + '%';
-      if (message) {
-        document.getElementById('modalTitle').innerText = message;
-      }
-    }
-
-    /**
-     * 模态框日志
-     */
-    function modalLog(message, type) {
-      var logArea = document.getElementById('modalLog');
-      var className = type || '';
-      logArea.innerHTML += '<div class="' + className + '">' + message + '</div>';
-      logArea.scrollTop = logArea.scrollHeight;
-    }
-
-    /**
-     * 全局log函数（供Installer模块使用）
-     */
-    function log(message, type) {
-      modalLog(message, type);
-    }
-
-    /**
-     * 扫描MinGW - 让用户选择目录并递归查找MinGW安装
-     */
-    function scanForMinGW() {
-      try {
-        var shellApp = new ActiveXObject("Shell.Application");
-        var folder = shellApp.BrowseForFolder(0, "选择要扫描的目录（将递归搜索 MinGW 安装）", 0x0051, "");
-
-        if (!folder) return; // 用户取消
-
-        var folderPath = folder.Self.Path;
-
-        // 显示扫描进度模态框
-        showScanModal(folderPath);
-
-        // 使用setTimeout让UI更新
-        window.setTimeout(function () {
-          var foundMinGWs = [];
-          scanDirectoryAsync(folderPath, foundMinGWs, 0, 7, function () {
-            // 扫描完成回调
-            finishScan(foundMinGWs);
-          });
-        }, 100);
-
-      } catch (e) {
-        alert('扫描出错: ' + e.message);
-        updateStatus();
-      }
-    }
-
-    /**
-     * 显示扫描模态框
-     */
-    function showScanModal(folderPath) {
-      // 重置扫描计数器
-      scanDirCount = 0;
-      lastUpdateCount = 0;
-
-      showModal('正在扫描 MinGW 安装...');
-      modalLog('扫描目录: ' + folderPath, 'info');
-      modalLog('这可能需要几分钟时间，请耐心等待...', 'info');
-      updateModalProgress(0, '正在扫描: ' + folderPath);
-    }
-
-    /**
-     * 完成扫描
-     */
-    function finishScan(foundMinGWs) {
-      updateModalProgress(100, '扫描完成');
-      modalLog('总共扫描了 ' + scanDirCount + ' 个目录', 'info');
-
-      if (foundMinGWs.length > 0) {
-        // 添加找到的MinGW到检测列表
-        var addedCount = 0;
-        for (var i = 0; i < foundMinGWs.length; i++) {
-          var mingw = foundMinGWs[i];
-          var mingwPathLower = mingw.path.toLowerCase();
-
-          // 检查是否已存在或与已有IDE有父子目录关系
-          var shouldSkip = false;
-          for (var j = 0; j < detectedIDEs.length; j++) {
-            var existingPath = detectedIDEs[j].path.toLowerCase();
-            var existingInclude = (detectedIDEs[j].includePath || '').toLowerCase();
-
-            // 跳过完全相同的路径
-            if (existingPath === mingwPathLower) {
-              shouldSkip = true;
-              break;
-            }
-
-            // 跳过是已有IDE子目录的情况（如 RedPanda-Cpp\mingw64）
-            if (mingwPathLower.indexOf(existingPath + '\\') === 0) {
-              shouldSkip = true;
-              break;
-            }
-
-            // 跳过已有IDE的includePath包含此MinGW的情况
-            if (existingInclude && existingInclude.indexOf(mingwPathLower) === 0) {
-              shouldSkip = true;
-              break;
-            }
-          }
-
-          if (!shouldSkip) {
-            mingw.egeInstalled = checkEgeInstalled(mingw);
-            detectedIDEs.push(mingw);
-            addedCount++;
-            modalLog('添加: ' + mingw.name + ' - ' + mingw.path, 'success');
-          } else {
-            modalLog('跳过重复: ' + mingw.path, 'info');
-          }
-        }
-
-        modalLog('扫描完成！新增 ' + addedCount + ' 个 MinGW 安装', 'success');
-        renderIDEList();
-      } else {
-        modalLog('未找到 MinGW 安装', 'info');
-        modalLog('提示：MinGW 目录应包含 bin\\gcc.exe', 'info');
-      }
-
-      updateStatus();
-      enableModalClose();
-    }
-
-    // 扫描计数器（用于减少UI更新频率）
-    var scanDirCount = 0;
-    var lastUpdateCount = 0;
-    var UPDATE_INTERVAL = 100; // 每扫描50个目录更新一次UI
-
-    /**
-     * 异步递归扫描目录查找MinGW（优化版：减少UI更新频率）
-     */
-    function scanDirectoryAsync(path, results, depth, maxDepth, callback) {
-      if (depth > maxDepth) {
-        callback();
-        return;
-      }
-
-      try {
-        var folder = fso.GetFolder(path);
-        scanDirCount++;
-
-        // 只在扫描一定数量目录后才更新UI（大幅减少UI更新频率）
-        if (scanDirCount - lastUpdateCount >= UPDATE_INTERVAL) {
-          var progress = Math.min(95, (depth / maxDepth) * 90);
-          updateModalProgress(progress, '扫描中: ' + path.substring(0, 60) + '...');
-          modalLog('已扫描 ' + scanDirCount + ' 个目录...', 'info');
-          lastUpdateCount = scanDirCount;
-        }
-
-        // 检查当前目录是否是MinGW
-        if (isMinGWDirectory(path)) {
-          var is64bit = path.toLowerCase().indexOf('64') >= 0 ||
-            path.toLowerCase().indexOf('x64') >= 0;
-          results.push({
-            name: 'MinGW' + (is64bit ? '-w64' : '32') + ' (扫描发现)',
-            path: path,
-            type: 'mingw',
-            found: true,
-            includePath: path + '\\include',
-            libPath: path + '\\lib'
-          });
-          modalLog('找到 MinGW: ' + path, 'success');
-          callback();
-          return; // 找到后不再递归此目录
-        }
-
-        // 获取子目录列表
-        var subDirsToScan = [];
-        var subFolders = new Enumerator(folder.SubFolders);
-        for (; !subFolders.atEnd(); subFolders.moveNext()) {
-          var subPath = subFolders.item().Path;
-          var subName = fso.GetFileName(subPath).toLowerCase();
-
-          // 跳过一些目录以提高性能
-          if (subName === 'windows' || subName === '$recycle.bin' ||
-            subName === 'system volume information' || subName.charAt(0) === '.') {
-            continue;
-          }
-
-          // 优先扫描可能有MinGW或IDE的目录
-          var isRelevantPath =
-            subName.indexOf('mingw') >= 0 ||
-            subName.indexOf('msys') >= 0 ||
-            subName.indexOf('gcc') >= 0 ||
-            subName.indexOf('tdm') >= 0 ||
-            subName.indexOf('clion') >= 0 ||
-            subName.indexOf('jetbrains') >= 0 ||
-            subName.indexOf('redpanda') >= 0 ||
-            subName.indexOf('devcpp') >= 0 ||
-            subName.indexOf('dev-cpp') >= 0 ||
-            subName.indexOf('codeblocks') >= 0 ||
-            subName === 'program files' ||
-            subName === 'program files (x86)' ||
-            subName === 'programs' ||
-            subName === 'appdata' ||
-            subName === 'local';
-
-          if (isRelevantPath || depth < 3) {
-            subDirsToScan.push(subPath);
-          }
-        }
-
-        // 异步递归扫描子目录
-        var currentIndex = 0;
-        function scanNextSubDir() {
-          if (currentIndex >= subDirsToScan.length) {
-            callback();
-            return;
-          }
-
-          var subPath = subDirsToScan[currentIndex];
-          currentIndex++;
-
-          // 使用 setTimeout 避免阻塞
-          window.setTimeout(function () {
-            scanDirectoryAsync(subPath, results, depth + 1, maxDepth, scanNextSubDir);
-          }, 10);
-        }
-
-        scanNextSubDir();
-
-      } catch (e) {
-        // 忽略权限错误等
-        callback();
-      }
-    }
-
-    /**
-     * 同步扫描目录（保留原函数供其他地方使用）
-     */
-    function scanDirectory(path, results, depth, maxDepth) {
-      if (depth > maxDepth) return;
-
-      try {
-        var folder = fso.GetFolder(path);
-
-        // 检查当前目录是否是MinGW
-        if (isMinGWDirectory(path)) {
-          var is64bit = path.toLowerCase().indexOf('64') >= 0 ||
-            path.toLowerCase().indexOf('x64') >= 0;
-          results.push({
-            name: 'MinGW' + (is64bit ? '-w64' : '32') + ' (扫描发现)',
-            path: path,
-            type: 'mingw',
-            found: true,
-            includePath: path + '\\include',
-            libPath: path + '\\lib'
-          });
-          return; // 找到后不再递归此目录
-        }
-
-        // 递归子目录
-        var subFolders = new Enumerator(folder.SubFolders);
-        for (; !subFolders.atEnd(); subFolders.moveNext()) {
-          var subPath = subFolders.item().Path;
-          var subName = fso.GetFileName(subPath).toLowerCase();
-
-          // 跳过一些目录以提高性能
-          if (subName === 'windows' || subName === '$recycle.bin' ||
-            subName === 'system volume information' || subName.charAt(0) === '.') {
-            continue;
-          }
-
-          // 优先扫描可能有MinGW或IDE的目录（扩展关键词列表）
-          var isRelevantPath =
-            subName.indexOf('mingw') >= 0 ||
-            subName.indexOf('msys') >= 0 ||
-            subName.indexOf('gcc') >= 0 ||
-            subName.indexOf('tdm') >= 0 ||
-            subName.indexOf('clion') >= 0 ||
-            subName.indexOf('jetbrains') >= 0 ||
-            subName.indexOf('redpanda') >= 0 ||
-            subName.indexOf('devcpp') >= 0 ||
-            subName.indexOf('dev-cpp') >= 0 ||
-            subName.indexOf('codeblocks') >= 0 ||
-            subName === 'program files' ||
-            subName === 'program files (x86)' ||
-            subName === 'programs' ||  // Toolbox 安装路径
-            subName === 'appdata' ||   // 用户应用数据
-            subName === 'local';       // AppData\Local
-
-          if (isRelevantPath) {
-            // 关键路径继续深入扫描
-            scanDirectory(subPath, results, depth + 1, maxDepth);
-          } else if (depth < 3) {
-            // 前三层扫描所有目录（增加覆盖范围）
-            scanDirectory(subPath, results, depth + 1, maxDepth);
-          }
-        }
-      } catch (e) {
-        // 忽略权限错误等
-      }
-    }
-
-    /**
-     * 检查目录是否是MinGW安装
-     */
-    function isMinGWDirectory(path) {
-      try {
-        var binPath = path + '\\bin';
-        if (!fso.FolderExists(binPath)) return false;
-
-        // 检查是否有gcc或g++
-        var hasGcc = fso.FileExists(binPath + '\\gcc.exe') ||
-          fso.FileExists(binPath + '\\g++.exe');
-
-        // 检查是否有include和lib目录
-        var hasInclude = fso.FolderExists(path + '\\include');
-        var hasLib = fso.FolderExists(path + '\\lib');
-
-        return hasGcc && hasInclude && hasLib;
-      } catch (e) {
-        return false;
-      }
-    }
-
-    /**
-     * 更新状态栏
-     */
-    function updateStatus() {
-      var installedCount = 0;
-      for (var i = 0; i < detectedIDEs.length; i++) {
-        if (detectedIDEs[i].egeInstalled) installedCount++;
-      }
-      document.getElementById('statusText').innerText =
-        '检测到 ' + detectedIDEs.length + ' 个开发环境，' + installedCount + ' 个已安装 EGE';
-    }
-  </script>
+  <script language="JScript" src="ui.js"></script>
 </body>
 
 </html>

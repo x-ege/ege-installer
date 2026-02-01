@@ -240,6 +240,31 @@ var Installer = (function () {
   }
 
   /**
+   * 检查文件是否是有效的库文件
+   */
+  function isValidLibraryFile(fileName) {
+    var lowerName = fileName.toLowerCase();
+    var ext = lowerName.substring(lowerName.lastIndexOf('.'));
+
+    // 允许的库文件扩展名
+    var validExtensions = ['.lib', '.a', '.dll', '.so', '.dylib'];
+
+    // 不允许的文件（说明文档等）
+    if (ext === '.txt' || ext === '.md' || ext === '.pdf' || ext === '.doc') {
+      return false;
+    }
+
+    // 检查是否在允许的扩展名列表中
+    for (var i = 0; i < validExtensions.length; i++) {
+      if (ext === validExtensions[i]) {
+        return true;
+      }
+    }
+
+    return false;
+  }
+
+  /**
    * 安装库文件到指定 IDE
    */
   function installLibs(ide, egeLibsPath) {
@@ -257,6 +282,8 @@ var Installer = (function () {
     var libDirs = mapping(ide);
     var hasError = false;
     var foundAnyLib = false;
+    var installedCount = 0;
+    var skippedCount = 0;
 
     for (var arch in libDirs) {
       var srcLibDir = srcLib + "\\" + libDirs[arch];
@@ -289,22 +316,46 @@ var Installer = (function () {
       if (libFiles.length === 0) {
         log("  库目录为空: " + srcLibDir, "error");
         hasError = true;
-      } else {
-        foundAnyLib = true;
+        continue;
       }
 
       for (var i = 0; i < libFiles.length; i++) {
         var fileName = fso.GetFileName(libFiles[i]);
+
+        // 过滤非库文件
+        if (!isValidLibraryFile(fileName)) {
+          log("  跳过非库文件: " + fileName, "info");
+          skippedCount++;
+          continue;
+        }
+
+        foundAnyLib = true;
         var dest = destLibDir + "\\" + fileName;
         if (copyFile(libFiles[i], dest)) {
-          log("  复制: " + libFiles[i] + " -> " + dest, "success");
+          log("  复制: " + fileName, "success");
+          installedCount++;
         } else {
+          log("  复制失败: " + fileName, "error");
           hasError = true;
         }
       }
     }
 
-    return foundAnyLib && !hasError;
+    if (installedCount > 0) {
+      log("  成功安装 " + installedCount + " 个库文件" + (skippedCount > 0 ? "，跳过 " + skippedCount + " 个非库文件" : ""), "success");
+    }
+
+    if (!foundAnyLib) {
+      log("  未找到有效的库文件", "error");
+      return false;
+    }
+
+    if (hasError) {
+      log("  库文件安装过程中出现错误", "error");
+      return false;
+    }
+
+    return true;
   }
 
   /**
@@ -346,14 +397,13 @@ var Installer = (function () {
 
     if (!hasError) {
       log("  项目模板已安装到: " + userTemplateDir, "success");
-      showCodeBlocksUsageGuide();
     }
 
     return !hasError;
   }
 
   /**
-   * 显示 CodeBlocks 使用说明
+   * 显示 CodeBlocks 使用说明（简化版，详细说明在模态窗口中查看）
    */
   function showCodeBlocksUsageGuide() {
     log("", "");
@@ -361,16 +411,12 @@ var Installer = (function () {
     log("  ✓ Code::Blocks 项目模板安装成功！", "success");
     log("=====================================================", "success");
     log("", "");
-    log("📝 如何创建新的 EGE 项目：", "info");
-    log("", "");
+    log("📝 创建 EGE 项目：", "info");
     log("  1. 打开 Code::Blocks", "info");
-    log("  2. 点击菜单：文件 → 从用户模板新建...", "info");
-    log("  3. 选择：EGE_Project", "info");
-    log("  4. 输入项目名称和位置，完成！", "info");
+    log("  2. 文件 → 从用户模板新建...", "info");
+    log("  3. 选择 EGE_Project 模板", "info");
     log("", "");
-    log("💡 模板已自动配置所有链接选项，无需手动设置。", "info");
-    log("", "");
-    log("📚 更多信息请访问：https://xege.org/", "info");
+    log("💡 更多详细说明请点击下方\"查看使用说明\"按钮", "success");
     log("=====================================================", "success");
     log("", "");
   }
@@ -408,36 +454,54 @@ var Installer = (function () {
 
     var baseProgress = (currentIndex / totalCount) * 100;
     var stepProgress = (1 / totalCount) * 100;
-    var success = true;
+    var headersSuccess = true;
+    var libsSuccess = true;
+    var templateSuccess = true;
 
     // 安装头文件
     progressCallback(baseProgress + stepProgress * 0.3, "正在安装头文件到 " + ide.name + "...");
     if (!installHeaders(ide, egeLibsPath)) {
-      log("头文件安装失败", "error");
-      success = false;
+      log("❌ 头文件安装失败", "error");
+      headersSuccess = false;
+    } else {
+      log("✓ 头文件安装成功", "success");
     }
 
     // 安装库文件
     progressCallback(baseProgress + stepProgress * 0.7, "正在安装库文件到 " + ide.name + "...");
     if (!installLibs(ide, egeLibsPath)) {
-      log("库文件安装失败", "error");
-      success = false;
+      log("❌ 库文件安装失败", "error");
+      libsSuccess = false;
+    } else {
+      log("✓ 库文件安装成功", "success");
     }
 
     // 为 CodeBlocks 安装项目模板
-    if (ide.type === "codeblocks" && success) {
+    if (ide.type === "codeblocks") {
       progressCallback(baseProgress + stepProgress * 0.9, "正在安装项目模板...");
       if (!installCodeBlocksTemplate(ide)) {
-        log("项目模板安装失败（不影响库文件安装）", "warning");
+        log("⚠ 项目模板安装失败（不影响库文件安装）", "warning");
+        templateSuccess = false;
+      } else {
+        log("✓ 项目模板安装成功", "success");
+        // 只在库文件也安装成功时显示使用说明
+        if (headersSuccess && libsSuccess) {
+          showCodeBlocksUsageGuide();
+        }
       }
     }
 
-    if (success) {
-      log(ide.name + " 安装完成", "success");
+    var overallSuccess = headersSuccess && libsSuccess;
+
+    if (overallSuccess) {
+      log("", "");
+      log("✓ " + ide.name + " 安装完成", "success");
     } else {
-      log(ide.name + " 安装失败", "error");
+      log("", "");
+      log("❌ " + ide.name + " 安装失败，请查看上方错误信息", "error");
     }
-    return success;
+
+    return overallSuccess;
   }
 
   /**
@@ -487,13 +551,14 @@ var Installer = (function () {
     if (!fso.FolderExists(egeLibsPath)) {
       log("找不到 EGE 库文件目录!", "error");
       log("请确保 xege_libs 目录位于正确位置", "error");
-      completeCallback(false, "找不到 EGE 库文件目录: " + egeLibsPath);
+      completeCallback(false, "找不到 EGE 库文件目录: " + egeLibsPath, false);
       return;
     }
 
     var totalCount = selectedIDEs.length;
     var successCount = 0;
     var failCount = 0;
+    var codeBlocksInstalled = false;
 
     for (var i = 0; i < selectedIDEs.length; i++) {
       var ide = selectedIDEs[i];
@@ -506,6 +571,10 @@ var Installer = (function () {
       try {
         if (installToIDE(ide, egeLibsPath, progressCallback, i, totalCount)) {
           successCount++;
+          // 记录 CodeBlocks 安装成功
+          if (ide.type === "codeblocks") {
+            codeBlocksInstalled = true;
+          }
         } else {
           failCount++;
         }
@@ -518,13 +587,24 @@ var Installer = (function () {
     }
 
     log("", "");
-    log("=== 安装结束 ===", "info");
-    log("成功: " + successCount + ", 失败: " + failCount, successCount > 0 ? "success" : "error");
+    log("======================================", "info");
+    log("=== 安装流程结束 ===", "info");
+    log("======================================", "info");
+    log("", "");
+    log("📊 安装统计：", "info");
+    log("  • 成功：" + successCount + " 个", successCount > 0 ? "success" : "info");
+    log("  • 失败：" + failCount + " 个", failCount > 0 ? "error" : "info");
+    log("", "");
 
-    if (successCount > 0) {
-      completeCallback(true, "成功安装到 " + successCount + " 个 IDE");
+    if (successCount > 0 && failCount === 0) {
+      log("🎉 所有IDE安装成功！", "success");
+      completeCallback(true, "成功安装到 " + successCount + " 个 IDE", codeBlocksInstalled);
+    } else if (successCount > 0 && failCount > 0) {
+      log("⚠ 部分IDE安装成功，" + failCount + " 个失败，请检查上方日志", "error");
+      completeCallback(false, "" + successCount + " 个成功，" + failCount + " 个失败", codeBlocksInstalled);
     } else {
-      completeCallback(false, "所有安装均失败，请检查日志");
+      log("❌ 所有安装均失败，请检查日志并重试", "error");
+      completeCallback(false, "所有安装均失败，请检查日志", false);
     }
   }
 

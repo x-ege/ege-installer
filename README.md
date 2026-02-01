@@ -116,7 +116,8 @@ mshta.exe .\src\setup.hta
 ```
 ege-installer/
 ├── src/
-│   ├── setup.hta           # Main UI with embedded styles and logic
+│   ├── setup.hta           # Main UI with HTML/CSS structure
+│   ├── ui.js               # UI interaction logic (extracted from HTA)
 │   ├── detector.js         # IDE detection module
 │   │   ├── detectVSWithVswhere()      # VS 2017+ detection
 │   │   ├── detectVSFromRegistry()     # VS 2010-2015 detection
@@ -135,8 +136,9 @@ ege-installer/
 ├── assets/
 │   ├── templates/          # IDE project templates
 │   │   └── codeblocks/     # CodeBlocks project template
-│   │       ├── EGE_Project.cbp   # Pre-configured project file
-│   │       └── main.cpp          # Hello World example
+│   │       ├── EGE_Project.cbp       # Pre-configured project file
+│   │       ├── EGE_Project.template  # XML template descriptor
+│   │       └── main.cpp              # Hello World example
 │   ├── docs/               # User documentation
 │   │   └── codeblocks-usage.md   # CodeBlocks usage guide
 │   └── ege-icon.ico        # Application icon
