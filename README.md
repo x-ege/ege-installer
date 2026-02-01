@@ -19,21 +19,13 @@ Modern installer for [EGE (Easy Graphics Engine)](https://github.com/x-ege/xege)
 ## 🎯 Supported IDEs
 
 | IDE | Detection Methods | Library Support | Notes |
-|-----|------------------|-----------------|-------|
+| ----- | ------------------ | ----------------- | ------- |
 | **Visual Studio** | vswhere + Registry | VS 2010-2026 | x86/x64 architecture auto-detection |
 | **MinGW-w64** | Filesystem Scan | MSYS2, Standalone | Support for 32/64-bit variants |
 | **Red Panda C++** | Predefined Paths | Dedicated Library | Independent IDE with built-in MinGW |
-| **CLion** | Toolbox + Direct Install | Shared with Red Panda | 3 detection modes (see below) |
+| **CLion** | Toolbox + Direct Install | Shared with Red Panda | Toolbox/Direct installation |
 | **Dev-C++** | Predefined Paths | Embarcadero, Legacy | Standard Dev-C++ variants |
 | **Code::Blocks** | Predefined Paths | Latest | MinGW bundled version |
-
-### CLion Detection Modes
-
-1. **Toolbox Programs** - `%LOCALAPPDATA%\Programs\CLion`
-2. **Direct Installation** - `C:\Program Files\JetBrains\CLion*`
-3. **Toolbox Apps** - `%LOCALAPPDATA%\JetBrains\Toolbox\apps\clion`
-
-All modes validate MinGW presence at `bin\mingw\`, `mingw\`, or `bundled\`.
 
 ## 📦 Tech Stack
 
@@ -150,22 +142,7 @@ ege-installer/
 └── logs/                   # Build logs
 ```
 
-## 🔧 Configuration
-
-### Library Directory Mapping
-
-```javascript
-{
-  "vs": "vs<year>",           // Visual Studio (e.g., vs2022)
-  "mingw": "mingw32/mingw64", // MinGW by architecture
-  "redpanda": "redpanda",     // Red Panda dedicated
-  "clion": "redpanda",        // Shared with Red Panda
-  "devcpp": "devcpp",         // Other Dev-C++ versions
-  "codeblocks": "codeblocks"  // Code::Blocks
-}
-```
-
-### EGE Library Structure
+## 📁 EGE Library Structure
 
 Expected library structure in `../xege_libs/`:
 
@@ -185,27 +162,9 @@ xege_libs/
 │   └── codeblocks/       # Code::Blocks
 ```
 
-## 🎨 UI Design
-
-- **Base Window**: 720×600 px (DPI-scaled)
-- **Color Scheme**: Professional gradient (purple to blue)
-- **Layout**: Single-page with expandable sections
-- **Components**:
-  - Header with version badge
-  - IDE list with install/uninstall buttons
-  - Status indicators (installed/not installed/not found)
-  - Progress modal with detailed logs
-  - Footer with scan and close actions
-
 ## 🔍 Manual Scan Feature
 
-The "Scan MinGW" button performs intelligent directory scanning:
-
-- **Max Depth**: 7 layers (covers deep AppData installations)
-- **Keywords**: mingw, msys, gcc, tdm, clion, jetbrains, redpanda, devcpp, dev-cpp, codeblocks, programs, appdata, local
-- **Strategy**: Full scan for first 3 layers, keyword-driven for deeper levels
-- **Validation**: Checks for `bin\gcc.exe`, `include\`, and `lib\` directories
-- **Deduplication**: Skips paths already detected or parent directories
+If your MinGW installation is not automatically detected, use the "Scan MinGW" button to manually search directories (max depth: 7 layers).
 
 ## 🐛 Troubleshooting
 
