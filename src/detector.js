@@ -133,11 +133,24 @@ var Detector = (function () {
           var name = nameMatches && nameMatches[j] ?
             nameMatches[j].replace(/"displayName"\s*:\s*"/, "").replace(/"/, "") : "Visual Studio";
 
+          // 从名称中提取年份（如 "Visual Studio Community 2022"）
+          var yearMatch = name.match(/20\d{2}/);
+          var year = yearMatch ? yearMatch[0] : "";
+
+          // 如果无法从名称提取，根据版本号推断
+          if (!year && version) {
+            var majorVersion = parseInt(version.split(".")[0], 10);
+            if (majorVersion >= 17) year = "2022";
+            else if (majorVersion === 16) year = "2019";
+            else if (majorVersion === 15) year = "2017";
+          }
+
           if (pathExists(path)) {
             results.push({
               name: name,
               path: path,
               version: version,
+              year: year,
               type: "vs",
               found: true,
               includePath: path + "\\VC\\Tools\\MSVC",
