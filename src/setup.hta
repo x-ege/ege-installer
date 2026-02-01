@@ -469,8 +469,17 @@
       currentPath = fso.GetParentFolderName(htaPath);
       libsPath = fso.GetParentFolderName(currentPath) + '\\libs';
 
-      // 读取版本号（处理UTF-8 BOM，从 version.txt 提取 "Version: x.x.x"）
-      var versionFile = fso.GetParentFolderName(currentPath) + '\\version.txt';
+      // 读取版本号（从 version.txt 读取 EGE 库版本）
+      // 优先尝试打包后的位置，如果不存在则尝试开发环境位置
+      var projectRoot = fso.GetParentFolderName(currentPath);
+      var versionFile = projectRoot + '\\version.txt';
+
+      // 如果打包位置不存在，尝试开发环境位置
+      if (!fso.FileExists(versionFile)) {
+        var parentDir = fso.GetParentFolderName(projectRoot);
+        versionFile = parentDir + '\\xege_libs\\version.txt';
+      }
+
       if (fso.FileExists(versionFile)) {
         var ts = fso.OpenTextFile(versionFile, 1);
         var content = ts.ReadAll();
@@ -479,9 +488,9 @@
         if (content.charCodeAt(0) === 0xFEFF || content.charCodeAt(0) === 0xEF) {
           content = content.substring(1);
         }
-        // 从 "Version: x.x.x" 格式中提取版本号
-        var match = content.match(/Version:\s*([0-9][0-9.\-a-zA-Z]*)/i);
-        egeVersion = match ? match[1] : '';
+        // 提取版本号：支持两种格式 "Version: x.x.x" 或纯版本号 "x.x.x"
+        var match = content.match(/(?:Version:\s*)?([0-9]+[0-9.\-a-zA-Z]*)/i);
+        egeVersion = match ? match[1].trim() : '';
       } else {
         egeVersion = '1.0.0';
       }
@@ -557,11 +566,27 @@
     window.resizeTo(initWidth, initHeight);
     window.moveTo(Math.round((screen.width - initWidth) / 2), Math.round((screen.height - initHeight) / 2));
 
-    // 禁用resize
+    // 支持 resize 但限制最小尺寸（方案1）
+    var minWidth = initWidth;
+    var minHeight = initHeight;
+    var resizeTimer = null;
+
     document.body.onresize = function () {
-      if (window.outerWidth !== initWidth || window.outerHeight !== initHeight) {
-        window.resizeTo(initWidth, initHeight);
+      // 使用 setTimeout 避免频繁触发
+      if (resizeTimer) {
+        clearTimeout(resizeTimer);
       }
+      resizeTimer = setTimeout(function () {
+        var currentWidth = window.outerWidth;
+        var currentHeight = window.outerHeight;
+
+        // 如果窗口小于最小尺寸，调整回最小尺寸
+        if (currentWidth < minWidth || currentHeight < minHeight) {
+          var newWidth = currentWidth < minWidth ? minWidth : currentWidth;
+          var newHeight = currentHeight < minHeight ? minHeight : currentHeight;
+          window.resizeTo(newWidth, newHeight);
+        }
+      }, 50);
     };
 
     // 检查脚本加载

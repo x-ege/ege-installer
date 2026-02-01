@@ -7,6 +7,7 @@
 
 Name "EGE 图形库安装程序"
 OutFile "..\dist\ege-setup-${VERSION}.exe"
+Icon "..\assets\ege-icon.ico"  ; 设置安装程序图标
 Unicode True
 RequestExecutionLevel admin  ; 启动时申请管理员权限
 ManifestDPIAware true  ; 声明DPI感知，避免模糊缩放

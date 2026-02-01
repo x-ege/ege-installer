@@ -2,13 +2,13 @@
 # 使用 NSIS 打包 HTA 安装界面
 #
 # 用法:
-#   .\build.ps1                                    # 本地开发构建
-#   .\build.ps1 -Version "1.2.3"                   # 指定版本号
+#   .\build.ps1                                    # 使用 xege_libs/version.txt 中的版本号
+#   .\build.ps1 -Version "1.2.3"                   # 手动指定版本号（覆盖 version.txt）
 #   .\build.ps1 -XegeLibsPath "C:\path\to\libs"    # 自定义库路径 (CI)
 
 param(
     [string]$OutputDir = "dist",
-    [string]$Version = "1.0.0",
+    [string]$Version,                              # 可选：手动指定版本（优先级低于 version.txt）
     [string]$ProductVersion,                       # NSIS-compatible version (X.X.X.X)
     [string]$XegeLibsPath                          # 可选：自定义 xege_libs 路径
 )
@@ -30,6 +30,26 @@ if ($XegeLibsPath) {
 } else {
     # 默认路径：项目父目录下的 xege_libs
     $EgeLibsDir = Join-Path (Split-Path -Parent $ProjectRoot) "xege_libs"
+}
+
+# 从 xege_libs/version.txt 读取 EGE 库版本号
+$VersionSource = "default"
+if (-not $Version) {
+    $versionFilePath = Join-Path $EgeLibsDir "version.txt"
+    if (Test-Path $versionFilePath) {
+        try {
+            $Version = (Get-Content $versionFilePath -Raw).Trim()
+            $VersionSource = "version.txt"
+        } catch {
+            $Version = "1.0.0"
+            $VersionSource = "fallback (version.txt read error)"
+        }
+    } else {
+        $Version = "1.0.0"
+        $VersionSource = "fallback (version.txt not found)"
+    }
+} else {
+    $VersionSource = "parameter"
 }
 
 $LogFile = Join-Path $ProjectRoot "logs\build.log"
@@ -66,7 +86,7 @@ Log "=== EGE Installer Build Script (NSIS) ==="
 Log "Project Root: $ProjectRoot"
 Log "Source Dir: $SrcDir"
 Log "EGE Libs Dir: $EgeLibsDir"
-Log "Display Version: $Version"
+Log "Display Version: $Version (source: $VersionSource)"
 Log "Product Version: $ProductVersion"
 Log ""
 

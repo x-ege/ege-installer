@@ -93,15 +93,21 @@ mshta.exe .\src\setup.hta
 #### Build Package
 
 ```powershell
-# Build with default version (1.0.0)
+# Build with EGE library version (from xege_libs/version.txt)
 .\scripts\build.ps1
 
-# Build with specific version
+# Build with custom version (override version.txt)
 .\scripts\build.ps1 -Version "1.2.3"
 
 # Build with custom library path (CI)
-.\scripts\build.ps1 -XegeLibsPath "C:\path\to\xege_libs" -Version "1.2.3"
+.\scripts\build.ps1 -XegeLibsPath "C:\path\to\xege_libs"
 ```
+
+**Version Source Priority**:
+
+1. `-Version` parameter (manual override)
+2. `xege_libs/version.txt` (EGE library version)
+3. Fallback to `1.0.0` if version.txt not found
 
 **Output**: `dist/ege-setup-<version>.exe` (~20 MB)
 
@@ -229,7 +235,13 @@ The "Scan MinGW" button performs intelligent directory scanning:
 
 ## 📝 Changelog
 
-### Latest Changes (2026-02-01)
+### Latest Changes (2026-02-02)
+
+- 🔧 **Version Management**: Installer now uses EGE library version from `xege_libs/version.txt`
+- 🪟 **Window Behavior**: Support resizable window with minimum size constraint
+- 📝 Updated build script and CI/CD workflow
+
+### Changes (2026-02-01)
 
 - ✨ Separated Red Panda as independent IDE
 - ✨ Added CLion support with 3 detection modes

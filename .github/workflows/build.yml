@@ -29,30 +29,34 @@ jobs:
       - name: Get version
         id: version
         run: |
-          $version = Get-Date -Format "yyyy.MM.dd"
+          # Read version from xege_libs/version.txt (EGE library version)
+          $versionFile = "${{ github.workspace }}\xege_libs\version.txt"
+          $version = "1.0.0"
           
-          # Try to get version from git tag (ignore errors)
-          $tag = $null
-          try {
-            $tag = git describe --tags --abbrev=0 2>$null
-            if ($LASTEXITCODE -eq 0 -and $tag) {
-              $version = $tag -replace "^v", ""
+          if (Test-Path $versionFile) {
+            try {
+              $version = (Get-Content $versionFile -Raw).Trim()
+              Write-Host "Using EGE library version from version.txt: $version"
+            } catch {
+              Write-Host "Error reading version.txt, using default: $version"
             }
-          } catch { }
+          } else {
+            Write-Host "version.txt not found, using default: $version"
+          }
           
           # Create product version for NSIS VIProductVersion (X.X.X.X format, digits only, no leading zeros)
           $productVersion = $version -replace "[^0-9.]", "" -replace "\.+", "."
           # Remove leading zeros from each segment
           $productVersion = ($productVersion.Split('.') | ForEach-Object { [int]$_ }) -join '.'
           if ($productVersion -notmatch "^\d+\.\d+\.\d+") {
-            $productVersion = "2026.2.1"
+            $productVersion = "1.0.0"
           }
           # Ensure exactly 4 parts for NSIS (append .0 if needed)
           $parts = $productVersion.Split('.')
           if ($parts.Length -eq 3) {
             $productVersion = "$productVersion.0"
           } elseif ($parts.Length -lt 3) {
-            $productVersion = "2026.2.1.0"
+            $productVersion = "1.0.0.0"
           }
           
           # For PR builds, add PR suffix to display version
