@@ -1200,6 +1200,10 @@
      * 显示扫描模态框
      */
     function showScanModal(folderPath) {
+      // 重置扫描计数器
+      scanDirCount = 0;
+      lastUpdateCount = 0;
+
       showModal('正在扫描 MinGW 安装...');
       modalLog('扫描目录: ' + folderPath, 'info');
       modalLog('这可能需要几分钟时间，请耐心等待...', 'info');
@@ -1211,6 +1215,7 @@
      */
     function finishScan(foundMinGWs) {
       updateModalProgress(100, '扫描完成');
+      modalLog('总共扫描了 ' + scanDirCount + ' 个目录', 'info');
 
       if (foundMinGWs.length > 0) {
         // 添加找到的MinGW到检测列表
@@ -1265,8 +1270,13 @@
       enableModalClose();
     }
 
+    // 扫描计数器（用于减少UI更新频率）
+    var scanDirCount = 0;
+    var lastUpdateCount = 0;
+    var UPDATE_INTERVAL = 100; // 每扫描50个目录更新一次UI
+
     /**
-     * 异步递归扫描目录查找MinGW
+     * 异步递归扫描目录查找MinGW（优化版：减少UI更新频率）
      */
     function scanDirectoryAsync(path, results, depth, maxDepth, callback) {
       if (depth > maxDepth) {
@@ -1276,11 +1286,15 @@
 
       try {
         var folder = fso.GetFolder(path);
+        scanDirCount++;
 
-        // 更新进度显示
-        var progress = Math.min(95, (depth / maxDepth) * 90);
-        updateModalProgress(progress, '扫描中: ' + path.substring(0, 60) + '...');
-        modalLog('扫描: ' + path, 'info');
+        // 只在扫描一定数量目录后才更新UI（大幅减少UI更新频率）
+        if (scanDirCount - lastUpdateCount >= UPDATE_INTERVAL) {
+          var progress = Math.min(95, (depth / maxDepth) * 90);
+          updateModalProgress(progress, '扫描中: ' + path.substring(0, 60) + '...');
+          modalLog('已扫描 ' + scanDirCount + ' 个目录...', 'info');
+          lastUpdateCount = scanDirCount;
+        }
 
         // 检查当前目录是否是MinGW
         if (isMinGWDirectory(path)) {
