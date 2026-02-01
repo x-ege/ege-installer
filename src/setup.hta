@@ -285,6 +285,61 @@
       border-top-color: #3b82f6;
       border-radius: 50%;
       margin: 0 auto 16px;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      0% {
+        transform: rotate(0deg);
+      }
+
+      100% {
+        transform: rotate(360deg);
+      }
+    }
+
+    .detection-log {
+      background: #f9fafb;
+      border: 1px solid #e5e7eb;
+      border-radius: 6px;
+      padding: 12px;
+      margin-top: 12px;
+      max-height: 150px;
+      overflow-y: auto;
+      font-size: 12px;
+      color: #6b7280;
+      font-family: 'Consolas', monospace;
+    }
+
+    .detection-log .log-line {
+      padding: 2px 0;
+    }
+
+    .detection-log .log-line.info {
+      color: #3b82f6;
+    }
+
+    .detection-log .log-line.success {
+      color: #10b981;
+    }
+
+    .detection-log .log-line.error {
+      color: #ef4444;
+    }
+
+    .detection-progress {
+      height: 4px;
+      background: #e5e7eb;
+      border-radius: 2px;
+      margin: 12px 0;
+      overflow: hidden;
+    }
+
+    .detection-progress-bar {
+      height: 100%;
+      background: linear-gradient(90deg, #3b82f6, #8b5cf6);
+      width: 0%;
+      transition: width 0.3s ease;
     }
 
     /* Modal overlay */
@@ -406,7 +461,11 @@
       <div id="ideList" class="ide-list">
         <div class="loading">
           <div class="loading-spinner"></div>
-          <p>正在检测已安装的 IDE...</p>
+          <p id="detectionStatus">正在检测已安装的 IDE...</p>
+          <div class="detection-progress">
+            <div id="detectionProgressBar" class="detection-progress-bar"></div>
+          </div>
+          <div id="detectionLog" class="detection-log"></div>
         </div>
       </div>
 
@@ -594,17 +653,127 @@
       document.getElementById('ideList').innerHTML =
         '<div class="empty-message"><p style="color:#dc2626;">加载错误：无法加载检测或安装模块</p></div>';
     } else {
-      // 启动检测
-      window.setTimeout(function () {
-        detectAllIDEs();
-      }, 200);
+      // 立即启动检测（不延迟，让用户尽快看到进度）
+      detectAllIDEs();
     }
 
     /**
-     * 检测所有IDE
+     * 检测日志
+     */
+    function detectionLog(message, type) {
+      var logEl = document.getElementById('detectionLog');
+      if (logEl) {
+        var className = type ? 'log-line ' + type : 'log-line';
+        logEl.innerHTML += '<div class="' + className + '">' + message + '</div>';
+        logEl.scrollTop = logEl.scrollHeight;
+      }
+    }
+
+    /**
+     * 更新检测进度
+     */
+    function updateDetectionProgress(percent, message) {
+      var progressBar = document.getElementById('detectionProgressBar');
+      var statusEl = document.getElementById('detectionStatus');
+      if (progressBar) {
+        progressBar.style.width = percent + '%';
+      }
+      if (statusEl && message) {
+        statusEl.innerText = message;
+      }
+    }
+
+    /**
+     * 异步检测所有IDE（拆分任务避免界面卡死）
      */
     function detectAllIDEs() {
-      var allIDEs = Detector.detectAll();
+      var allIDEs = [];
+      var detectionSteps = [
+        {
+          name: 'MinGW',
+          func: function () { return Detector.detectMinGW(); }
+        },
+        {
+          name: 'Red Panda',
+          func: function () { return Detector.detectRedPanda ? Detector.detectRedPanda() : []; }
+        },
+        {
+          name: 'Dev-C++',
+          func: function () { return Detector.detectDevCpp ? Detector.detectDevCpp() : []; }
+        },
+        {
+          name: 'Code::Blocks',
+          func: function () { return Detector.detectCodeBlocks ? Detector.detectCodeBlocks() : []; }
+        },
+        {
+          name: 'CLion',
+          func: function () { return Detector.detectCLion ? Detector.detectCLion() : []; }
+        },
+        {
+          name: 'Visual Studio',
+          func: function () { return Detector.detectVS ? Detector.detectVS() : []; }
+        }
+      ];
+
+      var currentStep = 0;
+      var totalSteps = detectionSteps.length;
+
+      function runNextStep() {
+        if (currentStep >= totalSteps) {
+          // 所有检测完成，处理结果
+          finishDetection(allIDEs);
+          return;
+        }
+
+        var step = detectionSteps[currentStep];
+        var progress = (currentStep / totalSteps) * 100;
+
+        // 先更新 UI
+        updateDetectionProgress(progress, '正在检测 ' + step.name + '...');
+        detectionLog('检测 ' + step.name + '...', 'info');
+
+        // 使用两层 setTimeout 确保 UI 先渲染再执行检测
+        window.setTimeout(function () {
+          window.setTimeout(function () {
+            try {
+              var results = step.func();
+              if (results && results.length > 0) {
+                var foundCount = 0;
+                for (var i = 0; i < results.length; i++) {
+                  allIDEs.push(results[i]);
+                  if (results[i].found) foundCount++;
+                }
+                detectionLog('  找到 ' + foundCount + ' 个 ' + step.name, foundCount > 0 ? 'success' : '');
+              } else {
+                detectionLog('  未找到 ' + step.name, '');
+              }
+            } catch (e) {
+              detectionLog('  检测 ' + step.name + ' 出错: ' + e.message, 'error');
+            }
+
+            currentStep++;
+            // 继续下一步
+            window.setTimeout(runNextStep, 100);
+          }, 100);
+        }, 50);
+      }
+
+      // 开始检测 - 立即显示日志，然后异步开始
+      detectionLog('开始检测已安装的开发环境...', 'info');
+      updateDetectionProgress(0, '准备开始检测...');
+
+      // 使用 setTimeout 让初始日志先渲染
+      window.setTimeout(function () {
+        runNextStep();
+      }, 50);
+    }
+
+    /**
+     * 完成检测，处理结果
+     */
+    function finishDetection(allIDEs) {
+      updateDetectionProgress(100, '检测完成');
+      detectionLog('检测完成，正在整理结果...', 'success');
 
       // 分离已检测到和未检测到的
       detectedIDEs = [];
@@ -625,7 +794,12 @@
       // 去重：移除父子目录关系的重复项
       detectedIDEs = deduplicateIDEs(detectedIDEs);
 
-      renderIDEList();
+      detectionLog('找到 ' + detectedIDEs.length + ' 个已安装的开发环境', detectedIDEs.length > 0 ? 'success' : '');
+
+      // 延迟一点再渲染，让用户看到完成消息
+      window.setTimeout(function () {
+        renderIDEList();
+      }, 300);
     }
 
     /**
@@ -1003,62 +1177,17 @@
         if (!folder) return; // 用户取消
 
         var folderPath = folder.Self.Path;
-        document.getElementById('statusText').innerText = '正在扫描: ' + folderPath + '...';
+
+        // 显示扫描进度模态框
+        showScanModal(folderPath);
 
         // 使用setTimeout让UI更新
         window.setTimeout(function () {
           var foundMinGWs = [];
-          scanDirectory(folderPath, foundMinGWs, 0, 7); // 最大深度7层（覆盖 AppData 深层工具）
-
-          if (foundMinGWs.length > 0) {
-            // 添加找到的MinGW到检测列表
-            var addedCount = 0;
-            for (var i = 0; i < foundMinGWs.length; i++) {
-              var mingw = foundMinGWs[i];
-              var mingwPathLower = mingw.path.toLowerCase();
-
-              // 检查是否已存在或与已有IDE有父子目录关系
-              var shouldSkip = false;
-              for (var j = 0; j < detectedIDEs.length; j++) {
-                var existingPath = detectedIDEs[j].path.toLowerCase();
-                var existingInclude = (detectedIDEs[j].includePath || '').toLowerCase();
-
-                // 跳过完全相同的路径
-                if (existingPath === mingwPathLower) {
-                  shouldSkip = true;
-                  break;
-                }
-
-                // 跳过是已有IDE子目录的情况（如 RedPanda-Cpp\mingw64）
-                if (mingwPathLower.indexOf(existingPath + '\\') === 0) {
-                  shouldSkip = true;
-                  break;
-                }
-
-                // 跳过已有IDE的includePath包含此MinGW的情况
-                if (existingInclude && existingInclude.indexOf(mingwPathLower) === 0) {
-                  shouldSkip = true;
-                  break;
-                }
-              }
-
-              if (!shouldSkip) {
-                mingw.egeInstalled = checkEgeInstalled(mingw);
-                detectedIDEs.push(mingw);
-                addedCount++;
-              }
-            }
-            renderIDEList();
-            if (addedCount > 0) {
-              alert('扫描完成！新增 ' + addedCount + ' 个 MinGW 安装。');
-            } else {
-              alert('扫描完成，找到 ' + foundMinGWs.length + ' 个 MinGW，但均已在列表中。');
-            }
-          } else {
-            alert('扫描完成，未找到 MinGW 安装。\n\n提示：MinGW 目录应包含 bin\\gcc.exe 或 bin\\g++.exe');
-          }
-
-          updateStatus();
+          scanDirectoryAsync(folderPath, foundMinGWs, 0, 7, function () {
+            // 扫描完成回调
+            finishScan(foundMinGWs);
+          });
         }, 100);
 
       } catch (e) {
@@ -1068,7 +1197,171 @@
     }
 
     /**
-     * 递归扫描目录查找MinGW
+     * 显示扫描模态框
+     */
+    function showScanModal(folderPath) {
+      showModal('正在扫描 MinGW 安装...');
+      modalLog('扫描目录: ' + folderPath, 'info');
+      modalLog('这可能需要几分钟时间，请耐心等待...', 'info');
+      updateModalProgress(0, '正在扫描: ' + folderPath);
+    }
+
+    /**
+     * 完成扫描
+     */
+    function finishScan(foundMinGWs) {
+      updateModalProgress(100, '扫描完成');
+
+      if (foundMinGWs.length > 0) {
+        // 添加找到的MinGW到检测列表
+        var addedCount = 0;
+        for (var i = 0; i < foundMinGWs.length; i++) {
+          var mingw = foundMinGWs[i];
+          var mingwPathLower = mingw.path.toLowerCase();
+
+          // 检查是否已存在或与已有IDE有父子目录关系
+          var shouldSkip = false;
+          for (var j = 0; j < detectedIDEs.length; j++) {
+            var existingPath = detectedIDEs[j].path.toLowerCase();
+            var existingInclude = (detectedIDEs[j].includePath || '').toLowerCase();
+
+            // 跳过完全相同的路径
+            if (existingPath === mingwPathLower) {
+              shouldSkip = true;
+              break;
+            }
+
+            // 跳过是已有IDE子目录的情况（如 RedPanda-Cpp\mingw64）
+            if (mingwPathLower.indexOf(existingPath + '\\') === 0) {
+              shouldSkip = true;
+              break;
+            }
+
+            // 跳过已有IDE的includePath包含此MinGW的情况
+            if (existingInclude && existingInclude.indexOf(mingwPathLower) === 0) {
+              shouldSkip = true;
+              break;
+            }
+          }
+
+          if (!shouldSkip) {
+            mingw.egeInstalled = checkEgeInstalled(mingw);
+            detectedIDEs.push(mingw);
+            addedCount++;
+            modalLog('添加: ' + mingw.name + ' - ' + mingw.path, 'success');
+          } else {
+            modalLog('跳过重复: ' + mingw.path, 'info');
+          }
+        }
+
+        modalLog('扫描完成！新增 ' + addedCount + ' 个 MinGW 安装', 'success');
+        renderIDEList();
+      } else {
+        modalLog('未找到 MinGW 安装', 'info');
+        modalLog('提示：MinGW 目录应包含 bin\\gcc.exe', 'info');
+      }
+
+      updateStatus();
+      enableModalClose();
+    }
+
+    /**
+     * 异步递归扫描目录查找MinGW
+     */
+    function scanDirectoryAsync(path, results, depth, maxDepth, callback) {
+      if (depth > maxDepth) {
+        callback();
+        return;
+      }
+
+      try {
+        var folder = fso.GetFolder(path);
+
+        // 更新进度显示
+        var progress = Math.min(95, (depth / maxDepth) * 90);
+        updateModalProgress(progress, '扫描中: ' + path.substring(0, 60) + '...');
+        modalLog('扫描: ' + path, 'info');
+
+        // 检查当前目录是否是MinGW
+        if (isMinGWDirectory(path)) {
+          var is64bit = path.toLowerCase().indexOf('64') >= 0 ||
+            path.toLowerCase().indexOf('x64') >= 0;
+          results.push({
+            name: 'MinGW' + (is64bit ? '-w64' : '32') + ' (扫描发现)',
+            path: path,
+            type: 'mingw',
+            found: true,
+            includePath: path + '\\include',
+            libPath: path + '\\lib'
+          });
+          modalLog('找到 MinGW: ' + path, 'success');
+          callback();
+          return; // 找到后不再递归此目录
+        }
+
+        // 获取子目录列表
+        var subDirsToScan = [];
+        var subFolders = new Enumerator(folder.SubFolders);
+        for (; !subFolders.atEnd(); subFolders.moveNext()) {
+          var subPath = subFolders.item().Path;
+          var subName = fso.GetFileName(subPath).toLowerCase();
+
+          // 跳过一些目录以提高性能
+          if (subName === 'windows' || subName === '$recycle.bin' ||
+            subName === 'system volume information' || subName.charAt(0) === '.') {
+            continue;
+          }
+
+          // 优先扫描可能有MinGW或IDE的目录
+          var isRelevantPath =
+            subName.indexOf('mingw') >= 0 ||
+            subName.indexOf('msys') >= 0 ||
+            subName.indexOf('gcc') >= 0 ||
+            subName.indexOf('tdm') >= 0 ||
+            subName.indexOf('clion') >= 0 ||
+            subName.indexOf('jetbrains') >= 0 ||
+            subName.indexOf('redpanda') >= 0 ||
+            subName.indexOf('devcpp') >= 0 ||
+            subName.indexOf('dev-cpp') >= 0 ||
+            subName.indexOf('codeblocks') >= 0 ||
+            subName === 'program files' ||
+            subName === 'program files (x86)' ||
+            subName === 'programs' ||
+            subName === 'appdata' ||
+            subName === 'local';
+
+          if (isRelevantPath || depth < 3) {
+            subDirsToScan.push(subPath);
+          }
+        }
+
+        // 异步递归扫描子目录
+        var currentIndex = 0;
+        function scanNextSubDir() {
+          if (currentIndex >= subDirsToScan.length) {
+            callback();
+            return;
+          }
+
+          var subPath = subDirsToScan[currentIndex];
+          currentIndex++;
+
+          // 使用 setTimeout 避免阻塞
+          window.setTimeout(function () {
+            scanDirectoryAsync(subPath, results, depth + 1, maxDepth, scanNextSubDir);
+          }, 10);
+        }
+
+        scanNextSubDir();
+
+      } catch (e) {
+        // 忽略权限错误等
+        callback();
+      }
+    }
+
+    /**
+     * 同步扫描目录（保留原函数供其他地方使用）
      */
     function scanDirectory(path, results, depth, maxDepth) {
       if (depth > maxDepth) return;
