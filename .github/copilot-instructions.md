@@ -5,7 +5,7 @@ Installer for [EGE (Easy Graphics Engine)](https://github.com/x-ege/xege) - conf
 ## Tech Stack
 
 - **UI**: HTA + JScript
-- **Packaging**: 7-Zip SFX
+- **Packaging**: NSIS (Nullsoft Scriptable Install System)
 - **Supported IDEs**: Visual Studio 2010-2026, MinGW-w64/MSYS2, Dev-C++, Code::Blocks, Red Panda Dev-C++
 
 ## Key Files
@@ -13,7 +13,8 @@ Installer for [EGE (Easy Graphics Engine)](https://github.com/x-ege/xege) - conf
 - `src/setup.hta` - Main installer UI
 - `src/detector.js` - IDE detection (registry + vswhere + common paths)
 - `src/installer.js` - File copy logic
-- `scripts/build.ps1` - Build script
+- `scripts/build.ps1` - Build script (PowerShell)
+- `scripts/installer.nsi` - NSIS installer script
 
 ## EGE Library Location
 
