@@ -22,7 +22,12 @@ Installer for [EGE (Easy Graphics Engine)](https://github.com/x-ege/xege) - conf
 
 Library files in sibling directory `../xege_libs/`:
 - `include/` - Headers (ege.h, graphics.h)
-- `lib/<compiler>/<arch>/` - Prebuilt libraries
+- `lib/msvc/` - VS2017-2026 unified library (x64/x86)
+- `lib/vs2010/` - VS2010 library
+- `lib/mingw64/`, `lib/mingw32/` - MinGW libraries
+- `lib/redpanda/`, `lib/devcpp/`, `lib/codeblocks/` - IDE-specific libraries
+
+**Note**: VS2017+ use unified `msvc/` directory for 60% size reduction (binary compatible across v141-v143+ toolsets)
 
 ## Development
 

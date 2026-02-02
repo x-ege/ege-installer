@@ -22,7 +22,7 @@ Modern installer for [EGE (Easy Graphics Engine)](https://github.com/x-ege/xege)
 
 | IDE | Detection Methods | Library Support | Notes |
 | ----- | ------------------ | ----------------- | ------- |
-| **Visual Studio** | vswhere + Registry | VS 2010-2026 | x86/x64 auto-detection, multi-toolset support |
+| **Visual Studio** | vswhere + Registry | VS 2010-2026 | x86/x64 auto-detection, VS2017+ use unified msvc library |
 | **MinGW-w64** | Filesystem Scan | MSYS2, Standalone | Support for 32/64-bit variants |
 | **Red Panda C++** | Predefined Paths | Dedicated Library | Independent IDE with built-in MinGW |
 | **CLion** | Toolbox + Direct Install | Shared with Red Panda | Toolbox/Direct installation |
@@ -170,8 +170,10 @@ xege_libs/
 │   ├── graphics.h
 │   └── ege/              # EGE internal headers
 ├── lib/
-│   ├── vs2010/           # Visual Studio libraries
-│   ├── vs2022/
+│   ├── msvc/             # Visual Studio 2017-2026 (unified)
+│   │   ├── x64/
+│   │   └── x86/
+│   ├── vs2010/           # Visual Studio 2010
 │   ├── mingw32/          # MinGW 32-bit
 │   ├── mingw64/          # MinGW 64-bit
 │   ├── redpanda/         # Red Panda & CLion
@@ -211,7 +213,15 @@ If your MinGW installation is not automatically detected, use the "Scan MinGW" b
 
 ## 📝 Changelog
 
-### Latest Changes (2026-02-01)
+### Latest Changes (2026-02-03)
+
+- ✨ **MSVC Library Consolidation**: Adapted to xege-sdk's unified MSVC library structure
+  - VS2017-VS2026 now use unified `msvc/` directory (60% size reduction)
+  - VS2010 maintains separate `vs2010/` directory for compatibility
+  - Improved installer logic to handle version-specific library mapping
+- 📚 **Documentation Update**: Updated library structure documentation to reflect unified MSVC directory
+
+### Changes (2026-02-01)
 
 - **Project Templates**: Added CodeBlocks project template with pre-configured linker settings
 - 📚 **Usage Guide**: Interactive usage instructions displayed after installation
