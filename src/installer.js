@@ -1,4 +1,4 @@
-﻿/**
+/**
  * EGE Installer - Installation Module
  * 用于将 EGE 库文件安装到各 IDE
  */
@@ -302,12 +302,16 @@ var Installer = (function () {
 
       // 确定目标库目录
       var destLibDir = ide.libPath;
-      if (arch === "x64" && ide.type.indexOf("vs") >= 0) {
-        // Visual Studio x64 库在不同子目录
-        if (fso.FolderExists(ide.libPath + "\\x64")) {
-          destLibDir = ide.libPath + "\\x64";
-        } else if (fso.FolderExists(ide.libPath + "\\amd64")) {
-          destLibDir = ide.libPath + "\\amd64";
+      if (ide.type.indexOf("vs") >= 0) {
+        // Visual Studio libs 通常按架构在子目录
+        if (arch === "x86" && fso.FolderExists(ide.libPath + "\\x86")) {
+          destLibDir = ide.libPath + "\\x86";
+        } else if (arch === "x64") {
+          if (fso.FolderExists(ide.libPath + "\\x64")) {
+            destLibDir = ide.libPath + "\\x64";
+          } else if (fso.FolderExists(ide.libPath + "\\amd64")) {
+            destLibDir = ide.libPath + "\\amd64";
+          }
         }
       }
 
@@ -512,13 +516,6 @@ var Installer = (function () {
   function resolveVSPaths(ide) {
     // 如果已经有 msvcPath，说明是新版检测器返回的结果，路径已正确设置
     if (ide.msvcPath) {
-      // 检查 x86/x64 子目录
-      if (fso.FolderExists(ide.libPath + "\\x86")) {
-        ide.libPathX86 = ide.libPath + "\\x86";
-      }
-      if (fso.FolderExists(ide.libPath + "\\x64")) {
-        ide.libPathX64 = ide.libPath + "\\x64";
-      }
       return ide;
     }
 
@@ -533,14 +530,6 @@ var Installer = (function () {
         var latestVersion = versions[versions.length - 1];
         ide.includePath = latestVersion + "\\include";
         ide.libPath = latestVersion + "\\lib";
-
-        // 检查 x86/x64 子目录
-        if (fso.FolderExists(ide.libPath + "\\x86")) {
-          ide.libPathX86 = ide.libPath + "\\x86";
-        }
-        if (fso.FolderExists(ide.libPath + "\\x64")) {
-          ide.libPathX64 = ide.libPath + "\\x64";
-        }
       }
     }
 

@@ -1,4 +1,4 @@
-﻿/**
+/**
  * EGE Installer - IDE Detector Module
  * 用于检测系统中已安装的 IDE 和编译器
  */
@@ -51,6 +51,9 @@ var Detector = (function () {
     "21": { toolset: "v142", year: "2019", label: "VS2019" },
     "20": { toolset: "v142", year: "2019", label: "VS2019" },
     // 14.1x = v141 (VS2017)
+    "19": { toolset: "v141", year: "2017", label: "VS2017" },
+    "18": { toolset: "v141", year: "2017", label: "VS2017" },
+    "17": { toolset: "v141", year: "2017", label: "VS2017" },
     "16": { toolset: "v141", year: "2017", label: "VS2017" },
     "15": { toolset: "v141", year: "2017", label: "VS2017" },
     "14": { toolset: "v141", year: "2017", label: "VS2017" },
@@ -164,7 +167,18 @@ var Detector = (function () {
     // 取前两位作为 key
     var key = minorVersion.substring(0, 2);
 
-    return msvcToolsetMapping[key] || null;
+    var direct = msvcToolsetMapping[key];
+    if (direct) return direct;
+
+    // 未知 minor：按区间兜底到最近支持的工具集，避免库目录指向不存在的 vs20xx
+    var minor = parseInt(key, 10);
+    if (!isNaN(minor)) {
+      if (minor >= 30) return msvcToolsetMapping["30"]; // v143 / VS2022
+      if (minor >= 20) return msvcToolsetMapping["20"]; // v142 / VS2019
+      if (minor >= 10) return msvcToolsetMapping["10"]; // v141 / VS2017
+    }
+
+    return null;
   }
 
   /**
@@ -231,14 +245,35 @@ var Detector = (function () {
           if (pathExists(msvcBasePath)) {
             var msvcVersions = getSubDirNames(msvcBasePath);
 
+            // VC\Tools\MSVC 存在但没有版本子目录：仍展示该 VS，但禁用安装
+            if (!msvcVersions || msvcVersions.length === 0) {
+              results.push({
+                name: name + " (未安装 C++ 工具集)",
+                path: path,
+                version: version,
+                year: vsYear,
+                vsYear: vsYear,
+                type: "vs",
+                found: false,
+                includePath: "",
+                libPath: ""
+              });
+              continue;
+            }
+
             // 按版本号排序（降序，最新的在前）
             msvcVersions.sort(function (a, b) {
-              return b.name.localeCompare(a.name);
+              if (a.name === b.name) return 0;
+              return a.name < b.name ? 1 : -1;
             });
 
             for (var k = 0; k < msvcVersions.length; k++) {
               var msvcVer = msvcVersions[k];
               var toolsetInfo = getMsvcToolsetInfo(msvcVer.name);
+
+              var includePath = msvcVer.path + "\\include";
+              var libPath = msvcVer.path + "\\lib";
+              var found = pathExists(includePath) && pathExists(libPath);
 
               // 构建显示名称
               var displayName;
@@ -253,7 +288,7 @@ var Detector = (function () {
                   displayName = name + " (MSVC " + toolsetInfo.toolset + " - " + toolsetInfo.label + " 工具集)";
                 }
               } else {
-                // 未知工具集版本，使用 VS 实例的年份
+                // 仍然无法识别工具集版本：保守回退到 VS 实例年份
                 effectiveYear = vsYear;
                 displayName = name + " (MSVC " + msvcVer.name + ")";
               }
@@ -265,25 +300,29 @@ var Detector = (function () {
                 year: effectiveYear,
                 vsYear: vsYear,
                 type: "vs",
-                found: true,
+                found: found,
                 msvcVersion: msvcVer.name,
                 msvcPath: msvcVer.path,
                 toolset: toolsetInfo ? toolsetInfo.toolset : null,
-                includePath: msvcVer.path + "\\include",
-                libPath: msvcVer.path + "\\lib"
+                includePath: found ? includePath : "",
+                libPath: found ? libPath : ""
               });
             }
           } else {
             // 没有找到 MSVC 目录，可能是旧版 VS 或不完整安装
+            var legacyInclude = path + "\\VC\\include";
+            var legacyLib = path + "\\VC\\lib";
+            var legacyFound = pathExists(legacyInclude) && pathExists(legacyLib);
+
             results.push({
               name: name,
               path: path,
               version: version,
               year: vsYear,
               type: "vs",
-              found: true,
-              includePath: path + "\\VC\\include",
-              libPath: path + "\\VC\\lib"
+              found: legacyFound,
+              includePath: legacyFound ? legacyInclude : "",
+              libPath: legacyFound ? legacyLib : ""
             });
           }
         }

@@ -1,4 +1,4 @@
-﻿# EGE Installer
+# EGE Installer
 
 [![GitHub](https://img.shields.io/badge/GitHub-x--ege/xege-blue)](https://github.com/x-ege/xege)
 [![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
@@ -211,7 +211,7 @@ If your MinGW installation is not automatically detected, use the "Scan MinGW" b
 
 ## 📝 Changelog
 
-### Latest Changes (2026-02-02)
+### Latest Changes (2026-02-01)
 
 - **Project Templates**: Added CodeBlocks project template with pre-configured linker settings
 - 📚 **Usage Guide**: Interactive usage instructions displayed after installation
