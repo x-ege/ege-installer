@@ -151,6 +151,15 @@ try {
     Copy-Item "$SrcDir\setup.hta" $InstallDir -Force
     Copy-Item "$SrcDir\detector.js" $InstallDir -Force
     Copy-Item "$SrcDir\installer.js" $InstallDir -Force
+    Copy-Item "$SrcDir\ui.js" $InstallDir -Force
+
+    # 复制 assets（图标 / 模板 / 文档等）到临时根目录，供 NSIS 解压到 $TEMP\...\assets
+    Log "  Copying assets..."
+    $AssetsDir = Join-Path $ProjectRoot "assets"
+    if (-not (Test-Path $AssetsDir)) {
+        throw "Assets directory not found: $AssetsDir"
+    }
+    Copy-Item $AssetsDir (Join-Path $TempDir "assets") -Recurse -Force
     
     # 验证文件
     $htaSize = (Get-Item "$InstallDir\setup.hta").Length

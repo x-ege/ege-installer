@@ -41,6 +41,10 @@ Section "Main"
     ; 解压库文件到 libs 子目录
     SetOutPath "$0\libs"
     File /r "..\temp\libs\*.*"
+
+    ; 解压资源文件到 assets 子目录（图标/模板/文档等）
+    SetOutPath "$0\assets"
+    File /r "..\temp\assets\*.*"
     
     ; 解压版本信息到根目录
     SetOutPath $0
