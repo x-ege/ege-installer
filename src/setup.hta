@@ -691,50 +691,7 @@
         <p>在下面找到您所用的开发平台，点击「安装」将 EGE 库安装至该平台，或点击「卸载」从该平台移除。</p>
       </div>
 
-   !-- 不支持的 VS 版本安装说明模态窗口 -->
-  <div id="unsupportedVSGuideModal" class="modal-overlay">
-    <div class="modal unsupported-vs-guide-modal">
-      <div class="modal-header">
-        <span class="section-icon">⚠️</span>
-        不支持的 Visual Studio 版本
-      </div>
-      <div class="modal-body">
-        <div class="warning-box">
-          <h3>当前版本说明</h3>
-          <p>
-            您检测到的 <strong>Visual Studio 2012 / 2013 / 2015</strong> 目前不被本安装程序直接支持。
-          </p>
-          <p>
-            这是因为这些版本的 MSVC 编译器与 EGE 库的最新版本存在兼容性问题，本简化版安装程序不包含针对这些版本的库文件。
-          </p>
-        </div>
-
-        <div class="info-box">
-          <h3>📦 获取完整离线安装包</h3>
-          <p>
-            如果您需要在这些版本的 Visual Studio 中使用 EGE 图形库，请访问 EGE 官方网站下载更完整的离线安装包。
-          </p>
-          <p style="margin-top: 12px;">
-            <strong>官方安装指南：</strong><br>
-            <a href="https://xege.org/install_and_config" class="guide-link" target="_blank">https://xege.org/install_and_config</a>
-          </p>
-        </div>
-
-        <div class="info-box">
-          <h3>💡 建议</h3>
-          <p>
-            如果可能，我们建议升级到 <strong>Visual Studio 2017</strong> 或更新版本（如 VS 2022），这些版本获得更好的支持和更新。
-          </p>
-        </div>
-      </div>
-      <div class="modal-footer">
-        <button class="btn-visit-site" onclick="openEgeInstallPage()">访问官网</button>
-        <button class="btn-cancel" onclick="closeUnsupportedVSGuide()">关闭</button>
-      </div>
-    </div>
-  </div>
-
-  <   <p class="section-title">检测到的开发环境：</p>
+      <p class="section-title">检测到的开发环境：</p>
       <div id="ideList" class="ide-list">
         <div class="loading">
           <div class="loading-spinner"></div>
@@ -829,6 +786,49 @@
       </div>
       <div class="modal-footer">
         <button class="btn-got-it" onclick="closeCodeBlocksGuide()">知道了，开始使用 EGE！</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 不支持的 VS 版本安装说明模态窗口 -->
+  <div id="unsupportedVSGuideModal" class="modal-overlay">
+    <div class="modal unsupported-vs-guide-modal">
+      <div class="modal-header">
+        <span class="section-icon">⚠️</span>
+        不支持的 Visual Studio 版本
+      </div>
+      <div class="modal-body">
+        <div class="warning-box">
+          <h3>当前版本说明</h3>
+          <p>
+            您检测到的 <strong>Visual Studio 2012 / 2013 / 2015</strong> 目前不被本安装程序直接支持。
+          </p>
+          <p>
+            这是因为这些版本的 MSVC 编译器与 EGE 库的最新版本存在兼容性问题，本简化版安装程序不包含针对这些版本的库文件。
+          </p>
+        </div>
+
+        <div class="info-box">
+          <h3>📦 获取完整离线安装包</h3>
+          <p>
+            如果您需要在这些版本的 Visual Studio 中使用 EGE 图形库，请访问 EGE 官方网站下载更完整的离线安装包。
+          </p>
+          <p style="margin-top: 12px;">
+            <strong>官方安装指南：</strong><br>
+            <a href="https://xege.org/install_and_config" class="guide-link" target="_blank">https://xege.org/install_and_config</a>
+          </p>
+        </div>
+
+        <div class="info-box">
+          <h3>💡 建议</h3>
+          <p>
+            如果可能，我们建议升级到 <strong>Visual Studio 2017</strong> 或更新版本（如 VS 2022），这些版本获得更好的支持和更新。
+          </p>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-visit-site" onclick="openEgeInstallPage()">访问官网</button>
+        <button class="btn-cancel" onclick="closeUnsupportedVSGuide()">关闭</button>
       </div>
     </div>
   </div>
