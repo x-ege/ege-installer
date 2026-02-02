@@ -173,6 +173,16 @@ try {
     Copy-Item "$EgeLibsDir\include" "$LibsDir\include" -Recurse
     Copy-Item "$EgeLibsDir\lib" "$LibsDir\lib" -Recurse
     
+    # Windows 专用安装包，移除非 Windows 平台的库目录
+    $NonWindowsLibs = @("macOS", "mingw-w64-debian")
+    foreach ($libDir in $NonWindowsLibs) {
+        $pathToRemove = Join-Path (Join-Path $LibsDir "lib") $libDir
+        if (Test-Path $pathToRemove) {
+            Log "  Removing non-Windows library: $libDir"
+            Remove-Item -Recurse -Force $pathToRemove
+        }
+    }
+    
     # 创建版本信息文件
     @"
 EGE Installer
@@ -228,8 +238,8 @@ Build Date: $(Get-Date -Format "yyyy-MM-dd HH:mm:ss")
     Log "ERROR: $_"
     throw
 } finally {
-    # 清理临时目录
-    if (Test-Path $TempDir) {
-        Remove-Item -Recurse -Force $TempDir -ErrorAction SilentlyContinue
-    }
+    # 注：不删除临时目录，保留用于调试检查
+    # Temp 目录路径: $TempDir
+    Log ""
+    Log "Temp directory retained at: $TempDir"
 }
