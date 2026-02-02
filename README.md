@@ -211,7 +211,7 @@ If your MinGW installation is not automatically detected, use the "Scan MinGW" b
 
 ### Latest Changes (2026-02-02)
 
-- � **Project Templates**: Added CodeBlocks project template with pre-configured linker settings
+- **Project Templates**: Added CodeBlocks project template with pre-configured linker settings
 - 📚 **Usage Guide**: Interactive usage instructions displayed after installation
 - 🔧 **Uninstall Enhancement**: Complete cleanup including templates and all installed files
 - 🔍 **Template Detection**: Improved CodeBlocks detection to check for installed templates

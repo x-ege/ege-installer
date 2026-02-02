@@ -34,7 +34,7 @@ EGE 图形库已成功安装到您的 Code::Blocks！
 
 **Link libraries 区域添加：**
 
-```
+```text
 graphics
 gdiplus
 gdi32
@@ -48,7 +48,7 @@ uuid
 
 **Other linker options 区域添加：**
 
-```
+```text
 -mwindows
 -static
 ```
