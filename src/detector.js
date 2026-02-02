@@ -9,14 +9,14 @@ var Detector = (function () {
 
   // Visual Studio 版本配置
   var vsVersions = [
-    { name: "Visual Studio 2026", version: "18.0", regKey: "18.0", year: "2026" },
-    { name: "Visual Studio 2022", version: "17.0", regKey: "17.0", year: "2022" },
-    { name: "Visual Studio 2019", version: "16.0", regKey: "16.0", year: "2019" },
-    { name: "Visual Studio 2017", version: "15.0", regKey: "15.0", year: "2017" },
-    { name: "Visual Studio 2015", version: "14.0", regKey: "14.0", year: "2015" },
-    { name: "Visual Studio 2013", version: "12.0", regKey: "12.0", year: "2013" },
-    { name: "Visual Studio 2012", version: "11.0", regKey: "11.0", year: "2012" },
-    { name: "Visual Studio 2010", version: "10.0", regKey: "10.0", year: "2010" }
+    { name: "Visual Studio 2026", version: "18.0", regKey: "18.0", year: "2026", supported: true },
+    { name: "Visual Studio 2022", version: "17.0", regKey: "17.0", year: "2022", supported: true },
+    { name: "Visual Studio 2019", version: "16.0", regKey: "16.0", year: "2019", supported: true },
+    { name: "Visual Studio 2017", version: "15.0", regKey: "15.0", year: "2017", supported: true },
+    { name: "Visual Studio 2015", version: "14.0", regKey: "14.0", year: "2015", supported: false },
+    { name: "Visual Studio 2013", version: "12.0", regKey: "12.0", year: "2013", supported: false },
+    { name: "Visual Studio 2012", version: "11.0", regKey: "11.0", year: "2012", supported: false },
+    { name: "Visual Studio 2010", version: "10.0", regKey: "10.0", year: "2010", supported: true }
   ];
 
   // MSVC 工具集版本映射 (根据 MSVC 版本号主版本推断对应的 VS 年份)
@@ -236,6 +236,18 @@ var Detector = (function () {
             else if (majorVersion === 17) vsYear = "2022";
             else if (majorVersion === 16) vsYear = "2019";
             else if (majorVersion === 15) vsYear = "2017";
+            else if (majorVersion === 14) vsYear = "2015";
+            else if (majorVersion === 12) vsYear = "2013";
+            else if (majorVersion === 11) vsYear = "2012";
+          }
+
+          // 检查该年份的 VS 是否被 EGE 支持
+          var isSupported = true;
+          for (var vsIdx = 0; vsIdx < vsVersions.length; vsIdx++) {
+            if (vsVersions[vsIdx].year === vsYear) {
+              isSupported = vsVersions[vsIdx].supported !== false;
+              break;
+            }
           }
 
           if (!pathExists(path)) continue;
@@ -255,6 +267,7 @@ var Detector = (function () {
                 vsYear: vsYear,
                 type: "vs",
                 found: false,
+                supported: isSupported,
                 includePath: "",
                 libPath: ""
               });
@@ -301,6 +314,7 @@ var Detector = (function () {
                 vsYear: vsYear,
                 type: "vs",
                 found: found,
+                supported: isSupported,
                 msvcVersion: msvcVer.name,
                 msvcPath: msvcVer.path,
                 toolset: toolsetInfo ? toolsetInfo.toolset : null,
@@ -321,6 +335,7 @@ var Detector = (function () {
               year: vsYear,
               type: "vs",
               found: legacyFound,
+              supported: isSupported,
               includePath: legacyFound ? legacyInclude : "",
               libPath: legacyFound ? legacyLib : ""
             });
@@ -361,6 +376,7 @@ var Detector = (function () {
               year: vs.year,
               type: "vs-legacy",
               found: true,
+              supported: vs.supported !== false,
               includePath: vcPath + "\\include",
               libPath: vcPath + "\\lib"
             });

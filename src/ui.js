@@ -343,8 +343,8 @@ function renderIDEItem(ide, index, isFound) {
     statusText = '未安装';
   }
 
-  var installDisabled = !ide.found ? 'disabled' : '';
-  var uninstallDisabled = (!ide.found || !ide.egeInstalled) ? 'disabled' : '';
+  // 检查是否为不支持的 VS 版本
+  var isUnsupportedVS = ide.type && (ide.type === 'vs' || ide.type === 'vs-legacy') && ide.supported === false;
 
   var html = '<div class="ide-item" id="' + prefix + '_' + index + '">';
   html += '<div class="ide-info">';
@@ -353,8 +353,18 @@ function renderIDEItem(ide, index, isFound) {
   html += '</div>';
   html += '<span class="ide-status ' + statusClass + '">' + statusText + '</span>';
   html += '<div class="ide-actions">';
-  html += '<button class="btn btn-install" onclick="doInstall(' + index + ', ' + isFound + ')" ' + installDisabled + '>安装</button>';
-  html += '<button class="btn btn-uninstall" onclick="doUninstall(' + index + ', ' + isFound + ')" ' + uninstallDisabled + '>卸载</button>';
+
+  if (isUnsupportedVS) {
+    // 不支持的 VS 版本：显示 "安装说明" 按钮
+    html += '<button class="btn btn-guide" onclick="showUnsupportedVSGuide()">安装说明</button>';
+  } else {
+    // 支持的版本：显示 "安装" 和 "卸载" 按钮
+    var installDisabled = !ide.found ? 'disabled' : '';
+    var uninstallDisabled = (!ide.found || !ide.egeInstalled) ? 'disabled' : '';
+    html += '<button class="btn btn-install" onclick="doInstall(' + index + ', ' + isFound + ')" ' + installDisabled + '>安装</button>';
+    html += '<button class="btn btn-uninstall" onclick="doUninstall(' + index + ', ' + isFound + ')" ' + uninstallDisabled + '>卸载</button>';
+  }
+
   html += '</div>';
   html += '</div>';
 
@@ -551,6 +561,31 @@ function openGuideFromModal() {
  */
 function closeCodeBlocksGuide() {
   document.getElementById('codeBlocksGuideModal').className = 'modal-overlay';
+}
+
+/**
+ * 显示不支持的 VS 版本安装说明
+ */
+function showUnsupportedVSGuide() {
+  document.getElementById('unsupportedVSGuideModal').className = 'modal-overlay show';
+}
+
+/**
+ * 关闭不支持的 VS 版本安装说明窗口
+ */
+function closeUnsupportedVSGuide() {
+  document.getElementById('unsupportedVSGuideModal').className = 'modal-overlay';
+}
+
+/**
+ * 打开 EGE 官网安装页面
+ */
+function openEgeInstallPage() {
+  try {
+    shell.Run('https://xege.org/install_and_config');
+  } catch (e) {
+    alert('无法打开浏览器，请手动访问: https://xege.org/install_and_config');
+  }
 }
 
 /**

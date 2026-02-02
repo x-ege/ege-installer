@@ -192,6 +192,16 @@
       background: #dc2626;
     }
 
+    .btn-guide {
+      background: #f59e0b;
+      color: white;
+      min-width: 80px;
+    }
+
+    .btn-guide:hover {
+      background: #d97706;
+    }
+
     .btn:disabled {
       background: #e5e7eb;
       color: #9ca3af;
@@ -562,6 +572,105 @@
     .btn-got-it:hover {
       background: #059669;
     }
+
+    /* Unsupported VS Guide Modal */
+    .unsupported-vs-guide-modal {
+      width: 600px;
+      max-height: 85%;
+      animation: slideIn 0.3s ease-out;
+    }
+
+    .unsupported-vs-guide-modal .modal-header {
+      background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+      color: white;
+      padding: 20px 24px;
+      font-size: 19px;
+      font-weight: 600;
+    }
+
+    .unsupported-vs-guide-modal .modal-body {
+      padding: 24px;
+      max-height: 450px;
+      overflow-y: auto;
+      line-height: 1.6;
+    }
+
+    .warning-box {
+      background: #fef3c7;
+      border-left: 4px solid #f59e0b;
+      padding: 16px;
+      border-radius: 6px;
+      margin: 16px 0;
+    }
+
+    .warning-box h3 {
+      color: #92400e;
+      font-size: 16px;
+      margin-bottom: 12px;
+      font-weight: 600;
+    }
+
+    .warning-box p {
+      color: #78350f;
+      font-size: 14px;
+      margin-bottom: 8px;
+      line-height: 1.6;
+    }
+
+    .info-box {
+      background: #f0f9ff;
+      border-left: 4px solid #3b82f6;
+      padding: 16px;
+      border-radius: 6px;
+      margin: 16px 0;
+    }
+
+    .info-box h3 {
+      color: #1e40af;
+      font-size: 16px;
+      margin-bottom: 12px;
+      font-weight: 600;
+    }
+
+    .info-box p {
+      color: #1e40af;
+      font-size: 14px;
+      margin-bottom: 8px;
+      line-height: 1.6;
+    }
+
+    .btn-visit-site {
+      padding: 12px 28px;
+      background: #3b82f6;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      font-size: 15px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background 0.2s;
+      margin-right: 12px;
+    }
+
+    .btn-visit-site:hover {
+      background: #2563eb;
+    }
+
+    .btn-cancel {
+      padding: 12px 28px;
+      background: #6b7280;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      font-size: 15px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .btn-cancel:hover {
+      background: #4b5563;
+    }
   </style>
 </head>
 
@@ -582,7 +691,50 @@
         <p>在下面找到您所用的开发平台，点击「安装」将 EGE 库安装至该平台，或点击「卸载」从该平台移除。</p>
       </div>
 
-      <p class="section-title">检测到的开发环境：</p>
+   !-- 不支持的 VS 版本安装说明模态窗口 -->
+  <div id="unsupportedVSGuideModal" class="modal-overlay">
+    <div class="modal unsupported-vs-guide-modal">
+      <div class="modal-header">
+        <span class="section-icon">⚠️</span>
+        不支持的 Visual Studio 版本
+      </div>
+      <div class="modal-body">
+        <div class="warning-box">
+          <h3>当前版本说明</h3>
+          <p>
+            您检测到的 <strong>Visual Studio 2012 / 2013 / 2015</strong> 目前不被本安装程序直接支持。
+          </p>
+          <p>
+            这是因为这些版本的 MSVC 编译器与 EGE 库的最新版本存在兼容性问题，本简化版安装程序不包含针对这些版本的库文件。
+          </p>
+        </div>
+
+        <div class="info-box">
+          <h3>📦 获取完整离线安装包</h3>
+          <p>
+            如果您需要在这些版本的 Visual Studio 中使用 EGE 图形库，请访问 EGE 官方网站下载更完整的离线安装包。
+          </p>
+          <p style="margin-top: 12px;">
+            <strong>官方安装指南：</strong><br>
+            <a href="https://xege.org/install_and_config" class="guide-link" target="_blank">https://xege.org/install_and_config</a>
+          </p>
+        </div>
+
+        <div class="info-box">
+          <h3>💡 建议</h3>
+          <p>
+            如果可能，我们建议升级到 <strong>Visual Studio 2017</strong> 或更新版本（如 VS 2022），这些版本获得更好的支持和更新。
+          </p>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-visit-site" onclick="openEgeInstallPage()">访问官网</button>
+        <button class="btn-cancel" onclick="closeUnsupportedVSGuide()">关闭</button>
+      </div>
+    </div>
+  </div>
+
+  <   <p class="section-title">检测到的开发环境：</p>
       <div id="ideList" class="ide-list">
         <div class="loading">
           <div class="loading-spinner"></div>
