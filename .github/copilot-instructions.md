@@ -16,7 +16,9 @@ Installer for [EGE (Easy Graphics Engine)](https://github.com/x-ege/xege) - conf
 - `scripts/build.ps1` - Build script (PowerShell)
 - `scripts/installer.nsi` - NSIS installer script
 
-## EGE Library Location
+## EGE Location
+
+- xege-sdk: <https://github.com/x-ege/xege-sdk>
 
 Library files in sibling directory `../xege_libs/`:
 - `include/` - Headers (ege.h, graphics.h)
