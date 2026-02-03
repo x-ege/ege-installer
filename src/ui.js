@@ -349,7 +349,9 @@ function renderIDEItem(ide, index, isFound) {
   var html = '<div class="ide-item" id="' + prefix + '_' + index + '">';
   html += '<div class="ide-info">';
   html += '<div class="ide-name">' + ide.name + '</div>';
-  html += '<div class="ide-path">' + (ide.path || '未安装') + '</div>';
+  // 对于有 msvcPath 的项（不同工具集），显示完整工具集路径；否则显示 IDE 路径
+  var displayPath = ide.msvcPath || ide.path || '未安装';
+  html += '<div class="ide-path">' + displayPath + '</div>';
   html += '</div>';
   html += '<span class="ide-status ' + statusClass + '">' + statusText + '</span>';
   html += '<div class="ide-actions">';
@@ -439,14 +441,14 @@ function doInstall(index, isFound) {
         } else {
           modalLog('安装失败: ' + message, 'error');
         }
-        
+
         // 如果是 CodeBlocks 安装成功，显示"查看使用说明"按钮
         if (showCodeBlocksGuide && success) {
           document.getElementById('modalGuideBtn').style.display = 'inline-block';
           modalLog('', '');
           modalLog('💡 提示：可以点击下方的"查看使用说明"按钮查看详细使用指南', 'info');
         }
-        
+
         enableModalClose();
         renderIDEList();
       }, libsPath);
@@ -670,7 +672,7 @@ function showScanModal(folderPath) {
  * 完成扫描
  */
 function finishScan(foundMinGWs) {
- updateModalProgress(100, '扫描完成');
+  updateModalProgress(100, '扫描完成');
   modalLog('总共扫描了 ' + scanDirCount + ' 个目录', 'info');
 
   if (foundMinGWs.length > 0) {
