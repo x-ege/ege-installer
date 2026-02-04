@@ -1,22 +1,10 @@
-﻿<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
-<CodeBlocks_template_file>
-	<Template name="EGE_Project">
-		<Title>EGE Project</Title>
-		<Category>User templates</Category>
-		<Bitmap />
-		<Option>Has C++ project file</Option>
-		<Description>
-EGE (Easy Graphics Engine) 图形引擎项目模板
-
-此模板创建一个预配置的 EGE 图形项目，包含：
-• 自动配置的链接器选项
-• 基础的 EGE 示例代码
-• 开箱即用的项目结构
-
-创建项目后可直接编译运行（按 F9）。
-		</Description>
-		<Files>
-			<File name="main.cpp" />
-		</Files>
+﻿<CodeBlocks_template_file>
+	<Template name="EGE_Project" title="EGE Graphics Project" category="EGE" bitmap="">
+		<FileSet name="c++" title="C++ source">
+			<File source="ege-main.cpp" destination="main.cpp"/>
+		</FileSet>
+		<Option name="EGE Graphics Project">
+			<Project file="EGE_Project.cbp"/>
+		</Option>
 	</Template>
 </CodeBlocks_template_file>

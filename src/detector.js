@@ -527,32 +527,56 @@ var Detector = (function () {
   function detectCodeBlocks() {
     var results = [];
 
-    // 检测用户模板是否已安装
+    // 检测模板是否已安装（全局模板目录 + 旧的用户模板目录）
     var appData = shell.ExpandEnvironmentStrings("%APPDATA%");
     var userTemplateDir = appData + "\\CodeBlocks\\UserTemplates\\EGE_Project";
-    var templateInstalled = pathExists(userTemplateDir + "\\EGE_Project.cbp");
+    var userTemplateInstalled = pathExists(userTemplateDir + "\\EGE_Project.cbp") || pathExists(userTemplateDir + "\\EGE_Project.template");
 
     for (var i = 0; i < codeBlocksPaths.length; i++) {
       var cb = codeBlocksPaths[i];
       var found = false;
       var foundPath = "";
 
+      var exePath = "";
+      var shareTemplatesDir = "";
+      var shareTemplateInstalled = false;
+
       for (var j = 0; j < cb.paths.length; j++) {
-        if (pathExists(cb.paths[j])) {
+        var base = cb.paths[j];
+        var exe = base.replace(/\\+$/, "") + "\\codeblocks.exe";
+        if (pathExists(exe)) {
           found = true;
-          foundPath = cb.paths[j];
+          foundPath = base;
+          exePath = exe;
           break;
         }
       }
+
+      if (found) {
+        shareTemplatesDir = foundPath.replace(/\\+$/, "") + "\\share\\CodeBlocks\\templates";
+        shareTemplateInstalled = pathExists(shareTemplatesDir + "\\EGE_Project.template") || pathExists(shareTemplatesDir + "\\EGE_Project.cbp");
+      }
+
+      var templateInstalled = shareTemplateInstalled || userTemplateInstalled;
+
+      // Code::Blocks 有些安装不带 MinGW，此时 include/lib 不一定存在
+      var includePath = found ? (foundPath + "\\MinGW\\include") : "";
+      var libPath = found ? (foundPath + "\\MinGW\\lib") : "";
+      if (found && !pathExists(includePath)) includePath = "";
+      if (found && !pathExists(libPath)) libPath = "";
 
       results.push({
         name: cb.name,
         path: found ? foundPath : cb.paths[0],
         type: "codeblocks",
         found: found,
-        includePath: found ? foundPath + "\\MinGW\\include" : "",
-        libPath: found ? foundPath + "\\MinGW\\lib" : "",
-        templateInstalled: templateInstalled
+        exePath: exePath,
+        templatesPath: shareTemplatesDir,
+        includePath: includePath,
+        libPath: libPath,
+        templateInstalled: templateInstalled,
+        templateInstalledInShare: shareTemplateInstalled,
+        templateInstalledInUserDir: userTemplateInstalled
       });
     }
 
