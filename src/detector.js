@@ -532,6 +532,10 @@ var Detector = (function () {
     var userTemplateDir = appData + "\\CodeBlocks\\UserTemplates\\EGE_Project";
     var userTemplateInstalled = pathExists(userTemplateDir + "\\EGE_Project.cbp") || pathExists(userTemplateDir + "\\EGE_Project.template");
 
+    // 用户级 share 模板目录（无需管理员权限）
+    var userShareTemplatesDir = appData + "\\CodeBlocks\\share\\CodeBlocks\\templates";
+    var userShareTemplateInstalled = pathExists(userShareTemplatesDir + "\\EGE_Project.template") || pathExists(userShareTemplatesDir + "\\EGE_Project.cbp");
+
     for (var i = 0; i < codeBlocksPaths.length; i++) {
       var cb = codeBlocksPaths[i];
       var found = false;
@@ -557,7 +561,7 @@ var Detector = (function () {
         shareTemplateInstalled = pathExists(shareTemplatesDir + "\\EGE_Project.template") || pathExists(shareTemplatesDir + "\\EGE_Project.cbp");
       }
 
-      var templateInstalled = shareTemplateInstalled || userTemplateInstalled;
+      var templateInstalled = shareTemplateInstalled || userShareTemplateInstalled || userTemplateInstalled;
 
       // Code::Blocks 有些安装不带 MinGW，此时 include/lib 不一定存在
       var includePath = found ? (foundPath + "\\MinGW\\include") : "";
@@ -572,10 +576,12 @@ var Detector = (function () {
         found: found,
         exePath: exePath,
         templatesPath: shareTemplatesDir,
+        userShareTemplatesPath: userShareTemplatesDir,
         includePath: includePath,
         libPath: libPath,
         templateInstalled: templateInstalled,
         templateInstalledInShare: shareTemplateInstalled,
+        templateInstalledInUserShare: userShareTemplateInstalled,
         templateInstalledInUserDir: userTemplateInstalled
       });
     }

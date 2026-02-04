@@ -76,6 +76,18 @@ var Installer = (function () {
     }
   }
 
+  // 获取 Code::Blocks 的用户级 share 模板目录（无需管理员权限）
+  // 某些版本会将该目录与全局 share 目录一起作为模板搜索路径。
+  function getCodeBlocksUserShareTemplateDir() {
+    try {
+      var appData = shell.ExpandEnvironmentStrings("%APPDATA%");
+      if (!appData) return null;
+      return appData + "\\CodeBlocks\\share\\CodeBlocks\\templates";
+    } catch (e) {
+      return null;
+    }
+  }
+
   // IDE 类型到库目录的映射
   var libDirMapping = {
     "vs": function (ide) {
@@ -407,51 +419,95 @@ var Installer = (function () {
       return true; // 不影响主安装流程
     }
 
-    // 优先安装到 Code::Blocks 安装目录的全局模板目录（更符合 Code::Blocks 的模板读取逻辑）
-    // 回退：用户模板目录（部分环境可能只支持该入口）
+    // Code::Blocks 模板目录在不同版本/安装方式下可能不同：
+    // 1) 全局模板：<CodeBlocks>\share\CodeBlocks\templates（推荐，File -> New -> From template...）
+    // 2) 用户模板：%APPDATA%\CodeBlocks\UserTemplates\...（File -> New from user templates...）
+    // 为最大兼容性：优先尝试全局模板，同时也安装一份到用户模板。
     var shareTemplateDir = getCodeBlocksShareTemplateDir(ide);
+    var userShareTemplateDir = getCodeBlocksUserShareTemplateDir();
     var appData = shell.ExpandEnvironmentStrings("%APPDATA%");
     var userTemplateDir = appData + "\\CodeBlocks\\UserTemplates\\EGE_Project";
-    var destTemplateDir = shareTemplateDir || userTemplateDir;
+
+    function copyTemplateToDir(destDir, label) {
+      if (!destDir) return false;
+
+      log("  目标模板目录: " + destDir + " (" + label + ")", "info");
+
+      if (!fso.FolderExists(destDir)) {
+        if (!createFolder(destDir)) {
+          log("  创建模板目录失败: " + destDir, "error");
+          return false;
+        }
+      }
+
+      var hasError = false;
+      var copiedCount = 0;
+
+      var templateFiles = getFiles(templateSrc);
+      for (var i = 0; i < templateFiles.length; i++) {
+        var fileName = fso.GetFileName(templateFiles[i]);
+
+        // 不再使用 main.cpp 作为模板源文件，避免与全局模板目录内其他文件名冲突。
+        if (fileName.toLowerCase() === "main.cpp") {
+          continue;
+        }
+
+        var dest = destDir + "\\" + fileName;
+        if (copyFile(templateFiles[i], dest)) {
+          log("  复制模板: " + fileName + " -> " + dest, "success");
+          copiedCount++;
+        } else {
+          hasError = true;
+        }
+      }
+
+      // 复制后验证关键文件是否存在
+      var required = ["EGE_Project.template", "EGE_Project.cbp", "ege-main.cpp"];
+      for (var r = 0; r < required.length; r++) {
+        var reqPath = destDir + "\\" + required[r];
+        if (!fso.FileExists(reqPath)) {
+          log("  ⚠ 缺少模板文件: " + reqPath, "warning");
+          hasError = true;
+        }
+      }
+
+      if (!hasError && copiedCount > 0) {
+        log("  ✓ 项目模板已安装到: " + destDir + " (" + label + ")", "success");
+      }
+
+      return !hasError;
+    }
 
     log("安装 Code::Blocks 项目模板...", "info");
     log("  模板源目录: " + templateSrc, "info");
-    log("  目标模板目录: " + destTemplateDir + (shareTemplateDir ? " (全局模板)" : " (用户模板)") , "info");
 
-    // 创建目标目录（全局模板目录通常已存在；用户模板目录需要创建）
-    if (!fso.FolderExists(destTemplateDir)) {
-      if (!createFolder(destTemplateDir)) {
-        log("  创建模板目录失败: " + destTemplateDir, "error");
-        return false;
-      }
-    }
+    var anySuccess = false;
 
-    var hasError = false;
-
-    // 复制模板文件
-    var templateFiles = getFiles(templateSrc);
-    for (var i = 0; i < templateFiles.length; i++) {
-      var fileName = fso.GetFileName(templateFiles[i]);
-
-      // 全局模板目录是共享目录：避免把通用文件名 main.cpp 直接丢进去造成潜在覆盖。
-      // 我们使用 ege-main.cpp 作为模板源文件名（由 .template 映射到新项目的 main.cpp）。
-      if (shareTemplateDir && fileName.toLowerCase() === "main.cpp") {
-        continue;
-      }
-
-      var dest = destTemplateDir + "\\" + fileName;
-      if (copyFile(templateFiles[i], dest)) {
-        log("  复制模板: " + fileName + " -> " + dest, "success");
+    // 先尝试全局模板（需要管理员权限写入 Program Files）
+    if (shareTemplateDir) {
+      log("  尝试安装到全局模板目录（需要管理员权限）...", "info");
+      if (copyTemplateToDir(shareTemplateDir, "全局模板")) {
+        anySuccess = true;
       } else {
-        hasError = true;
+        log("  ⚠ 安装到全局模板目录失败，将继续安装到用户模板目录", "warning");
       }
     }
 
-    if (!hasError) {
-      log("  项目模板已安装到: " + destTemplateDir, "success");
+    // 安装到用户级 share 模板目录（无需管理员权限，尝试让其出现在“从模板...”列表）
+    if (userShareTemplateDir) {
+      log("  安装到用户级 share 模板目录（无需管理员权限）...", "info");
+      if (copyTemplateToDir(userShareTemplateDir, "用户级 share 模板")) {
+        anySuccess = true;
+      }
     }
 
-    return !hasError;
+    // 始终安装到用户模板目录（无需管理员权限，更稳）
+    log("  安装到用户模板目录（兼容入口：从用户模板新建...）...", "info");
+    if (copyTemplateToDir(userTemplateDir, "用户模板")) {
+      anySuccess = true;
+    }
+
+    return anySuccess;
   }
 
   /**
@@ -482,6 +538,7 @@ var Installer = (function () {
   function uninstallCodeBlocksTemplate(ide) {
     var userTemplateDir = getCodeBlocksUserTemplateDir();
     var shareTemplateDir = getCodeBlocksShareTemplateDir(ide);
+    var userShareTemplateDir = getCodeBlocksUserShareTemplateDir();
 
     log("卸载 Code::Blocks 项目模板...", "info");
 
@@ -499,6 +556,23 @@ var Installer = (function () {
           }
         } catch (e1) {
           log("  ⚠ 删除失败: " + p + " (" + e1.message + ")", "warning");
+        }
+      }
+    }
+
+    // 1.5) 删除用户级 share 模板目录下的文件（如果存在）
+    if (userShareTemplateDir && fso.FolderExists(userShareTemplateDir)) {
+      var userShareFiles = ["EGE_Project.template", "EGE_Project.cbp", "ege-main.cpp"];
+      for (var u = 0; u < userShareFiles.length; u++) {
+        var up = userShareTemplateDir + "\\" + userShareFiles[u];
+        try {
+          if (fso.FileExists(up)) {
+            fso.DeleteFile(up, true);
+            log("  ✓ 删除: " + up, "success");
+            removedAny = true;
+          }
+        } catch (eU) {
+          log("  ⚠ 删除失败: " + up + " (" + eU.message + ")", "warning");
         }
       }
     }

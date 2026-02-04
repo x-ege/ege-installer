@@ -1,5 +1,5 @@
 ﻿<CodeBlocks_template_file>
-	<Template name="EGE_Project" title="EGE Graphics Project" category="EGE" bitmap="">
+	<Template name="EGE_Project" title="EGE Graphics Project" category="EGE" bitmap="console.png">
 		<FileSet name="c++" title="C++ source">
 			<File source="ege-main.cpp" destination="main.cpp"/>
 		</FileSet>
