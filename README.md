@@ -140,7 +140,11 @@ ege-installer/
 │   │   └── codeblocks/     # CodeBlocks project template
 │   │       ├── EGE_Project.cbp       # Pre-configured project file
 │   │       ├── EGE_Project.template  # XML template descriptor
-│   │       └── main.cpp              # Hello World example
+│   │       ├── main.cpp              # Unified template source (Hello World)
+│   │       └── wizard/               # Project wizard for CB 25.03+
+│   │           ├── wizard.script     # Squirrel wizard script
+│   │           ├── logo.png          # 32x32 wizard icon
+│   │           └── wizard.png        # 116x280 wizard sidebar
 │   ├── docs/               # User documentation
 │   │   └── codeblocks-usage.md   # CodeBlocks usage guide
 │   └── ege-icon.ico        # Application icon

@@ -334,17 +334,30 @@ var Installer = (function () {
       }
     }
 
-    // 复制 files 子目录（模板源文件）
-    var filesSrc = wizardSrc + "\\files";
+    // 复制模板源文件 main.cpp 到 wizard/files/ 目录
+    // 使用 codeblocks 模板目录下的统一 main.cpp（DRY 原则）
+    var mainCppSrc = getTemplatePath("codeblocks") + "\\main.cpp";
     var filesDest = destWizardDir + "\\files";
-    if (fso.FolderExists(filesSrc)) {
+    var mainCppDest = filesDest + "\\main.cpp";
+
+    if (!fso.FolderExists(filesDest)) {
+      if (!createFolder(filesDest)) {
+        log("  创建 files 目录失败: " + filesDest, "error");
+        hasError = true;
+      }
+    }
+
+    if (!hasError && fso.FileExists(mainCppSrc)) {
       if (dryRunMode) {
-        log("  [DRY-RUN] 将复制目录: files -> " + filesDest, "info");
-      } else if (copyFolder(filesSrc, filesDest)) {
-        log("  复制目录: files", "success");
+        log("  [DRY-RUN] 将复制: main.cpp -> " + mainCppDest, "info");
+      } else if (copyFile(mainCppSrc, mainCppDest)) {
+        log("  复制: main.cpp -> files/", "success");
       } else {
         hasError = true;
       }
+    } else if (!fso.FileExists(mainCppSrc)) {
+      log("  模板源文件不存在: " + mainCppSrc, "error");
+      hasError = true;
     }
 
     if (hasError) {
@@ -819,17 +832,14 @@ var Installer = (function () {
       for (var i = 0; i < templateFiles.length; i++) {
         var fileName = fso.GetFileName(templateFiles[i]);
 
-        // 在共享的扁平模板目录中跳过 main.cpp，避免与其他模板的同名文件冲突。
-        // 这些目录使用 .template 文件的 FileSet 映射 (ege-main.cpp → main.cpp)。
-        // 在独立子目录中保留 main.cpp，因为 .cbp 直接引用它。
+        // 在共享目录中，把 main.cpp 重命名为 ege-main.cpp（.template FileSet 期望该名称）
+        // 在独立子目录中，保持 main.cpp 不变（.cbp 直接引用它）
+        var destFileName = fileName;
         if (isSharedDir && fileName.toLowerCase() === "main.cpp") {
-          continue;
+          destFileName = "ege-main.cpp";
         }
 
-        // 在独立子目录中跳过 wizard/ 子目录的文件（wizard 有独立安装流程）
-        // getFiles 只枚举文件，不递归，所以 wizard/ 下的文件不会出现在这里
-
-        var dest = destDir + "\\" + fileName;
+        var dest = destDir + "\\" + destFileName;
         if (dryRunMode) {
           log("  [DRY-RUN] 将复制模板: " + fileName + " -> " + dest, "info");
           copiedCount++;
