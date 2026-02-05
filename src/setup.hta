@@ -202,6 +202,15 @@
       background: #d97706;
     }
 
+    .btn-open {
+      background: #6b7280;
+      color: white;
+    }
+
+    .btn-open:hover {
+      background: #4b5563;
+    }
+
     .btn:disabled {
       background: #e5e7eb;
       color: #9ca3af;
@@ -688,6 +697,8 @@
 
     <div class="content">
       <div class="intro">
+        <p>注意: 安装到 MinGW 之后, 仍需配置编译选项以正确使用 EGE 库, <a href="javascript:void(0)"
+            onclick="openUrl('https://xege.org/install_and_config'); return false;">点击查看说明</a></p>
         <p>在下面找到您所用的开发平台，点击「安装」将 EGE 库安装至该平台，或点击「卸载」从该平台移除。</p>
       </div>
 
@@ -780,7 +791,8 @@
         <div class="guide-section">
           <h3><span class="section-icon">📚</span>获取更多帮助</h3>
           <p>
-            访问 <a href="https://xege.org/" class="guide-link" target="_blank">https://xege.org/</a> 查看详细文档和示例教程。
+            访问 <a href="javascript:void(0)" class="guide-link"
+              onclick="openUrl('https://xege.org/'); return false;">https://xege.org/</a> 查看详细文档和示例教程。
           </p>
         </div>
       </div>
@@ -815,8 +827,8 @@
           </p>
           <p style="margin-top: 12px;">
             <strong>官方安装指南：</strong><br>
-            <a href="https://xege.org/install_and_config" class="guide-link"
-              target="_blank">https://xege.org/install_and_config</a>
+            <a href="javascript:void(0)" class="guide-link"
+              onclick="openUrl('https://xege.org/install_and_config'); return false;">https://xege.org/install_and_config</a>
           </p>
         </div>
 
@@ -846,6 +858,7 @@
     var detectedIDEs = [];
     var notFoundIDEs = [];
     var notFoundExpanded = false;
+    var dryRunMode = false;  // Dry-run 模式标志
 
     // 初始化
     try {
@@ -859,10 +872,39 @@
       htaPath = htaPath.replace(/\//g, '\\');
       currentPath = fso.GetParentFolderName(htaPath);
 
-      // 开发环境优先使用 <repo>\\libs（打包后也会有 libs），但如果不存在则留空，让 installer.js 自行探测 ..\\xege_libs
-      var projectRootForLibs = fso.GetParentFolderName(currentPath);
-      var devLibsPath = projectRootForLibs + '\\libs';
-      libsPath = fso.FolderExists(devLibsPath) ? devLibsPath : '';
+      // 检测 EGE 库路径：支持打包环境和开发环境
+      // 打包环境：<project_root>/libs
+      // 开发环境：<parent_of_project>/xege_libs
+      var projectRoot = fso.GetParentFolderName(currentPath);
+      var devLibsPath = projectRoot + '\\libs';
+
+      if (fso.FolderExists(devLibsPath)) {
+        // 打包后的路径
+        libsPath = devLibsPath;
+      } else {
+        // 开发环境：尝试在项目父目录查找 xege_libs
+        var grandParentDir = fso.GetParentFolderName(projectRoot);
+        var xegeLibsPath = grandParentDir + '\\xege_libs';
+        if (fso.FolderExists(xegeLibsPath)) {
+          libsPath = xegeLibsPath;
+        } else {
+          // 也尝试 xege-libs（带连字符）
+          var xegeLibsPath2 = grandParentDir + '\\xege-libs';
+          if (fso.FolderExists(xegeLibsPath2)) {
+            libsPath = xegeLibsPath2;
+          } else {
+            // 留空，让 installer.js 自行探测
+            libsPath = '';
+          }
+        }
+      }
+
+      // 检测 dry-run 模式（开发调试用）
+      // 标志文件位置：项目根目录/temp/.dry-run
+      var dryRunFlagFile = projectRoot + '\\temp\\.dry-run';
+      if (fso.FileExists(dryRunFlagFile)) {
+        dryRunMode = true;
+      }
 
       // 读取版本号（从 version.txt 读取 EGE 库版本）
       // 优先尝试打包后的位置，如果不存在则尝试开发环境位置
@@ -898,8 +940,27 @@
       document.getElementById('versionBadge').innerText = 'v' + egeVersion;
       document.title = 'EGE 图形库安装程序 v' + egeVersion;
 
+      // 如果是 dry-run 模式，更新 UI 提示
+      if (dryRunMode) {
+        document.getElementById('appTitle').innerText = 'EGE 图形库安装程序 [DRY-RUN 模式]';
+        document.getElementById('versionBadge').innerText = 'v' + egeVersion + ' (DRY-RUN)';
+        document.getElementById('versionBadge').style.background = '#f59e0b';
+        document.title = 'EGE 图形库安装程序 v' + egeVersion + ' [DRY-RUN]';
+        // 设置 Installer 的 dry-run 模式
+        // 注意：Installer 对象在下面的 script 标签中加载，需要延迟设置
+      }
+
     } catch (e) {
       alert('初始化错误: ' + e.message);
+    }
+
+    // 用默认浏览器打开 URL
+    function openUrl(url) {
+      try {
+        shell.Run(url, 1);
+      } catch (e) {
+        alert('无法打开链接: ' + e.message);
+      }
     }
   </script>
 

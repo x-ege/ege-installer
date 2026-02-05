@@ -12,17 +12,17 @@ var Installer = (function () {
     try {
       // HTA 中获取路径
       var path = location.pathname;
-      // 移除文件名，保留目录
-      path = path.replace(/\/[^\/]*$/, "");
-      // 处理 URL 编码和格式
+      // 处理 URL 编码
       path = decodeURIComponent(path);
-      // 移除开头的 /
+      // 移除开头的 / (URL 格式)
       if (path.charAt(0) === "/") {
         path = path.substr(1);
       }
-      // Windows 路径格式
+      // 转换为 Windows 路径格式
       path = path.replace(/\//g, "\\");
-      return path;
+      // 使用 FSO 获取父目录（正确移除文件名）
+      var dir = fso.GetParentFolderName(path);
+      return dir || ".";
     } catch (e) {
       return ".";
     }
@@ -31,17 +31,36 @@ var Installer = (function () {
   // EGE 库文件源目录（相对于安装器）
   function getEgeLibsPath() {
     var scriptDir = getScriptDir();
-    // 向上两级到 ege-installer，再向上一级到 xege_libs
     var parentDir = fso.GetParentFolderName(scriptDir);
     var grandParentDir = fso.GetParentFolderName(parentDir);
-    var egeLibsPath = grandParentDir + "\\xege_libs";
 
-    if (!fso.FolderExists(egeLibsPath)) {
-      // 尝试打包后的路径（同级目录）
-      egeLibsPath = parentDir + "\\libs";
+    // 按优先级尝试多个可能的位置
+    var candidatePaths = [
+      // 1. 开发环境：项目父目录下的 xege_libs (../xege_libs)
+      grandParentDir + "\\xege_libs",
+      // 2. 打包后的路径：项目根目录下的 libs
+      parentDir + "\\libs",
+      // 3. 开发环境备选：直接使用项目根目录下的 libs（如果存在）
+      grandParentDir + "\\xege-libs",
+      // 4. 同级目录的 libs（兼容某些打包结构）
+      scriptDir + "\\..\\libs"
+    ];
+
+    for (var i = 0; i < candidatePaths.length; i++) {
+      var path = candidatePaths[i];
+      try {
+        // 规范化路径
+        path = fso.GetAbsolutePathName(path);
+        if (fso.FolderExists(path) && fso.FolderExists(path + "\\include")) {
+          return path;
+        }
+      } catch (e) {
+        // 忽略无效路径
+      }
     }
 
-    return egeLibsPath;
+    // 如果都找不到，返回最可能的路径以便显示有意义的错误信息
+    return grandParentDir + "\\xege_libs";
   }
 
   // 获取模板目录路径
@@ -228,11 +247,42 @@ var Installer = (function () {
   }
 
   /**
+   * Dry-run 模式标志
+   */
+  var dryRunMode = false;
+
+  /**
+   * 检查是否为有效的安装目标路径
+   * 防止向根目录或无效路径写入文件
+   */
+  function isValidInstallPath(path) {
+    if (!path || path === "") {
+      return false;
+    }
+    // 检查是否为根目录（如 C:\ 或 \）
+    if (path.match(/^[A-Za-z]:\\?$/) || path === "\\" || path === "/") {
+      return false;
+    }
+    // 路径长度至少应包含驱动器号和一个目录
+    if (path.length < 4) {
+      return false;
+    }
+    return true;
+  }
+
+  /**
    * 安装头文件到指定 IDE
    */
   function installHeaders(ide, egeLibsPath) {
     var srcInclude = egeLibsPath + "\\include";
     var destInclude = ide.includePath;
+
+    // 安全检查：验证目标路径有效性
+    if (!isValidInstallPath(destInclude)) {
+      log("错误: 头文件目标路径无效或为空: [" + (destInclude || "(空)") + "]", "error");
+      log("该 IDE 可能未正确配置 include 路径，请检查 IDE 安装", "error");
+      return false;
+    }
 
     log("安装头文件到: " + destInclude, "info");
 
@@ -249,7 +299,9 @@ var Installer = (function () {
       var src = srcInclude + "\\" + headerFiles[i];
       var dest = destInclude + "\\" + headerFiles[i];
       if (fso.FileExists(src)) {
-        if (copyFile(src, dest)) {
+        if (dryRunMode) {
+          log("  [DRY-RUN] 将复制: " + src + " -> " + dest, "info");
+        } else if (copyFile(src, dest)) {
           log("  复制: " + src + " -> " + dest, "success");
         } else {
           hasError = true;
@@ -264,7 +316,9 @@ var Installer = (function () {
     var egeSubDir = srcInclude + "\\ege";
     if (fso.FolderExists(egeSubDir)) {
       var destEgeDir = destInclude + "\\ege";
-      if (copyFolder(egeSubDir, destEgeDir)) {
+      if (dryRunMode) {
+        log("  [DRY-RUN] 将复制目录: " + egeSubDir + " -> " + destEgeDir, "info");
+      } else if (copyFolder(egeSubDir, destEgeDir)) {
         log("  复制: " + egeSubDir + " -> " + destEgeDir, "success");
       } else {
         hasError = true;
@@ -348,6 +402,15 @@ var Installer = (function () {
 
       // 确定目标库目录
       var destLibDir = ide.libPath;
+
+      // 安全检查：验证目标路径有效性
+      if (!isValidInstallPath(destLibDir)) {
+        log("  错误: 库文件目标路径无效或为空: [" + (destLibDir || "(空)") + "]", "error");
+        log("  该 IDE 可能未正确配置 lib 路径，请检查 IDE 安装", "error");
+        hasError = true;
+        continue;
+      }
+
       if (ide.type.indexOf("vs") >= 0) {
         // Visual Studio libs 通常按架构在子目录
         if (arch === "x86" && fso.FolderExists(ide.libPath + "\\x86")) {
@@ -381,7 +444,10 @@ var Installer = (function () {
 
         foundAnyLib = true;
         var dest = destLibDir + "\\" + fileName;
-        if (copyFile(libFiles[i], dest)) {
+        if (dryRunMode) {
+          log("  [DRY-RUN] 将复制: " + libFiles[i] + " -> " + dest, "info");
+          installedCount++;
+        } else if (copyFile(libFiles[i], dest)) {
           log("  复制: " + fileName, "success");
           installedCount++;
         } else {
@@ -453,7 +519,10 @@ var Installer = (function () {
         }
 
         var dest = destDir + "\\" + fileName;
-        if (copyFile(templateFiles[i], dest)) {
+        if (dryRunMode) {
+          log("  [DRY-RUN] 将复制模板: " + fileName + " -> " + dest, "info");
+          copiedCount++;
+        } else if (copyFile(templateFiles[i], dest)) {
           log("  复制模板: " + fileName + " -> " + dest, "success");
           copiedCount++;
         } else {
@@ -461,13 +530,15 @@ var Installer = (function () {
         }
       }
 
-      // 复制后验证关键文件是否存在
-      var required = ["EGE_Project.template", "EGE_Project.cbp", "ege-main.cpp"];
-      for (var r = 0; r < required.length; r++) {
-        var reqPath = destDir + "\\" + required[r];
-        if (!fso.FileExists(reqPath)) {
-          log("  ⚠ 缺少模板文件: " + reqPath, "warning");
-          hasError = true;
+      // 复制后验证关键文件是否存在（DRY-RUN 模式下跳过验证）
+      if (!dryRunMode) {
+        var required = ["EGE_Project.template", "EGE_Project.cbp", "ege-main.cpp"];
+        for (var r = 0; r < required.length; r++) {
+          var reqPath = destDir + "\\" + required[r];
+          if (!fso.FileExists(reqPath)) {
+            log("  ⚠ 缺少模板文件: " + reqPath, "warning");
+            hasError = true;
+          }
         }
       }
 
@@ -608,23 +679,38 @@ var Installer = (function () {
     var headersSuccess = true;
     var libsSuccess = true;
     var templateSuccess = true;
+    var headersSkipped = false;
+    var libsSkipped = false;
 
-    // 安装头文件
-    progressCallback(baseProgress + stepProgress * 0.3, "正在安装头文件到 " + ide.name + "...");
-    if (!installHeaders(ide, egeLibsPath)) {
-      log("❌ 头文件安装失败", "error");
-      headersSuccess = false;
-    } else {
-      log("✓ 头文件安装成功", "success");
-    }
+    // Code::Blocks 特殊处理：如果没有自带 MinGW，跳过头文件/库文件安装
+    var skipLibInstall = (ide.type === "codeblocks" && (!ide.includePath || !ide.libPath));
 
-    // 安装库文件
-    progressCallback(baseProgress + stepProgress * 0.7, "正在安装库文件到 " + ide.name + "...");
-    if (!installLibs(ide, egeLibsPath)) {
-      log("❌ 库文件安装失败", "error");
-      libsSuccess = false;
+    if (skipLibInstall) {
+      log("", "");
+      log("⚠ 检测到 Code::Blocks 未自带 MinGW 编译器", "warning");
+      log("  将只安装项目模板，头文件和库文件需要安装到您实际使用的编译器目录", "warning");
+      log("  如果您使用 MSYS2/MinGW-w64，请同时选择安装到对应的 MinGW 条目", "info");
+      log("", "");
+      headersSkipped = true;
+      libsSkipped = true;
     } else {
-      log("✓ 库文件安装成功", "success");
+      // 安装头文件
+      progressCallback(baseProgress + stepProgress * 0.3, "正在安装头文件到 " + ide.name + "...");
+      if (!installHeaders(ide, egeLibsPath)) {
+        log("❌ 头文件安装失败", "error");
+        headersSuccess = false;
+      } else {
+        log("✓ 头文件安装成功", "success");
+      }
+
+      // 安装库文件
+      progressCallback(baseProgress + stepProgress * 0.7, "正在安装库文件到 " + ide.name + "...");
+      if (!installLibs(ide, egeLibsPath)) {
+        log("❌ 库文件安装失败", "error");
+        libsSuccess = false;
+      } else {
+        log("✓ 库文件安装成功", "success");
+      }
     }
 
     // 为 CodeBlocks 安装项目模板
@@ -636,13 +722,19 @@ var Installer = (function () {
       } else {
         log("✓ 项目模板安装成功", "success");
         // 只在库文件也安装成功时显示使用说明
-        if (headersSuccess && libsSuccess) {
+        if (headersSuccess && libsSuccess && !headersSkipped) {
           showCodeBlocksUsageGuide();
         }
       }
     }
 
-    var overallSuccess = headersSuccess && libsSuccess;
+    // Code::Blocks 特殊处理：如果跳过了库安装，整体成功取决于模板安装
+    var overallSuccess;
+    if (skipLibInstall && ide.type === "codeblocks") {
+      overallSuccess = templateSuccess;
+    } else {
+      overallSuccess = headersSuccess && libsSuccess;
+    }
 
     if (overallSuccess) {
       log("", "");
@@ -862,6 +954,13 @@ var Installer = (function () {
     getEgeLibsPath: getEgeLibsPath,
     getCodeBlocksUserTemplateDir: getCodeBlocksUserTemplateDir,
     copyFile: copyFile,
-    copyFolder: copyFolder
+    copyFolder: copyFolder,
+    setDryRunMode: function (enabled) {
+      dryRunMode = !!enabled;
+      return dryRunMode;
+    },
+    isDryRunMode: function () {
+      return dryRunMode;
+    }
   };
 })();

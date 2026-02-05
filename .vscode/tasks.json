@@ -2,7 +2,7 @@
   "version": "2.0.0",
   "tasks": [
     {
-      "label": "Run Installer",
+      "label": "Run Installer (Non-Admin)",
       "type": "shell",
       "command": "mshta.exe",
       "args": [
@@ -12,6 +12,57 @@
       "group": "test",
       "presentation": {
         "reveal": "never"
+      }
+    },
+    {
+      "label": "Run Installer",
+      "type": "shell",
+      "command": "powershell.exe",
+      "args": [
+        "-Command",
+        "Start-Process",
+        "mshta.exe",
+        "-ArgumentList",
+        "'${workspaceFolder}\\src\\setup.hta'",
+        "-Verb",
+        "RunAs"
+      ],
+      "problemMatcher": [],
+      "group": "test",
+      "presentation": {
+        "reveal": "never",
+        "panel": "shared",
+        "close": true
+      }
+    },
+    {
+      "label": "Enable Dry-Run Mode",
+      "type": "shell",
+      "command": "powershell.exe",
+      "args": [
+        "-Command",
+        "New-Item -ItemType Directory -Path '${workspaceFolder}\\temp' -Force | Out-Null; New-Item -ItemType File -Path '${workspaceFolder}\\temp\\.dry-run' -Force | Out-Null; Write-Host 'Dry-run mode ENABLED. Run installer to test without making changes.'"
+      ],
+      "problemMatcher": [],
+      "group": "test",
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared"
+      }
+    },
+    {
+      "label": "Disable Dry-Run Mode",
+      "type": "shell",
+      "command": "powershell.exe",
+      "args": [
+        "-Command",
+        "Remove-Item -Path '${workspaceFolder}\\temp\\.dry-run' -Force -ErrorAction SilentlyContinue; Write-Host 'Dry-run mode DISABLED. Installer will make actual changes.'"
+      ],
+      "problemMatcher": [],
+      "group": "test",
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared"
       }
     },
     {

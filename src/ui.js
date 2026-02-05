@@ -85,6 +85,10 @@ if (typeof Detector === 'undefined' || typeof Installer === 'undefined') {
   document.getElementById('ideList').innerHTML =
     '<div class="empty-message"><p style="color:#dc2626;">加载错误：无法加载检测或安装模块</p></div>';
 } else {
+  // 设置 dry-run 模式（如果在 setup.hta 中检测到标志）
+  if (typeof dryRunMode !== 'undefined' && dryRunMode) {
+    Installer.setDryRunMode(true);
+  }
   // 立即启动检测（不延迟，让用户尽快看到进度）
   detectAllIDEs();
 }
@@ -367,6 +371,11 @@ function renderIDEItem(ide, index, isFound) {
     html += '<button class="btn btn-uninstall" onclick="doUninstall(' + index + ', ' + isFound + ')" ' + uninstallDisabled + '>卸载</button>';
   }
 
+  // 打开目录按钮（只有找到的IDE才显示）
+  if (ide.found && ide.path) {
+    html += '<button class="btn btn-open" onclick="openFolder(' + index + ', ' + isFound + ')">打开目录</button>';
+  }
+
   html += '</div>';
   html += '</div>';
 
@@ -622,6 +631,25 @@ function modalLog(message, type) {
  */
 function log(message, type) {
   modalLog(message, type);
+}
+
+/**
+ * 打开IDE安装目录
+ */
+function openFolder(index, isFound) {
+  var ide = isFound ? detectedIDEs[index] : notFoundIDEs[index];
+  if (!ide) return;
+
+  // 优先使用 msvcPath（对于 VS 显示工具集路径），否则使用 path
+  var targetPath = ide.msvcPath || ide.path;
+  if (!targetPath) return;
+
+  try {
+    // 使用 explorer.exe 打开目录
+    shell.Run('explorer.exe "' + targetPath + '"');
+  } catch (e) {
+    alert('无法打开目录: ' + e.message);
+  }
 }
 
 /**

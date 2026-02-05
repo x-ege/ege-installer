@@ -820,6 +820,7 @@ var Detector = (function () {
       return detectVSWithVswhere().concat(detectVSFromRegistry());
     },
     detectMinGW: detectMinGW,
+    detectRedPanda: detectRedPanda,
     detectDevCpp: detectDevCpp,
     detectCodeBlocks: detectCodeBlocks,
     detectCLion: detectCLion,
