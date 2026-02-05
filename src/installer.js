@@ -107,6 +107,304 @@ var Installer = (function () {
     }
   }
 
+  // 获取 Code::Blocks 全局 wizard 目录（安装目录下 share\CodeBlocks\templates\wizard）
+  function getCodeBlocksWizardDir(ide) {
+    try {
+      if (!ide || !ide.path) return null;
+      var dir = ide.path.replace(/\\+$/, "") + "\\share\\CodeBlocks\\templates\\wizard";
+      if (fso.FolderExists(dir)) return dir;
+      return null;
+    } catch (e) {
+      return null;
+    }
+  }
+
+  /**
+   * 读取文本文件内容
+   */
+  function readTextFile(filePath) {
+    try {
+      var stream = fso.OpenTextFile(filePath, 1, false);
+      var content = stream.ReadAll();
+      stream.Close();
+      return content;
+    } catch (e) {
+      return null;
+    }
+  }
+
+  /**
+   * 写入文本文件
+   */
+  function writeTextFile(filePath, content) {
+    try {
+      var stream = fso.OpenTextFile(filePath, 2, true);
+      stream.Write(content);
+      stream.Close();
+      return true;
+    } catch (e) {
+      log("写入文件失败: " + filePath + " (" + e.message + ")", "error");
+      return false;
+    }
+  }
+
+  // EGE wizard 在 config.script 中的注册行标记
+  var EGE_WIZARD_MARKER = "// [EGE-INSTALLER]";
+  var EGE_WIZARD_REGISTER_LINE = '        RegisterWizard(wizProject, _T("ege"), _T("EGE project"), _T("2D/3D Graphics")); ' + EGE_WIZARD_MARKER;
+
+  /**
+   * 在 config.script 中注册 EGE wizard
+   * 在 RegisterWizards() 函数的末尾（最后一个 RegisterWizard 调用之后）追加注册行
+   */
+  function registerEGEWizardInConfig(configScriptPath) {
+    if (!fso.FileExists(configScriptPath)) {
+      log("  config.script 不存在: " + configScriptPath, "error");
+      return false;
+    }
+
+    var content = readTextFile(configScriptPath);
+    if (content === null) {
+      log("  读取 config.script 失败", "error");
+      return false;
+    }
+
+    // 检查是否已经注册
+    if (content.indexOf(EGE_WIZARD_MARKER) >= 0) {
+      log("  EGE wizard 已在 config.script 中注册，跳过", "info");
+      return true;
+    }
+
+    // 策略：在 RegisterWizards() 函数中找到最后一个 RegisterWizard() 调用，在其后追加
+    // 查找模式：从后往前找最后一个 RegisterWizard(...); 行
+    var lines = content.split("\n");
+    var lastRegisterIdx = -1;
+
+    for (var i = 0; i < lines.length; i++) {
+      var trimmed = lines[i].replace(/^\s+/, "").replace(/\s+$/, "");
+      if (trimmed.indexOf("RegisterWizard(") === 0 || trimmed.indexOf("RegisterWizard(") > 0 && trimmed.indexOf("//") !== 0) {
+        // 确认这不是 RegisterWizard 函数定义（function RegisterWizard）
+        if (lines[i].indexOf("function ") < 0) {
+          lastRegisterIdx = i;
+        }
+      }
+    }
+
+    if (lastRegisterIdx < 0) {
+      log("  无法在 config.script 中找到 RegisterWizard 调用", "error");
+      return false;
+    }
+
+    // 在最后一个 RegisterWizard 之后插入 EGE 注册行
+    var newLines = [];
+    for (var j = 0; j <= lastRegisterIdx; j++) {
+      newLines.push(lines[j]);
+    }
+
+    // 添加空行 + EGE 注册
+    newLines.push("");
+    newLines.push("    // EGE Graphics Engine project wizard");
+    newLines.push("    if (PLATFORM == PLATFORM_MSW)");
+    newLines.push(EGE_WIZARD_REGISTER_LINE);
+
+    for (var k = lastRegisterIdx + 1; k < lines.length; k++) {
+      newLines.push(lines[k]);
+    }
+
+    var newContent = newLines.join("\n");
+
+    if (dryRunMode) {
+      log("  [DRY-RUN] 将修改 config.script 注册 EGE wizard", "info");
+      return true;
+    }
+
+    // 备份原文件
+    var backupPath = configScriptPath + ".ege-backup";
+    if (!fso.FileExists(backupPath)) {
+      try {
+        fso.CopyFile(configScriptPath, backupPath, false);
+        log("  备份 config.script -> " + backupPath, "info");
+      } catch (e) {
+        log("  备份 config.script 失败: " + e.message, "warning");
+      }
+    }
+
+    if (writeTextFile(configScriptPath, newContent)) {
+      log("  ✓ 已在 config.script 中注册 EGE wizard", "success");
+      return true;
+    }
+
+    return false;
+  }
+
+  /**
+   * 从 config.script 中移除 EGE wizard 注册
+   */
+  function unregisterEGEWizardFromConfig(configScriptPath) {
+    if (!fso.FileExists(configScriptPath)) return true;
+
+    var content = readTextFile(configScriptPath);
+    if (content === null) return true;
+
+    if (content.indexOf(EGE_WIZARD_MARKER) < 0) {
+      return true; // 未注册，无需清理
+    }
+
+    var lines = content.split("\n");
+    var newLines = [];
+    var removedCount = 0;
+
+    for (var i = 0; i < lines.length; i++) {
+      // 跳过 EGE 相关的行（注册行 + 上方的注释和 if 语句）
+      if (lines[i].indexOf(EGE_WIZARD_MARKER) >= 0) {
+        removedCount++;
+        // 同时移除前面的 if (PLATFORM == PLATFORM_MSW) 和注释
+        while (newLines.length > 0) {
+          var prev = newLines[newLines.length - 1].replace(/^\s+/, "").replace(/\s+$/, "");
+          if (prev === "" || prev === "// EGE Graphics Engine project wizard" || prev === "if (PLATFORM == PLATFORM_MSW)") {
+            newLines.pop();
+            removedCount++;
+          } else {
+            break;
+          }
+        }
+        continue;
+      }
+      newLines.push(lines[i]);
+    }
+
+    if (removedCount > 0) {
+      if (writeTextFile(configScriptPath, newLines.join("\n"))) {
+        log("  ✓ 已从 config.script 中移除 EGE wizard 注册", "success");
+      }
+    }
+
+    return true;
+  }
+
+  /**
+   * 安装 Code::Blocks Projects wizard（仅 CB >= 25.03）
+   * 将 wizard 文件复制到全局 wizard 目录，并修改 config.script 注册
+   */
+  function installCodeBlocksWizard(ide) {
+    var wizardSrc = getTemplatePath("codeblocks") + "\\wizard";
+
+    if (!fso.FolderExists(wizardSrc)) {
+      log("  wizard 源目录不存在: " + wizardSrc, "warning");
+      return false;
+    }
+
+    var wizardBaseDir = getCodeBlocksWizardDir(ide);
+    if (!wizardBaseDir) {
+      log("  Code::Blocks wizard 目录不存在", "warning");
+      return false;
+    }
+
+    var destWizardDir = wizardBaseDir + "\\ege";
+    var configScriptPath = wizardBaseDir + "\\config.script";
+
+    log("  安装 Projects wizard...", "info");
+    log("  wizard 源目录: " + wizardSrc, "info");
+    log("  wizard 目标目录: " + destWizardDir, "info");
+
+    // 1) 复制 wizard 文件
+    if (!fso.FolderExists(destWizardDir)) {
+      if (!createFolder(destWizardDir)) {
+        log("  创建 wizard 目录失败: " + destWizardDir, "error");
+        return false;
+      }
+    }
+
+    // 复制 wizard.script, logo.png, wizard.png
+    var wizardFiles = ["wizard.script", "logo.png", "wizard.png"];
+    var hasError = false;
+    for (var i = 0; i < wizardFiles.length; i++) {
+      var src = wizardSrc + "\\" + wizardFiles[i];
+      var dest = destWizardDir + "\\" + wizardFiles[i];
+      if (!fso.FileExists(src)) {
+        log("  wizard 文件不存在: " + src, "error");
+        hasError = true;
+        continue;
+      }
+      if (dryRunMode) {
+        log("  [DRY-RUN] 将复制: " + wizardFiles[i] + " -> " + dest, "info");
+      } else if (copyFile(src, dest)) {
+        log("  复制: " + wizardFiles[i], "success");
+      } else {
+        hasError = true;
+      }
+    }
+
+    // 复制 files 子目录（模板源文件）
+    var filesSrc = wizardSrc + "\\files";
+    var filesDest = destWizardDir + "\\files";
+    if (fso.FolderExists(filesSrc)) {
+      if (dryRunMode) {
+        log("  [DRY-RUN] 将复制目录: files -> " + filesDest, "info");
+      } else if (copyFolder(filesSrc, filesDest)) {
+        log("  复制目录: files", "success");
+      } else {
+        hasError = true;
+      }
+    }
+
+    if (hasError) {
+      log("  ⚠ wizard 文件复制过程中出现错误", "warning");
+      return false;
+    }
+
+    // 2) 修改 config.script 注册 EGE wizard
+    if (!fso.FileExists(configScriptPath)) {
+      log("  config.script 不存在: " + configScriptPath, "warning");
+      log("  wizard 文件已复制，但无法自动注册", "warning");
+      return false;
+    }
+
+    if (!registerEGEWizardInConfig(configScriptPath)) {
+      log("  ⚠ 注册 EGE wizard 到 config.script 失败", "warning");
+      return false;
+    }
+
+    log("  ✓ Projects wizard 安装成功！新建项目时可在 \"2D/3D Graphics\" 中找到 EGE", "success");
+    return true;
+  }
+
+  /**
+   * 卸载 Code::Blocks Projects wizard
+   */
+  function uninstallCodeBlocksWizard(ide) {
+    var wizardBaseDir = getCodeBlocksWizardDir(ide);
+
+    // 从 config.script 移除注册
+    if (wizardBaseDir) {
+      var configScriptPath = wizardBaseDir + "\\config.script";
+      unregisterEGEWizardFromConfig(configScriptPath);
+
+      // 删除 wizard 文件
+      var egeWizardDir = wizardBaseDir + "\\ege";
+      if (fso.FolderExists(egeWizardDir)) {
+        try {
+          fso.DeleteFolder(egeWizardDir, true);
+          log("  ✓ 删除 wizard 目录: " + egeWizardDir, "success");
+        } catch (e) {
+          log("  ⚠ 删除 wizard 目录失败: " + e.message, "warning");
+        }
+      }
+
+      // 删除备份文件
+      var backupPath = configScriptPath + ".ege-backup";
+      if (fso.FileExists(backupPath)) {
+        try {
+          fso.DeleteFile(backupPath, true);
+          log("  ✓ 删除 config.script 备份", "success");
+        } catch (e) {
+          // 忽略
+        }
+      }
+    }
+
+    return true;
+  }
+
   // IDE 类型到库目录的映射
   var libDirMapping = {
     "vs": function (ide) {
@@ -494,7 +792,15 @@ var Installer = (function () {
     var appData = shell.ExpandEnvironmentStrings("%APPDATA%");
     var userTemplateDir = appData + "\\CodeBlocks\\UserTemplates\\EGE_Project";
 
-    function copyTemplateToDir(destDir, label) {
+    /**
+     * 复制模板文件到目标目录
+     * @param {string} destDir - 目标目录
+     * @param {string} label - 显示标签
+     * @param {boolean} isSharedDir - 是否为多模板共享的扁平目录（全局/用户级 share 模板目录）。
+     *   共享目录需要跳过 main.cpp 以避免与其他模板的同名文件冲突。
+     *   独立子目录（如 UserTemplates\EGE_Project\）则不存在冲突问题。
+     */
+    function copyTemplateToDir(destDir, label, isSharedDir) {
       if (!destDir) return false;
 
       log("  目标模板目录: " + destDir + " (" + label + ")", "info");
@@ -513,10 +819,15 @@ var Installer = (function () {
       for (var i = 0; i < templateFiles.length; i++) {
         var fileName = fso.GetFileName(templateFiles[i]);
 
-        // 不再使用 main.cpp 作为模板源文件，避免与全局模板目录内其他文件名冲突。
-        if (fileName.toLowerCase() === "main.cpp") {
+        // 在共享的扁平模板目录中跳过 main.cpp，避免与其他模板的同名文件冲突。
+        // 这些目录使用 .template 文件的 FileSet 映射 (ege-main.cpp → main.cpp)。
+        // 在独立子目录中保留 main.cpp，因为 .cbp 直接引用它。
+        if (isSharedDir && fileName.toLowerCase() === "main.cpp") {
           continue;
         }
+
+        // 在独立子目录中跳过 wizard/ 子目录的文件（wizard 有独立安装流程）
+        // getFiles 只枚举文件，不递归，所以 wizard/ 下的文件不会出现在这里
 
         var dest = destDir + "\\" + fileName;
         if (dryRunMode) {
@@ -532,7 +843,9 @@ var Installer = (function () {
 
       // 复制后验证关键文件是否存在（DRY-RUN 模式下跳过验证）
       if (!dryRunMode) {
-        var required = ["EGE_Project.template", "EGE_Project.cbp", "ege-main.cpp"];
+        var required = isSharedDir
+          ? ["EGE_Project.template", "EGE_Project.cbp", "ege-main.cpp"]
+          : ["EGE_Project.cbp", "main.cpp"];
         for (var r = 0; r < required.length; r++) {
           var reqPath = destDir + "\\" + required[r];
           if (!fso.FileExists(reqPath)) {
@@ -557,7 +870,7 @@ var Installer = (function () {
     // 先尝试全局模板（需要管理员权限写入 Program Files）
     if (shareTemplateDir) {
       log("  尝试安装到全局模板目录（需要管理员权限）...", "info");
-      if (copyTemplateToDir(shareTemplateDir, "全局模板")) {
+      if (copyTemplateToDir(shareTemplateDir, "全局模板", true)) {
         anySuccess = true;
       } else {
         log("  ⚠ 安装到全局模板目录失败，将继续安装到用户模板目录", "warning");
@@ -567,15 +880,28 @@ var Installer = (function () {
     // 安装到用户级 share 模板目录（无需管理员权限，尝试让其出现在“从模板...”列表）
     if (userShareTemplateDir) {
       log("  安装到用户级 share 模板目录（无需管理员权限）...", "info");
-      if (copyTemplateToDir(userShareTemplateDir, "用户级 share 模板")) {
+      if (copyTemplateToDir(userShareTemplateDir, "用户级 share 模板", true)) {
         anySuccess = true;
       }
     }
 
     // 始终安装到用户模板目录（无需管理员权限，更稳）
     log("  安装到用户模板目录（兼容入口：从用户模板新建...）...", "info");
-    if (copyTemplateToDir(userTemplateDir, "用户模板")) {
+    if (copyTemplateToDir(userTemplateDir, "用户模板", false)) {
       anySuccess = true;
+    }
+
+    // 对于 CB >= 25.03，额外安装 Projects wizard（出现在"新建项目 → 2D/3D Graphics"分类中）
+    if (ide.supportsWizard) {
+      log("", "");
+      log("  检测到 Code::Blocks " + (ide.cbVersion ? ide.cbVersion.major + "." + (ide.cbVersion.minor < 10 ? "0" : "") + ide.cbVersion.minor : "≥25.03") + "，安装 Projects wizard...", "info");
+      if (installCodeBlocksWizard(ide)) {
+        anySuccess = true;
+      } else {
+        log("  ⚠ Projects wizard 安装失败（User Template 仍可使用）", "warning");
+      }
+    } else if (ide.cbVersion) {
+      log("  Code::Blocks " + ide.cbVersion.major + "." + (ide.cbVersion.minor < 10 ? "0" : "") + ide.cbVersion.minor + " 版本较旧，跳过 Projects wizard 安装", "info");
     }
 
     return anySuccess;
@@ -584,13 +910,21 @@ var Installer = (function () {
   /**
    * 显示 CodeBlocks 使用说明（简化版，详细说明在模态窗口中查看）
    */
-  function showCodeBlocksUsageGuide() {
+  function showCodeBlocksUsageGuide(ide) {
     log("", "");
     log("=====================================================", "success");
     log("  ✓ Code::Blocks 项目模板安装成功！", "success");
     log("=====================================================", "success");
     log("", "");
     log("📝 创建 EGE 项目：", "info");
+    if (ide && ide.supportsWizard) {
+      log("  方法一（推荐）：", "info");
+      log("  1. 打开 Code::Blocks", "info");
+      log("  2. 文件 → 新建 → 项目...", "info");
+      log("  3. 选择分类 \"2D/3D Graphics\"，点击 \"EGE project\"", "info");
+      log("", "");
+      log("  方法二（备选）：", "info");
+    }
     log("  1. 打开 Code::Blocks", "info");
     log("  2. 文件 → 新建 → 从模板...", "info");
     log("  3. 在分类中找到 EGE，选择 EGE_Project", "info");
@@ -659,6 +993,9 @@ var Installer = (function () {
       log("  ⚠ 删除用户模板目录失败: " + e2.message, "warning");
     }
 
+    // 3) 卸载 Projects wizard（config.script 注册 + wizard 文件）
+    uninstallCodeBlocksWizard(ide);
+
     if (!removedAny) {
       log("  模板未安装或已删除", "info");
     }
@@ -723,7 +1060,7 @@ var Installer = (function () {
         log("✓ 项目模板安装成功", "success");
         // 只在库文件也安装成功时显示使用说明
         if (headersSuccess && libsSuccess && !headersSkipped) {
-          showCodeBlocksUsageGuide();
+          showCodeBlocksUsageGuide(ide);
         }
       }
     }

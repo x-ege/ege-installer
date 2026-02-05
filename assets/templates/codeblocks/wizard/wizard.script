@@ -1,0 +1,67 @@
+////////////////////////////////////////////////////////////////////////////////
+//
+// EGE Graphics project wizard
+//
+// EGE (Easy Graphics Engine) - https://xege.org/
+//
+////////////////////////////////////////////////////////////////////////////////
+
+function BeginWizard()
+{
+    local intro_msg = _T("Welcome to the new EGE Graphics project wizard!\n\n") +
+                      _T("This wizard will guide you to create a new project\n") +
+                      _T("using the EGE (Easy Graphics Engine) library.\n\n") +
+                      _T("EGE has already been installed to your compiler's\n") +
+                      _T("include and lib directories, so no additional\n") +
+                      _T("configuration is needed.\n\n") +
+                      _T("When you're ready to proceed, please click \"Next\"...");
+
+    Wizard.AddInfoPage(_T("EGEIntro"), intro_msg);
+    Wizard.AddProjectPathPage();
+    Wizard.AddCompilerPage(_T(""), _T("gcc*"), true, true);
+}
+
+function GetFilesDir()
+{
+    return _T("ege/files");
+}
+
+function SetupProject(project)
+{
+    // Compiler warnings
+    WarningsOn(project, Wizard.GetCompilerID());
+
+    // Linker options (EGE required libraries)
+    project.AddLinkerOption(_T("-mwindows"));
+    project.AddLinkerOption(_T("-static"));
+
+    project.AddLinkLib(_T("graphics"));
+    project.AddLinkLib(_T("gdiplus"));
+    project.AddLinkLib(_T("gdi32"));
+    project.AddLinkLib(_T("imm32"));
+    project.AddLinkLib(_T("msimg32"));
+    project.AddLinkLib(_T("ole32"));
+    project.AddLinkLib(_T("oleaut32"));
+    project.AddLinkLib(_T("winmm"));
+    project.AddLinkLib(_T("uuid"));
+
+    // Debug target
+    local target = project.GetBuildTarget(Wizard.GetDebugName());
+    if (!IsNull(target))
+    {
+        target.SetTargetType(ttConsoleOnly);
+        target.SetOutputFilename(Wizard.GetDebugOutputDir() + Wizard.GetProjectName() + DOT_EXT_EXECUTABLE);
+        DebugSymbolsOn(target, Wizard.GetCompilerID());
+    }
+
+    // Release target
+    target = project.GetBuildTarget(Wizard.GetReleaseName());
+    if (!IsNull(target))
+    {
+        target.SetTargetType(ttExecutable);
+        target.SetOutputFilename(Wizard.GetReleaseOutputDir() + Wizard.GetProjectName() + DOT_EXT_EXECUTABLE);
+        OptimizationsOn(target, Wizard.GetCompilerID());
+    }
+
+    return true;
+}

@@ -292,7 +292,14 @@ function deduplicateIDEs(ides) {
  * （Red Panda 等发行版将 EGE 内置于 sysroot 中）
  */
 function checkEgeInstalled(ide) {
-  if (!ide.found || !ide.includePath) return false;
+  if (!ide.found) return false;
+
+  // Code::Blocks 特殊处理：如果没有自带 MinGW，则检查模板/wizard 是否已安装
+  if (ide.type === 'codeblocks' && !ide.includePath) {
+    return !!(ide.templateInstalled || ide.wizardInstalled);
+  }
+
+  if (!ide.includePath) return false;
   try {
     // 标准检查：includePath 下的 graphics.h
     if (fso.FileExists(ide.includePath + '\\graphics.h')) return true;

@@ -522,6 +522,41 @@ var Detector = (function () {
   }
 
   /**
+   * 获取 Code::Blocks 版本号
+   * 通过 codeblocks.exe 的文件版本信息获取
+   * @returns {{ major: number, minor: number, versionStr: string } | null}
+   */
+  function getCodeBlocksVersion(exePath) {
+    try {
+      if (!exePath || !pathExists(exePath)) return null;
+      var ver = fso.GetFileVersion(exePath);
+      if (!ver || ver === "") return null;
+      // 版本格式: "25.3.0.0" (major.minor.build.revision)
+      var parts = ver.split(".");
+      if (parts.length < 2) return null;
+      return {
+        major: parseInt(parts[0], 10),
+        minor: parseInt(parts[1], 10),
+        versionStr: ver
+      };
+    } catch (e) {
+      return null;
+    }
+  }
+
+  /**
+   * 判断 Code::Blocks 版本是否 >= 25.03
+   * 只有 >= 25.03 的版本才支持安装 Projects wizard
+   */
+  function isCBVersionSupportWizard(ver) {
+    if (!ver) return false;
+    // 25.03 -> major=25, minor=3
+    if (ver.major > 25) return true;
+    if (ver.major === 25 && ver.minor >= 3) return true;
+    return false;
+  }
+
+  /**
    * 检测 Code::Blocks
    */
   function detectCodeBlocks() {
@@ -544,6 +579,8 @@ var Detector = (function () {
       var exePath = "";
       var shareTemplatesDir = "";
       var shareTemplateInstalled = false;
+      var cbVersion = null;
+      var supportsWizard = false;
 
       for (var j = 0; j < cb.paths.length; j++) {
         var base = cb.paths[j];
@@ -559,9 +596,17 @@ var Detector = (function () {
       if (found) {
         shareTemplatesDir = foundPath.replace(/\\+$/, "") + "\\share\\CodeBlocks\\templates";
         shareTemplateInstalled = pathExists(shareTemplatesDir + "\\EGE_Project.template") || pathExists(shareTemplatesDir + "\\EGE_Project.cbp");
+
+        // 检测版本
+        cbVersion = getCodeBlocksVersion(exePath);
+        supportsWizard = isCBVersionSupportWizard(cbVersion);
       }
 
       var templateInstalled = shareTemplateInstalled || userShareTemplateInstalled || userTemplateInstalled;
+
+      // 检测 wizard 是否已安装
+      var wizardDir = found ? (foundPath.replace(/\\+$/, "") + "\\share\\CodeBlocks\\templates\\wizard\\ege") : "";
+      var wizardInstalled = wizardDir && pathExists(wizardDir + "\\wizard.script");
 
       // Code::Blocks 有些安装不带 MinGW，此时 include/lib 不一定存在
       var includePath = found ? (foundPath + "\\MinGW\\include") : "";
@@ -569,12 +614,20 @@ var Detector = (function () {
       if (found && !pathExists(includePath)) includePath = "";
       if (found && !pathExists(libPath)) libPath = "";
 
+      // 构建显示名称（附带版本号）
+      var displayName = cb.name;
+      if (cbVersion) {
+        displayName += " " + cbVersion.major + "." + (cbVersion.minor < 10 ? "0" : "") + cbVersion.minor;
+      }
+
       results.push({
-        name: cb.name,
+        name: displayName,
         path: found ? foundPath : cb.paths[0],
         type: "codeblocks",
         found: found,
         exePath: exePath,
+        cbVersion: cbVersion,
+        supportsWizard: supportsWizard,
         templatesPath: shareTemplatesDir,
         userShareTemplatesPath: userShareTemplatesDir,
         includePath: includePath,
@@ -582,7 +635,8 @@ var Detector = (function () {
         templateInstalled: templateInstalled,
         templateInstalledInShare: shareTemplateInstalled,
         templateInstalledInUserShare: userShareTemplateInstalled,
-        templateInstalledInUserDir: userTemplateInstalled
+        templateInstalledInUserDir: userTemplateInstalled,
+        wizardInstalled: wizardInstalled
       });
     }
 
