@@ -447,14 +447,12 @@ function isBuiltinEgeIDE(ide) {
 function getBuiltinEgeWarning(ide, isInstall) {
   var ideName = 'Red Panda';
   if (isInstall) {
-    return ideName + ' 已内置 EGE 图形库。\n\n' +
-      '通常无需手动安装，您可以直接通过「新建 EGE 项目」的方式使用 EGE。\n\n' +
-      '只有在需要更新到最新版 EGE 时才需要执行此安装。\n\n' +
+    return ideName + ' 已内置 EGE 图形库，通常无需手动安装。\n\n' +
+      '手动安装会将最新版 EGE 添加到编译器的标准搜索路径，优先于内置版本。\n\n' +
       '确定要继续安装吗？';
   } else {
-    return ideName + ' 已内置 EGE 图形库。\n\n' +
-      '卸载后可能影响 ' + ideName + ' 的正常使用。\n\n' +
-      '如需恢复，请重新安装 ' + ideName + ' 或重新运行本安装程序。\n\n' +
+    return '这将移除您手动安装的 EGE 库文件。\n\n' +
+      '卸载后，' + ideName + ' 将恢复使用其内置的 EGE 版本，不会影响正常使用。\n\n' +
       '确定要继续卸载吗？';
   }
 }
