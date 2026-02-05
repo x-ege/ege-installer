@@ -686,22 +686,51 @@ function scanForMinGW() {
  * 显示扫描模态框
  */
 function showScanModal(folderPath) {
-  // 重置扫描计数器
+  // 重置扫描计数器和取消标志
   scanDirCount = 0;
   lastUpdateCount = 0;
+  scanCancelled = false;
 
   showModal('正在扫描 MinGW 安装...');
   modalLog('扫描目录: ' + folderPath, 'info');
   modalLog('这可能需要几分钟时间，请耐心等待...', 'info');
   updateModalProgress(0, '正在扫描: ' + folderPath);
+  
+  // 显示取消按钮（替换原来的完成按钮）
+  var closeBtn = document.getElementById('modalCloseBtn');
+  closeBtn.innerText = '取消';
+  closeBtn.disabled = false;
+  closeBtn.onclick = function() { cancelScan(); };
+}
+
+/**
+ * 取消扫描
+ */
+function cancelScan() {
+  if (scanCancelled) return; // 避免重复取消
+  
+  scanCancelled = true;
+  modalLog('', '');
+  modalLog('用户已取消扫描', 'info');
+  updateModalProgress(100, '已取消');
+  
+  // 恢复完成按钮
+  var closeBtn = document.getElementById('modalCloseBtn');
+  closeBtn.innerText = '完成';
+  closeBtn.disabled = false;
+  closeBtn.onclick = function() { closeModal(); };
 }
 
 /**
  * 完成扫描
  */
 function finishScan(foundMinGWs) {
-  updateModalProgress(100, '扫描完成');
+  updateModalProgress(100, scanCancelled ? '已取消' : '扫描完成');
   modalLog('总共扫描了 ' + scanDirCount + ' 个目录', 'info');
+  
+  if (scanCancelled) {
+    modalLog('扫描已取消', 'info');
+  }
 
   if (foundMinGWs.length > 0) {
     // 添加找到的MinGW到检测列表
@@ -753,18 +782,30 @@ function finishScan(foundMinGWs) {
   }
 
   updateStatus();
-  enableModalClose();
+  
+  // 恢复完成按钮
+  var closeBtn = document.getElementById('modalCloseBtn');
+  closeBtn.innerText = '完成';
+  closeBtn.disabled = false;
+  closeBtn.onclick = function() { closeModal(); };
 }
 
 // 扫描计数器（用于减少UI更新频率）
 var scanDirCount = 0;
 var lastUpdateCount = 0;
 var UPDATE_INTERVAL = 100; // 每扫描100个目录更新一次UI
+var scanCancelled = false; // 扫描取消标志
 
 /**
  * 异步递归扫描目录查找MinGW（优化版：减少UI更新频率）
  */
 function scanDirectoryAsync(path, results, depth, maxDepth, callback) {
+  // 检查是否已取消
+  if (scanCancelled) {
+    callback();
+    return;
+  }
+  
   if (depth > maxDepth) {
     callback();
     return;
@@ -838,6 +879,12 @@ function scanDirectoryAsync(path, results, depth, maxDepth, callback) {
     // 异步递归扫描子目录
     var currentIndex = 0;
     function scanNextSubDir() {
+      // 检查是否已取消
+      if (scanCancelled) {
+        callback();
+        return;
+      }
+      
       if (currentIndex >= subDirsToScan.length) {
         callback();
         return;
