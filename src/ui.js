@@ -287,12 +287,34 @@ function deduplicateIDEs(ides) {
 
 /**
  * 检查IDE是否已安装EGE
+ * 对于 MinGW 系列 IDE，除检查 <prefix>/include 外，
+ * 还会扫描 GCC sysroot 路径 <prefix>/<target-triple>/include/
+ * （Red Panda 等发行版将 EGE 内置于 sysroot 中）
  */
 function checkEgeInstalled(ide) {
   if (!ide.found || !ide.includePath) return false;
   try {
-    var headerPath = ide.includePath + '\\graphics.h';
-    return fso.FileExists(headerPath);
+    // 标准检查：includePath 下的 graphics.h
+    if (fso.FileExists(ide.includePath + '\\graphics.h')) return true;
+
+    // 对 MinGW 系列 IDE，额外检查 GCC sysroot 路径
+    // 目录结构示例：mingw64/x86_64-w64-mingw32/include/graphics.h
+    var mingwTypes = { 'redpanda': 1, 'mingw': 1, 'devcpp': 1, 'clion': 1 };
+    if (mingwTypes[ide.type]) {
+      var mingwRoot = fso.GetParentFolderName(ide.includePath);
+      if (mingwRoot && fso.FolderExists(mingwRoot)) {
+        var subDirs = new Enumerator(fso.GetFolder(mingwRoot).SubFolders);
+        for (; !subDirs.atEnd(); subDirs.moveNext()) {
+          var sysrootInclude = subDirs.item().Path + '\\include';
+          if (fso.FolderExists(sysrootInclude) &&
+            fso.FileExists(sysrootInclude + '\\graphics.h')) {
+            return true;
+          }
+        }
+      }
+    }
+
+    return false;
   } catch (e) {
     return false;
   }
@@ -357,7 +379,11 @@ function renderIDEItem(ide, index, isFound) {
   var displayPath = ide.msvcPath || ide.path || '未安装';
   html += '<div class="ide-path">' + displayPath + '</div>';
   html += '</div>';
-  html += '<span class="ide-status ' + statusClass + '">' + statusText + '</span>';
+  if (ide.egeInstalled && ide.found) {
+    html += '<button class="btn-status-guide" onclick="showInstallGuide(' + index + ', ' + isFound + ')">查看安装说明</button>';
+  } else {
+    html += '<span class="ide-status ' + statusClass + '">' + statusText + '</span>';
+  }
   html += '<div class="ide-actions">';
 
   if (isUnsupportedVS) {
@@ -695,12 +721,12 @@ function showScanModal(folderPath) {
   modalLog('扫描目录: ' + folderPath, 'info');
   modalLog('这可能需要几分钟时间，请耐心等待...', 'info');
   updateModalProgress(0, '正在扫描: ' + folderPath);
-  
+
   // 显示取消按钮（替换原来的完成按钮）
   var closeBtn = document.getElementById('modalCloseBtn');
   closeBtn.innerText = '取消';
   closeBtn.disabled = false;
-  closeBtn.onclick = function() { cancelScan(); };
+  closeBtn.onclick = function () { cancelScan(); };
 }
 
 /**
@@ -708,17 +734,17 @@ function showScanModal(folderPath) {
  */
 function cancelScan() {
   if (scanCancelled) return; // 避免重复取消
-  
+
   scanCancelled = true;
   modalLog('', '');
   modalLog('用户已取消扫描', 'info');
   updateModalProgress(100, '已取消');
-  
+
   // 恢复完成按钮
   var closeBtn = document.getElementById('modalCloseBtn');
   closeBtn.innerText = '完成';
   closeBtn.disabled = false;
-  closeBtn.onclick = function() { closeModal(); };
+  closeBtn.onclick = function () { closeModal(); };
 }
 
 /**
@@ -727,7 +753,7 @@ function cancelScan() {
 function finishScan(foundMinGWs) {
   updateModalProgress(100, scanCancelled ? '已取消' : '扫描完成');
   modalLog('总共扫描了 ' + scanDirCount + ' 个目录', 'info');
-  
+
   if (scanCancelled) {
     modalLog('扫描已取消', 'info');
   }
@@ -782,12 +808,12 @@ function finishScan(foundMinGWs) {
   }
 
   updateStatus();
-  
+
   // 恢复完成按钮
   var closeBtn = document.getElementById('modalCloseBtn');
   closeBtn.innerText = '完成';
   closeBtn.disabled = false;
-  closeBtn.onclick = function() { closeModal(); };
+  closeBtn.onclick = function () { closeModal(); };
 }
 
 // 扫描计数器（用于减少UI更新频率）
@@ -805,7 +831,7 @@ function scanDirectoryAsync(path, results, depth, maxDepth, callback) {
     callback();
     return;
   }
-  
+
   if (depth > maxDepth) {
     callback();
     return;
@@ -884,7 +910,7 @@ function scanDirectoryAsync(path, results, depth, maxDepth, callback) {
         callback();
         return;
       }
-      
+
       if (currentIndex >= subDirsToScan.length) {
         callback();
         return;
@@ -993,6 +1019,83 @@ function isMinGWDirectory(path) {
     return hasGcc && hasInclude && hasLib;
   } catch (e) {
     return false;
+  }
+}
+
+/**
+ * 刷新页面（重新开始检测）
+ */
+function refreshPage() {
+  location.reload();
+}
+
+/**
+ * 查看安装说明（根据IDE类型显示不同内容）
+ */
+function showInstallGuide(index, isFound) {
+  var ide = isFound ? detectedIDEs[index] : notFoundIDEs[index];
+  if (!ide) return;
+
+  var type = ide.type;
+
+  // CodeBlocks 直接显示详细的使用指南窗口
+  if (type === 'codeblocks') {
+    showCodeBlocksGuideModal();
+    return;
+  }
+
+  var bodyHtml;
+  var linkerFlags = '-lgraphics -lgdiplus -luuid -lmsimg32 -lgdi32 -limm32 -lole32 -loleaut32 -lwinmm';
+
+  if (type === 'vs' || type === 'vs-legacy') {
+    bodyHtml = '<p style="color:#059669; font-weight:500;">\u2714 已完成安装</p>' +
+      '<p>Visual Studio 项目中可以直接使用：</p>' +
+      '<div class="guide-command-box">#include &lt;graphics.h&gt;</div>' +
+      '<p>无需额外配置编译选项。</p>';
+  } else if (type === 'redpanda') {
+    bodyHtml = '<p style="color:#059669; font-weight:500;">\u2714 已完成安装</p>' +
+      '<p>Red Panda Dev-C++ 已内置 EGE 支持，可直接通过「新建项目 \u2192 EGE」开始使用。</p>';
+  } else {
+    // mingw, clion, devcpp 等需要手动配置链接选项的环境
+    bodyHtml = '<p style="color:#059669; font-weight:500;">\u2714 已完成安装</p>' +
+      '<p>仍需在编译时添加以下链接选项：</p>' +
+      '<div class="guide-command-wrapper">' +
+      '<div class="guide-command-box" id="linkerFlagsBox">' + linkerFlags + '</div>' +
+      '<button class="btn-copy" onclick="copyLinkerFlags()">复制</button>' +
+      '</div>' +
+      '<p>详细说明请访问 <a href="javascript:void(0)" class="guide-link" ' +
+      'onclick="openUrl(\'https://xege.org/install_and_config\'); return false;">' +
+      'https://xege.org/install_and_config</a></p>';
+  }
+
+  document.getElementById('installGuideTitle').innerText = ide.name + ' - 安装说明';
+  document.getElementById('installGuideBody').innerHTML = bodyHtml;
+  document.getElementById('installGuideModal').className = 'modal-overlay show';
+}
+
+/**
+ * 关闭安装说明模态框
+ */
+function closeInstallGuide() {
+  document.getElementById('installGuideModal').className = 'modal-overlay';
+}
+
+/**
+ * 复制链接选项到剪贴板
+ */
+function copyLinkerFlags() {
+  var flags = '-lgraphics -lgdiplus -luuid -lmsimg32 -lgdi32 -limm32 -lole32 -loleaut32 -lwinmm';
+  try {
+    window.clipboardData.setData('Text', flags);
+    var btn = event.target;
+    btn.innerText = '已复制';
+    btn.className = 'btn-copy copied';
+    window.setTimeout(function () {
+      btn.innerText = '复制';
+      btn.className = 'btn-copy';
+    }, 2000);
+  } catch (e) {
+    alert('复制失败，请手动选择文本复制');
   }
 }
 

@@ -158,6 +158,26 @@
       color: #9ca3af;
     }
 
+    .btn-status-guide {
+      background: #dcfce7;
+      color: #166534;
+      border: 1px solid #86efac;
+      padding: 3px 10px;
+      border-radius: 4px;
+      font-size: 12px;
+      cursor: pointer;
+      min-width: 70px;
+      text-align: center;
+      margin: 0 12px;
+      font-weight: 500;
+      transition: all 0.15s;
+    }
+
+    .btn-status-guide:hover {
+      background: #bbf7d0;
+      border-color: #4ade80;
+    }
+
     .ide-actions {
       display: flex;
       gap: 8px;
@@ -680,6 +700,74 @@
     .btn-cancel:hover {
       background: #4b5563;
     }
+
+    /* Install Guide Modal */
+    .install-guide-modal {
+      width: 560px;
+      animation: slideIn 0.3s ease-out;
+    }
+
+    .install-guide-modal .modal-header {
+      background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+      color: white;
+      padding: 18px 24px;
+      font-size: 18px;
+      font-weight: 600;
+    }
+
+    .install-guide-modal .modal-body {
+      padding: 24px;
+      line-height: 1.6;
+    }
+
+    .install-guide-modal .modal-body p {
+      font-size: 14px;
+      color: #374151;
+      margin-bottom: 12px;
+    }
+
+    .guide-command-wrapper {
+      display: flex;
+      gap: 8px;
+      align-items: flex-start;
+      margin: 12px 0;
+    }
+
+    .guide-command-box {
+      background: #1f2937;
+      color: #e5e7eb;
+      padding: 12px 16px;
+      border-radius: 6px;
+      font-family: "Consolas", monospace;
+      font-size: 13px;
+      line-height: 1.8;
+      flex: 1;
+      word-break: break-all;
+      cursor: text;
+    }
+
+    .btn-copy {
+      padding: 6px 14px;
+      background: rgba(255, 255, 255, 0.15);
+      color: #d1d5db;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 4px;
+      font-size: 12px;
+      cursor: pointer;
+      white-space: nowrap;
+      flex-shrink: 0;
+      transition: all 0.2s;
+    }
+
+    .btn-copy:hover {
+      background: rgba(255, 255, 255, 0.25);
+    }
+
+    .btn-copy.copied {
+      background: #059669;
+      color: white;
+      border-color: #059669;
+    }
   </style>
 </head>
 
@@ -725,8 +813,8 @@
         <span id="statusText">就绪</span>
       </div>
       <div class="footer-right">
-        <button class="btn-scan" onclick="scanForMinGW()">扫描 MinGW</button>
-        <button class="btn-close" onclick="window.close()">关闭</button>
+        <button class="btn-scan" onclick="scanForMinGW()">扫描更多</button>
+        <button class="btn-close" onclick="refreshPage()">刷新</button>
       </div>
     </div>
   </div>
@@ -963,6 +1051,17 @@
       }
     }
   </script>
+
+  <!-- 安装说明模态窗口 -->
+  <div id="installGuideModal" class="modal-overlay">
+    <div class="modal install-guide-modal">
+      <div class="modal-header" id="installGuideTitle">安装说明</div>
+      <div class="modal-body" id="installGuideBody"></div>
+      <div class="modal-footer">
+        <button class="btn-got-it" onclick="closeInstallGuide()">知道了</button>
+      </div>
+    </div>
+  </div>
 
   <script language="JScript" src="detector.js"></script>
   <script language="JScript" src="installer.js"></script>
