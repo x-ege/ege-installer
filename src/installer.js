@@ -430,9 +430,22 @@ var Installer = (function () {
     }
   }
 
+  // 获取 Dev-C++ Icons 目录
+  function getDevCppIconsDir(ide) {
+    try {
+      if (!ide || !ide.path) return null;
+      var dir = ide.path.replace(/\\+$/, "") + "\\Icons";
+      if (fso.FolderExists(dir)) return dir;
+      return null;
+    } catch (e) {
+      return null;
+    }
+  }
+
   /**
    * 安装 Dev-C++ 项目模板
    * 将 .template 文件和源码文件复制到 Dev-C++ 的 Templates 目录
+   * 图标文件复制到 Icons 目录
    */
   function installDevCppTemplate(ide) {
     var templateSrc = getTemplatePath("devcpp");
@@ -451,10 +464,33 @@ var Installer = (function () {
 
     log("安装 Dev-C++ 项目模板...", "info");
     log("  模板源目录: " + templateSrc, "info");
-    log("  目标目录: " + destDir, "info");
+    log("  模板目标目录: " + destDir, "info");
 
     var hasError = false;
     var copiedCount = 0;
+
+    // 复制自定义图标到 Icons 目录（轻量级图标 < 5KB，符合 Dev-C++ 5.11 要求）
+    var iconsDir = getDevCppIconsDir(ide);
+    if (iconsDir) {
+      var iconSrc = templateSrc + "\\ege-template.ico";
+      var iconDest = iconsDir + "\\ege-template.ico";
+
+      if (fso.FileExists(iconSrc)) {
+        if (dryRunMode) {
+          log("  [DRY-RUN] 将复制图标: ege-template.ico -> Icons\\", "info");
+          copiedCount++;
+        } else if (copyFile(iconSrc, iconDest)) {
+          log("  复制图标: ege-template.ico -> Icons\\", "success");
+          copiedCount++;
+        } else {
+          hasError = true;
+        }
+      } else {
+        log("  图标文件不存在: " + iconSrc, "warning");
+      }
+    } else {
+      log("  Dev-C++ Icons 目录不存在，跳过图标安装", "warning");
+    }
 
     // 需要复制的模板文件
     var templateFiles = ["EGE_Graphics.template", "EGE_main_cpp.txt"];
@@ -509,18 +545,34 @@ var Installer = (function () {
     }
 
     var removedAny = false;
-    var filesToRemove = ["EGE_Graphics.template", "EGE_main_cpp.txt"];
 
-    for (var i = 0; i < filesToRemove.length; i++) {
-      var filePath = destDir + "\\" + filesToRemove[i];
+    // 删除 Templates 目录中的模板文件
+    var templateFiles = ["EGE_Graphics.template", "EGE_main_cpp.txt"];
+    for (var i = 0; i < templateFiles.length; i++) {
+      var filePath = destDir + "\\" + templateFiles[i];
       try {
         if (fso.FileExists(filePath)) {
           fso.DeleteFile(filePath, true);
-          log("  ✓ 删除: " + filePath, "success");
+          log("  ✓ 删除模板: " + templateFiles[i], "success");
           removedAny = true;
         }
       } catch (e) {
         log("  ⚠ 删除失败: " + filePath + " (" + e.message + ")", "warning");
+      }
+    }
+
+    // 删除 Icons 目录中的图标文件
+    var iconsDir = getDevCppIconsDir(ide);
+    if (iconsDir) {
+      var iconPath = iconsDir + "\\ege-template.ico";
+      try {
+        if (fso.FileExists(iconPath)) {
+          fso.DeleteFile(iconPath, true);
+          log("  ✓ 删除图标: ege-template.ico", "success");
+          removedAny = true;
+        }
+      } catch (e) {
+        log("  ⚠ 删除图标失败: " + iconPath + " (" + e.message + ")", "warning");
       }
     }
 

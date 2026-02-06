@@ -2,36 +2,36 @@
  * EGE Graphics Project
  *
  * EGE (Easy Graphics Engine) - https://xege.org/
- * 这是一个 EGE 图形库的示例程序。
+ * A simple graphics library for beginners
  */
 
 #include <graphics.h>
 
 int main()
 {
-    // 初始化图形窗口 (640x480)
+    // Initialize graphics window (640x480)
     initgraph(640, 480, 0);
 
-    // 设置窗口标题
+    // Set window title
     setcaption("EGE Graphics - Hello World");
 
-    // 设置背景色为白色
+    // Set background color to white
     setbkcolor(WHITE);
     cleardevice();
 
-    // 绘制一个蓝色填充圆
+    // Draw a blue filled circle
     setfillcolor(BLUE);
     fillellipse(320, 200, 100, 100);
 
-    // 设置文字颜色并输出
+    // Draw text message
     setcolor(BLACK);
     setfont(24, 0, "Consolas");
     outtextxy(200, 350, "Hello, EGE Graphics!");
 
-    // 等待用户按键
+    // Wait for key press
     getch();
 
-    // 关闭图形窗口
+    // Close graphics window
     closegraph();
 
     return 0;
