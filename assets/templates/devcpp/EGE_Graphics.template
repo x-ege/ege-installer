@@ -1,7 +1,8 @@
-﻿[Template]
+[Template]
 ver=1
 Name=EGE Graphics
-Description=A project using EGE (Easy Graphics Engine) graphics library
+Icon=ege-template.ico
+Description=Create EGE graphics applications
 Category=Multimedia
 
 [Unit0]

@@ -77,8 +77,12 @@ if (-not $ProductVersion) {
     }
 }
 
-function Log($msg) {
-    Write-Host $msg
+function Log($msg, $color) {
+    if ($color) {
+        Write-Host $msg -ForegroundColor $color
+    } else {
+        Write-Host $msg
+    }
     $msg | Out-File $LogFile -Append
 }
 
@@ -143,6 +147,26 @@ Log "Building package..."
 Log "Temp directory: $TempDir"
 
 try {
+    # 生成 Dev-C++ 模板图标
+    Log "  Generating Dev-C++ template icon..."
+    $iconScriptPath = Join-Path $ScriptDir "generate-icon.ps1"
+    if (Test-Path $iconScriptPath) {
+        try {
+            & $iconScriptPath
+            $iconPath = Join-Path $ProjectRoot "assets\templates\devcpp\ege-template.ico"
+            if (Test-Path $iconPath) {
+                $iconSize = (Get-Item $iconPath).Length
+                Log "    Generated: ege-template.ico ($iconSize bytes)"
+            } else {
+                Log "    Warning: Icon not generated" "Yellow"
+            }
+        } catch {
+            Log "    Warning: Failed to generate icon - $($_.Exception.Message)" "Yellow"
+        }
+    } else {
+        Log "    Warning: Icon generator script not found" "Yellow"
+    }
+
     # 复制安装程序源文件
     Log "  Copying installer files..."
     $InstallDir = Join-Path $TempDir "installer"
