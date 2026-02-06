@@ -474,7 +474,7 @@ function doInstall(index, isFound) {
 
   window.setTimeout(function () {
     try {
-      Installer.install([ide], updateModalProgress, function (success, message, showCodeBlocksGuide) {
+      Installer.install([ide], updateModalProgress, function (success, message, showCodeBlocksGuide, showDevCppGuide) {
         if (success) {
           modalLog('安装完成！', 'success');
           ide.egeInstalled = true;
@@ -485,6 +485,15 @@ function doInstall(index, isFound) {
         // 如果是 CodeBlocks 安装成功，显示"查看使用说明"按钮
         if (showCodeBlocksGuide && success) {
           document.getElementById('modalGuideBtn').style.display = 'inline-block';
+          document.getElementById('modalGuideBtn').onclick = function () { showCodeBlocksGuideModal(); };
+          modalLog('', '');
+          modalLog('💡 提示：可以点击下方的"查看使用说明"按钮查看详细使用指南', 'info');
+        }
+
+        // 如果是 Dev-C++ 安装成功，显示"查看使用说明"按钮
+        if (showDevCppGuide && success) {
+          document.getElementById('modalGuideBtn').style.display = 'inline-block';
+          document.getElementById('modalGuideBtn').onclick = function () { showDevCppGuideModal(); };
           modalLog('', '');
           modalLog('💡 提示：可以点击下方的"查看使用说明"按钮查看详细使用指南', 'info');
         }
@@ -603,6 +612,20 @@ function openGuideFromModal() {
  */
 function closeCodeBlocksGuide() {
   document.getElementById('codeBlocksGuideModal').className = 'modal-overlay';
+}
+
+/**
+ * 显示 Dev-C++ 使用说明窗口
+ */
+function showDevCppGuideModal() {
+  document.getElementById('devCppGuideModal').className = 'modal-overlay show';
+}
+
+/**
+ * 关闭 Dev-C++ 使用说明窗口
+ */
+function closeDevCppGuide() {
+  document.getElementById('devCppGuideModal').className = 'modal-overlay';
 }
 
 /**
@@ -1046,6 +1069,12 @@ function showInstallGuide(index, isFound) {
   // CodeBlocks 直接显示详细的使用指南窗口
   if (type === 'codeblocks') {
     showCodeBlocksGuideModal();
+    return;
+  }
+
+  // Dev-C++ 显示详细的使用指南窗口
+  if (type === 'devcpp') {
+    showDevCppGuideModal();
     return;
   }
 

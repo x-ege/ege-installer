@@ -498,13 +498,19 @@ var Detector = (function () {
           mingwDir = foundPath + "\\TDM-GCC-64";
         }
 
+        // 检测模板是否已安装
+        var templatesDir = foundPath + "\\Templates";
+        var templateInstalled = pathExists(templatesDir + "\\EGE_Graphics.template");
+
         results.push({
           name: devcpp.name,
           path: foundPath,
           type: "devcpp",
           found: true,
           includePath: mingwDir + "\\include",
-          libPath: mingwDir + "\\lib"
+          libPath: mingwDir + "\\lib",
+          templatesPath: templatesDir,
+          templateInstalled: templateInstalled
         });
       } else {
         results.push({

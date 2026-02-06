@@ -418,6 +418,139 @@ var Installer = (function () {
     return true;
   }
 
+  // 获取 Dev-C++ 模板目录
+  function getDevCppTemplateDir(ide) {
+    try {
+      if (!ide || !ide.path) return null;
+      var dir = ide.path.replace(/\\+$/, "") + "\\Templates";
+      if (fso.FolderExists(dir)) return dir;
+      return null;
+    } catch (e) {
+      return null;
+    }
+  }
+
+  /**
+   * 安装 Dev-C++ 项目模板
+   * 将 .template 文件和源码文件复制到 Dev-C++ 的 Templates 目录
+   */
+  function installDevCppTemplate(ide) {
+    var templateSrc = getTemplatePath("devcpp");
+
+    if (!fso.FolderExists(templateSrc)) {
+      log("  模板源目录不存在: " + templateSrc, "warning");
+      return true; // 不影响主安装流程
+    }
+
+    var destDir = getDevCppTemplateDir(ide);
+    if (!destDir) {
+      log("  Dev-C++ Templates 目录不存在: " + (ide.path || "(空)") + "\\Templates", "warning");
+      log("  跳过项目模板安装", "warning");
+      return false;
+    }
+
+    log("安装 Dev-C++ 项目模板...", "info");
+    log("  模板源目录: " + templateSrc, "info");
+    log("  目标目录: " + destDir, "info");
+
+    var hasError = false;
+    var copiedCount = 0;
+
+    // 需要复制的模板文件
+    var templateFiles = ["EGE_Graphics.template", "EGE_main_cpp.txt"];
+    for (var i = 0; i < templateFiles.length; i++) {
+      var src = templateSrc + "\\" + templateFiles[i];
+      var dest = destDir + "\\" + templateFiles[i];
+
+      if (!fso.FileExists(src)) {
+        log("  模板文件不存在: " + src, "error");
+        hasError = true;
+        continue;
+      }
+
+      if (dryRunMode) {
+        log("  [DRY-RUN] 将复制: " + templateFiles[i] + " -> " + dest, "info");
+        copiedCount++;
+      } else if (copyFile(src, dest)) {
+        log("  复制: " + templateFiles[i], "success");
+        copiedCount++;
+      } else {
+        hasError = true;
+      }
+    }
+
+    // 验证
+    if (!dryRunMode && !hasError) {
+      if (!fso.FileExists(destDir + "\\EGE_Graphics.template")) {
+        log("  ⚠ 缺少模板文件: EGE_Graphics.template", "warning");
+        hasError = true;
+      }
+    }
+
+    if (!hasError && copiedCount > 0) {
+      log("  ✓ Dev-C++ 项目模板安装成功！", "success");
+      log("  新建项目时可在 \"Multimedia\" 分类中找到 \"EGE Graphics\"", "success");
+    }
+
+    return !hasError;
+  }
+
+  /**
+   * 卸载 Dev-C++ 项目模板
+   */
+  function uninstallDevCppTemplate(ide) {
+    var destDir = getDevCppTemplateDir(ide);
+
+    log("卸载 Dev-C++ 项目模板...", "info");
+
+    if (!destDir) {
+      log("  Dev-C++ Templates 目录不存在，跳过", "info");
+      return true;
+    }
+
+    var removedAny = false;
+    var filesToRemove = ["EGE_Graphics.template", "EGE_main_cpp.txt"];
+
+    for (var i = 0; i < filesToRemove.length; i++) {
+      var filePath = destDir + "\\" + filesToRemove[i];
+      try {
+        if (fso.FileExists(filePath)) {
+          fso.DeleteFile(filePath, true);
+          log("  ✓ 删除: " + filePath, "success");
+          removedAny = true;
+        }
+      } catch (e) {
+        log("  ⚠ 删除失败: " + filePath + " (" + e.message + ")", "warning");
+      }
+    }
+
+    if (!removedAny) {
+      log("  模板未安装或已删除", "info");
+    }
+
+    return true;
+  }
+
+  /**
+   * 显示 Dev-C++ 使用说明
+   */
+  function showDevCppUsageGuide(ide) {
+    log("", "");
+    log("=====================================================", "success");
+    log("  ✓ Dev-C++ 项目模板安装成功！", "success");
+    log("=====================================================", "success");
+    log("", "");
+    log("📝 创建 EGE 项目：", "info");
+    log("  1. 打开 Dev-C++", "info");
+    log("  2. 文件 → 新建 → 项目...", "info");
+    log("  3. 选择 \"Multimedia\" 标签页，点击 \"EGE Graphics\"", "info");
+    log("  4. 输入项目名称，点击确定", "info");
+    log("", "");
+    log("⚠ 提示：模板已自动配置所有链接选项，无需手动设置。", "warning");
+    log("=====================================================", "success");
+    log("", "");
+  }
+
   // IDE 类型到库目录的映射
   var libDirMapping = {
     "vs": function (ide) {
@@ -1075,6 +1208,20 @@ var Installer = (function () {
       }
     }
 
+    // 为 Dev-C++ 安装项目模板
+    if (ide.type === "devcpp") {
+      progressCallback(baseProgress + stepProgress * 0.9, "正在安装项目模板...");
+      if (!installDevCppTemplate(ide)) {
+        log("⚠ 项目模板安装失败（不影响库文件安装）", "warning");
+        templateSuccess = false;
+      } else {
+        log("✓ 项目模板安装成功", "success");
+        if (headersSuccess && libsSuccess) {
+          showDevCppUsageGuide(ide);
+        }
+      }
+    }
+
     // Code::Blocks 特殊处理：如果跳过了库安装，整体成功取决于模板安装
     var overallSuccess;
     if (skipLibInstall && ide.type === "codeblocks") {
@@ -1148,6 +1295,7 @@ var Installer = (function () {
     var successCount = 0;
     var failCount = 0;
     var codeBlocksInstalled = false;
+    var devCppInstalled = false;
 
     for (var i = 0; i < selectedIDEs.length; i++) {
       var ide = selectedIDEs[i];
@@ -1163,6 +1311,10 @@ var Installer = (function () {
           // 记录 CodeBlocks 安装成功
           if (ide.type === "codeblocks") {
             codeBlocksInstalled = true;
+          }
+          // 记录 Dev-C++ 安装成功
+          if (ide.type === "devcpp") {
+            devCppInstalled = true;
           }
         } else {
           failCount++;
@@ -1187,13 +1339,13 @@ var Installer = (function () {
 
     if (successCount > 0 && failCount === 0) {
       log("🎉 所有IDE安装成功！", "success");
-      completeCallback(true, "成功安装到 " + successCount + " 个 IDE", codeBlocksInstalled);
+      completeCallback(true, "成功安装到 " + successCount + " 个 IDE", codeBlocksInstalled, devCppInstalled);
     } else if (successCount > 0 && failCount > 0) {
       log("⚠ 部分IDE安装成功，" + failCount + " 个失败，请检查上方日志", "error");
-      completeCallback(false, "" + successCount + " 个成功，" + failCount + " 个失败", codeBlocksInstalled);
+      completeCallback(false, "" + successCount + " 个成功，" + failCount + " 个失败", codeBlocksInstalled, devCppInstalled);
     } else {
       log("❌ 所有安装均失败，请检查日志并重试", "error");
-      completeCallback(false, "所有安装均失败，请检查日志", false);
+      completeCallback(false, "所有安装均失败，请检查日志", false, false);
     }
   }
 
@@ -1271,6 +1423,11 @@ var Installer = (function () {
         // 为 CodeBlocks 卸载项目模板
         if (ide.type === "codeblocks") {
           uninstallCodeBlocksTemplate(ide);
+        }
+
+        // 为 Dev-C++ 卸载项目模板
+        if (ide.type === "devcpp") {
+          uninstallDevCppTemplate(ide);
         }
 
         log(ide.name + " 卸载完成", "success");

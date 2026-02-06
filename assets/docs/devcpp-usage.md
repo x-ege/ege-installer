@@ -1,0 +1,128 @@
+﻿# Dev-C++ EGE 项目使用指南
+
+## 🎉 安装成功
+
+EGE 图形库已成功安装到您的 Dev-C++！
+
+---
+
+## 📝 创建新的 EGE 项目
+
+### 方法一：使用项目模板（推荐）
+
+1. 打开 Dev-C++
+2. 点击菜单：**文件 → 新建 → 项目...**
+3. 选择 **Multimedia** 标签页
+4. 点击 **EGE Graphics**，输入项目名称
+5. 点击**确定**，项目创建完成！
+
+**模板已自动配置好所有编译和链接选项，无需手动设置。**
+
+> ⚠ 如果在 Multimedia 标签页中没有看到 EGE Graphics，请关闭并重新打开 Dev-C++ 后再试。
+
+---
+
+### 方法二：手动配置现有项目
+
+如果您需要在现有项目中使用 EGE，请按以下步骤配置：
+
+#### 1. 创建项目
+
+- **文件 → 新建 → 项目...**
+- 选择 **Basic** 标签页中的 **Empty Project** 或 **Console Application**
+- 输入项目名称，点击确定
+
+#### 2. 配置链接器选项
+
+- 点击菜单：**项目 → 项目属性**
+- 切换到 **参数** 标签页
+- 在 **链接器** 输入框中添加以下内容：
+
+```text
+-lgraphics -lgdiplus -lgdi32 -limm32 -lmsimg32 -lole32 -loleaut32 -lwinmm -luuid -mwindows -static
+```
+
+#### 3. 保存设置
+
+点击 **确定** 保存所有设置。
+
+---
+
+## 🚀 快速开始示例
+
+创建 `main.cpp` 并输入以下代码：
+
+```cpp
+#include <graphics.h>
+
+int main()
+{
+    // 初始化图形窗口 (640x480)
+    initgraph(640, 480, 0);
+    
+    // 设置窗口标题
+    setcaption("EGE Graphics - Hello World");
+    
+    // 设置背景色为白色
+    setbkcolor(WHITE);
+    cleardevice();
+    
+    // 绘制一个蓝色填充圆
+    setfillcolor(BLUE);
+    fillellipse(320, 200, 100, 100);
+    
+    // 设置文字颜色并输出
+    setcolor(BLACK);
+    setfont(24, 0, "微软雅黑");
+    outtextxy(220, 350, "Hello, EGE Graphics!");
+    
+    // 等待用户按键
+    getch();
+    
+    // 关闭图形窗口
+    closegraph();
+    
+    return 0;
+}
+```
+
+点击 **编译运行** (F11) 即可运行程序！
+
+---
+
+## 📚 更多资源
+
+- **官方网站**: <https://xege.org/>
+- **API 文档**: <https://xege.org/man/api/>
+- **示例教程**: <https://xege.org/man/tutorial/>
+- **GitHub**: <https://github.com/wysaid/xege>
+
+---
+
+## ❓ 常见问题
+
+### Q: 编译时提示找不到 graphics.h？
+
+**A**: 确保已安装到正确的 Dev-C++，重新运行安装程序。
+
+### Q: 链接时出现 undefined reference 错误？
+
+**A**: 检查项目属性 → 参数 → 链接器中是否添加了所有必需的库（见上方配置步骤）。使用模板创建的项目不需要手动配置。
+
+### Q: 程序运行时闪退？
+
+**A**: 检查是否调用了 `getch()` 等待用户输入，避免窗口立即关闭。
+
+### Q: 如何卸载 EGE？
+
+**A**: 运行安装程序，点击"卸载"按钮即可删除已安装的文件和模板。
+
+---
+
+## 💡 提示
+
+- 使用项目模板可以省去手动配置的麻烦
+- 编译前确保项目已正确配置链接选项
+- 遇到问题可以访问官方网站查看详细文档
+
+祝您使用愉快！🎨

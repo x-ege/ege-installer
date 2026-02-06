@@ -1,0 +1,15 @@
+﻿[Template]
+ver=1
+Name=EGE Graphics
+Description=A project using EGE (Easy Graphics Engine) graphics library
+Category=Multimedia
+
+[Unit0]
+CppName=main.cpp
+Cpp=EGE_main_cpp.txt
+
+[Project]
+UnitCount=1
+Type=0
+IsCpp=1
+Linker=-lgraphics -lgdiplus -lgdi32 -limm32 -lmsimg32 -lole32 -loleaut32 -lwinmm -luuid -mwindows -static
