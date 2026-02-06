@@ -1,13 +1,23 @@
 ﻿# Dev-C++ 模板文件
 
-此目录包含 Dev-C++ 项目模板文件和相关资源。
+此目录包含 Dev-C++ 项目模板文件和相关资源。**仅支持 64-bit 编译**。
 
 ## 文件说明
 
 ### 模板文件
 
-- **EGE_Graphics.template** - Dev-C++ 项目模板定义文件（INI 格式，ANSI 编码）
+- **EGE_Graphics.template** - Dev-C++ 项目模板定义文件（INI 格式，ANSI 编码，64-bit only）
 - **EGE_main_cpp.txt** - C++ 源代码模板文件（ANSI 编码，英文注释）
+
+## 编译要求
+
+⚠️ **重要提示**: 此模板仅支持 64-bit 编译模式！
+
+**编译器设置步骤：**
+
+1. 工具 → 编译器选项
+2. 设置 → 代码生成 → 架构 = **x86_64**
+3. 确保未选择 i686（32-bit 模式已淘汰）
 
 ### 图标文件
 
@@ -21,7 +31,7 @@
 
 ### Dev-C++ 5.11 模板规范
 
-1. **编码要求**: 
+1. **编码要求**:
    - **模板定义文件** (`.template`): 必须使用 **ANSI 编码**（无 BOM）
      - UTF-8 BOM 会导致模板解析失败，不显示在项目列表中
    - **源代码模板** (`.txt`): 使用 **ANSI 编码 + 英文注释**
@@ -29,7 +39,7 @@
      - 英文注释避免编码问题，通用性更好
      - 如需中文注释，需使用 GBK 编码（仅适用于中文 Windows）
 
-2. **图标要求**: 
+2. **图标要求**:
    - 图标文件必须 **小于 5KB**
    - 必须使用 **传统 BMP DIB 格式**（不支持 PNG 压缩）
    - 超过 5KB 或使用 PNG 格式会导致 Dev-C++ 崩溃（`Out of system resources` 错误）
@@ -87,29 +97,28 @@ cd scripts
   - `EGE_main_cpp.txt`
 - **图标文件**: `C:\Program Files (x86)\Dev-Cpp\Icons\`
   - `ege-template.ico`
+- **库文件**: `C:\Program Files (x86)\Dev-Cpp\MinGW64\lib\`
+  - `libgraphics.a` (64-bit only)
 
 ### 卸载处理
 
-卸载时，所有文件（Templates 和 Icons 目录中）会被自动删除。
+卸载时，所有文件会被自动删除。
+
+## 使用注意事项
+
+1. **架构设置**: 确保 Dev-C++ 设置为 x86_64 架构
+2. **编译模式**: 仅支持 64-bit 编译
+3. **自动配置**: 模板已包含所有必需的链接参数
 
 ## 测试
 
-### 验证编码
+### 验证编译设置
 
-确保模板文件使用 ANSI 编码：
+项目创建后检查编译器架构：
 
-```powershell
-$bytes = [System.IO.File]::ReadAllBytes(".\EGE_Graphics.template") | Select-Object -First 10
-($bytes | ForEach-Object { $_.ToString('x2') }) -join ' '
-# 应该显示: 5b 54 65 6d... (即 "[Tem...")
-# 不应该有: ef bb bf (UTF-8 BOM)
 ```
-
-### 验证图标大小
-
-```powershell
-(Get-Item ".\ege-template.ico").Length / 1KB
-# 应该小于 5KB
+工具 → 编译器选项 → 设置 → 代码生成 → 架构
+应该显示: x86_64
 ```
 
 ## 参考资料

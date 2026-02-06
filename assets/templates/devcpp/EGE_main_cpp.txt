@@ -3,6 +3,9 @@
  *
  * EGE (Easy Graphics Engine) - https://xege.org/
  * A simple graphics library for beginners
+ * 
+ * IMPORTANT: This template only supports 64-bit compilation!
+ * Please ensure Dev-C++ is set to 64-bit mode
  */
 
 #include <graphics.h>

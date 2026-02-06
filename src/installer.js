@@ -598,7 +598,12 @@ var Installer = (function () {
     log("  3. 选择 \"Multimedia\" 标签页，点击 \"EGE Graphics\"", "info");
     log("  4. 输入项目名称，点击确定", "info");
     log("", "");
-    log("⚠ 提示：模板已自动配置所有链接选项，无需手动设置。", "warning");
+    log("⚙️ 编译设置：", "warning");
+    log("  ⚠ 重要：请确保使用 64-bit 编译模式！", "warning");
+    log("  • 工具 → 编译器选项 → 设置 → 代码生成 → 架构 = x86_64", "warning");
+    log("  • 32-bit 模式已淘汰，本模板仅支持 64-bit 编译", "warning");
+    log("", "");
+    log("✅ 模板已自动配置所有链接选项，无需手动设置。", "info");
     log("=====================================================", "success");
     log("", "");
   }
@@ -640,7 +645,7 @@ var Installer = (function () {
       return { "default": "redpanda" };
     },
     "devcpp": function (ide) {
-      // 其他 Dev-C++ 版本
+      // Dev-C++ 仅支持 64-bit 编译（主流选择，简化维护）
       return { "default": "devcpp" };
     },
     "codeblocks": function (ide) {
@@ -919,6 +924,7 @@ var Installer = (function () {
           }
         }
       }
+      // Dev-C++ 使用默认的 ide.libPath (MinGW64\lib)，仅支持 64-bit
 
       // 复制库文件
       var libFiles = getFiles(srcLibDir);
@@ -1452,13 +1458,18 @@ var Installer = (function () {
           var libDirs = mapping(ide);
           for (var arch in libDirs) {
             var destLibDir = ide.libPath;
-            if (arch === "x64" && ide.type.indexOf("vs") >= 0) {
-              if (fso.FolderExists(ide.libPath + "\\x64")) {
-                destLibDir = ide.libPath + "\\x64";
-              } else if (fso.FolderExists(ide.libPath + "\\amd64")) {
-                destLibDir = ide.libPath + "\\amd64";
+
+            if (ide.type.indexOf("vs") >= 0) {
+              // Visual Studio 架构处理
+              if (arch === "x64") {
+                if (fso.FolderExists(ide.libPath + "\\x64")) {
+                  destLibDir = ide.libPath + "\\x64";
+                } else if (fso.FolderExists(ide.libPath + "\\amd64")) {
+                  destLibDir = ide.libPath + "\\amd64";
+                }
               }
             }
+            // Dev-C++ 仅支持 64-bit，使用默认 libPath
 
             // 删除 graphics.lib/libgraphics.a
             var libPatterns = ["graphics.lib", "graphicsd.lib", "libgraphics.a"];

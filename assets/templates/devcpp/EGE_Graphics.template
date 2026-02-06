@@ -2,7 +2,7 @@
 ver=1
 Name=EGE Graphics
 Icon=ege-template.ico
-Description=Create EGE graphics applications
+Description=Create EGE graphics applications (64-bit only)
 Category=Multimedia
 
 [Unit0]
