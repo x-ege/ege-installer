@@ -902,8 +902,77 @@
     </div>
   </div>
 
+  <!-- Dev-C++ 使用说明模态窗口 -->
+  <div id="devCppGuideModal" class="modal-overlay">
+    <div class="modal codeblocks-guide-modal">
+      <div class="modal-header">
+        <span class="section-icon">🎉</span>
+        Dev-C++ 安装成功！
+      </div>
+      <div class="modal-body">
+        <div class="guide-section">
+          <p style="font-size: 15px; color: #059669; font-weight: 500; margin-bottom: 16px;">
+            EGE 图形库和项目模板已成功安装到您的 Dev-C++！
+          </p>
+        </div>
+
+        <div class="guide-section">
+          <h3><span class="section-icon">📝</span>如何创建新的 EGE 项目</h3>
+
+          <p style="font-size: 13px; color: #6b7280; margin-bottom: 8px;"><strong>方法一：使用项目模板（推荐）</strong></p>
+          <div class="guide-steps">
+            <ol>
+              <li>打开 <strong>Dev-C++</strong></li>
+              <li>点击菜单：<strong>文件 → 新建 → 项目...</strong></li>
+              <li>选择 <strong>Multimedia</strong> 标签页</li>
+              <li>点击 <strong>EGE Graphics</strong>，输入项目名称</li>
+              <li>点击<strong>确定</strong>，项目创建完成！</li>
+            </ol>
+          </div>
+
+          <p style="font-size: 13px; color: #6b7280; margin: 12px 0 8px 0;"><strong>方法二：手动配置现有项目</strong></p>
+          <div class="guide-steps">
+            <ol>
+              <li>打开 <strong>Dev-C++</strong>，创建一个空项目或新建源文件</li>
+              <li>点击菜单：<strong>项目 → 项目属性</strong></li>
+              <li>切换到 <strong>参数</strong> 标签页</li>
+              <li>在 <strong>链接器</strong> 中添加以下内容：<br>
+                <code style="background:#f3f4f6; padding:2px 4px; border-radius:3px; font-size:12px;">-lgraphics -lgdiplus -lgdi32 -limm32 -lmsimg32 -lole32 -loleaut32 -lwinmm -luuid -mwindows -static</code>
+              </li>
+              <li>点击<strong>确定</strong>保存设置</li>
+            </ol>
+          </div>
+        </div>
+
+        <div class="guide-section">
+          <div class="guide-tips">
+            <h3 style="margin: 0 0 8px 0; font-size: 15px; color: #92400e;">💡 重要提示</h3>
+            <ul>
+              <li>使用项目模板创建的项目已自动配置所有链接选项，<strong>无需手动设置</strong></li>
+              <li>可以直接使用 <code>#include &lt;graphics.h&gt;</code> 头文件</li>
+              <li>按 <strong>F11</strong> 即可编译并运行项目</li>
+              <li>如果在 Multimedia 中没有看到 EGE Graphics，请<strong>关闭并重新打开</strong> Dev-C++</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="guide-section">
+          <h3><span class="section-icon">📚</span>获取更多帮助</h3>
+          <p>
+            访问 <a href="javascript:void(0)" class="guide-link"
+              onclick="openUrl('https://xege.org/'); return false;">https://xege.org/</a> 查看详细文档和示例教程。
+          </p>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-got-it" onclick="closeDevCppGuide()">知道了，开始使用 EGE！</button>
+      </div>
+    </div>
+  </div>
+
   <!-- 不支持的 VS 版本安装说明模态窗口 -->
   <div id="unsupportedVSGuideModal" class="modal-overlay">
+
     <div class="modal unsupported-vs-guide-modal">
       <div class="modal-header">
         <span class="section-icon">⚠️</span>
