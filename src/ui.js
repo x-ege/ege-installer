@@ -3,7 +3,7 @@
  * 用户界面交互逻辑
  */
 
-// 获取DPI缩放比例（通过多种方式尝试）
+// 获取DPI缩放比例
 function getDpiScale() {
   try {
     // 方案一：通过注册表读取系统DPI设置
@@ -17,20 +17,13 @@ function getDpiScale() {
         regDpi = shell.RegRead('HKCU\\Control Panel\\Desktop\\LogPixels');
       } catch (e2) { }
     }
-    if (regDpi && regDpi > 96) {
+    if (regDpi && regDpi >= 96) {
       return regDpi / 96;
     }
 
     // 方案二：IE/HTA 获取DPI方式
-    if (screen.deviceXDPI && screen.logicalXDPI && screen.deviceXDPI > screen.logicalXDPI) {
+    if (screen.deviceXDPI && screen.logicalXDPI) {
       return screen.deviceXDPI / screen.logicalXDPI;
-    }
-
-    // 方案三：根据屏幕分辨率推断（如果分辨率很高但逻辑尺寸小，可能是高DPI）
-    // 如果屏幕物理宽度大于2560但screen.width小于2560，则可能有缩放
-    if (screen.width <= 1920 && window.screen.availWidth <= 1920) {
-      // 可能是高DPI屏幕，使用稍大的窗口
-      return 1.25;  // 默认假设125%缩放作为安全值
     }
 
     return 1;
@@ -39,14 +32,27 @@ function getDpiScale() {
   }
 }
 
-// 初始化窗口（考虑DPI缩放）
+/**
+ * 窗口缩放策略：简单方案，根据屏幕逻辑分辨率调整
+ * 
+ * 不考虑 DPI，只看 screen.width：
+ * - 1280×720: 窗口 750×620 (基准)
+ * - 1920×1080: 窗口 750×620 (基准)
+ * - 2560×1440: 窗口 1000×827 (1.33倍)
+ * - 3840×2160: 窗口 1500×1240 (2倍)
+ */
 var dpiScale = getDpiScale();
 var baseWidth = 750;
 var baseHeight = 620;
-var initWidth = Math.round(baseWidth * dpiScale);
-var initHeight = Math.round(baseHeight * dpiScale);
 
-// 确保窗口不会超过屏幕
+// 直接根据逻辑分辨率计算缩放因子
+var scaleFactor = Math.max(1, screen.width / 1920);
+
+// 窗口逻辑尺寸 = 基准 × 缩放因子
+var initWidth = Math.round(baseWidth * scaleFactor);
+var initHeight = Math.round(baseHeight * scaleFactor);
+
+// 确保不超过屏幕 95%
 if (initWidth > screen.availWidth * 0.95) {
   initWidth = Math.round(screen.availWidth * 0.9);
 }
