@@ -1275,11 +1275,14 @@ var Installer = (function () {
       var devCppTemplateResult = installDevCppTemplate(ide);
       if (devCppTemplateResult === "skipped") {
         log("⚠ 项目模板源文件缺失，跳过模板安装", "warning");
+        ide.templateInstalled = false;
       } else if (!devCppTemplateResult) {
         log("⚠ 项目模板安装失败（不影响库文件安装）", "warning");
         templateSuccess = false;
+        ide.templateInstalled = false;
       } else {
         log("✓ 项目模板安装成功", "success");
+        ide.templateInstalled = true;
         if (headersSuccess && libsSuccess) {
           showDevCppUsageGuide(ide);
         }
@@ -1376,8 +1379,8 @@ var Installer = (function () {
           if (ide.type === "codeblocks") {
             codeBlocksInstalled = true;
           }
-          // 记录 Dev-C++ 模板安装成功（仅在模板实际安装时标记）
-          if (ide.type === "devcpp" && ide.templatesPath) {
+          // 记录 Dev-C++ 模板安装成功（仅在模板真正安装成功时标记）
+          if (ide.type === "devcpp" && ide.templateInstalled === true) {
             devCppTemplateInstalled = true;
           }
         } else {
