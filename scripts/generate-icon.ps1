@@ -53,8 +53,6 @@ $stringFormat.Dispose()
 # 手动创建 ICO 文件（传统 BMP DIB 格式，非 PNG 压缩）
 # 这是为了兼容 Dev-C++ 5.11，它不支持 PNG 压缩的 ICO
 
-$ms = New-Object System.IO.MemoryStream
-
 # 将 Bitmap 转换为 32bpp ARGB DIB 数据
 $bmpData = $bitmap.LockBits(
     (New-Object System.Drawing.Rectangle(0, 0, $size, $size)),
@@ -117,12 +115,15 @@ $iconDirEntry[7] = 0
 
 # 写入 ICO 文件
 $outputFile = [System.IO.File]::Create($outputPath)
-$outputFile.Write($iconDir, 0, 6)
-$outputFile.Write($iconDirEntry, 0, 16)
-$outputFile.Write($dibHeader, 0, 40)
-$outputFile.Write($flippedBytes, 0, $flippedBytes.Length)
-$outputFile.Write($andMask, 0, $andMask.Length)
-$outputFile.Close()
+try {
+    $outputFile.Write($iconDir, 0, 6)
+    $outputFile.Write($iconDirEntry, 0, 16)
+    $outputFile.Write($dibHeader, 0, 40)
+    $outputFile.Write($flippedBytes, 0, $flippedBytes.Length)
+    $outputFile.Write($andMask, 0, $andMask.Length)
+} finally {
+    $outputFile.Close()
+}
 
 $bitmap.Dispose()
 
