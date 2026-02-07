@@ -450,7 +450,7 @@ function checkCodeBlocksInstallWarning(ide) {
     var mingw64Found = false;
     var mingw32Found = false;
     var mingwNames = [];
-    
+
     for (var i = 0; i < detectedIDEs.length; i++) {
       var item = detectedIDEs[i];
       if (item.type === 'mingw' && item.found) {
@@ -462,11 +462,11 @@ function checkCodeBlocksInstallWarning(ide) {
         }
       }
     }
-    
+
     var msg = '⚠️ Code::Blocks 无编译器检测\n\n';
     msg += '此 Code::Blocks 未自带 MinGW 编译器。\n';
     msg += '本次安装将只能配置项目模板，无法安装 EGE 库文件。\n\n';
-    
+
     if (mingw64Found || mingw32Found) {
       msg += '✅ 检测到以下编译器：\n';
       for (var j = 0; j < mingwNames.length; j++) {
@@ -481,9 +481,9 @@ function checkCodeBlocksInstallWarning(ide) {
       msg += '   2. 在 Code::Blocks 中配置外部编译器路径\n';
       msg += '   3. 重新运行本安装程序，选择对应的 MinGW 进行安装\n\n';
     }
-    
+
     msg += '确定要继续吗？';
-    
+
     return confirm(msg);
   }
   return true;
@@ -652,10 +652,34 @@ function closeCodeBlocksGuide() {
 }
 
 /**
+ * 打开 Code::Blocks 完整使用文档
+ */
+function openCodeBlocksFullDocs() {
+  try {
+    // 跳转到 GitHub 上的文档链接
+    shell.Run('https://github.com/x-ege/ege-installer/blob/main/assets/docs/codeblocks-usage.md');
+  } catch (e) {
+    alert('无法打开浏览器：' + e.message + '\n\n请手动访问：\nhttps://github.com/x-ege/ege-installer/blob/main/assets/docs/codeblocks-usage.md');
+  }
+}
+
+/**
  * 显示 Dev-C++ 使用说明窗口
  */
 function showDevCppGuideModal() {
   document.getElementById('devCppGuideModal').className = 'modal-overlay show';
+}
+
+/**
+ * 打开 Dev-C++ 完整使用文档
+ */
+function openDevCppFullDocs() {
+  try {
+    // 跳转到 GitHub 上的文档链接
+    shell.Run('https://github.com/x-ege/ege-installer/blob/main/assets/docs/devcpp-usage.md');
+  } catch (e) {
+    alert('无法打开浏览器：' + e.message + '\n\n请手动访问：\nhttps://github.com/x-ege/ege-installer/blob/main/assets/docs/devcpp-usage.md');
+  }
 }
 
 /**

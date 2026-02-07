@@ -884,47 +884,51 @@
         </div>
 
         <div class="guide-section">
-          <h3><span class="section-icon">📝</span>如何创建新的 EGE 项目</h3>
+          <h3><span class="section-icon">📝</span>创建 EGE 项目</h3>
 
-          <p style="font-size: 13px; color: #6b7280; margin-bottom: 8px;"><strong>方法一：从项目向导创建（推荐，Code::Blocks
+          <p style="font-size: 13px; color: #6b7280; margin-bottom: 8px;"><strong>方法一：项目向导（推荐，Code::Blocks
               25.03+）</strong></p>
-          <div class="guide-steps">
-            <ol>
-              <li>打开 <strong>Code::Blocks</strong></li>
-              <li>点击菜单：<strong>文件 → 新建 → 项目...</strong></li>
-              <li>分类选择 <strong>2D/3D Graphics</strong>，找到 <strong>EGE project</strong></li>
-              <li>按提示输入项目名称和路径，完成创建</li>
-            </ol>
-          </div>
+          <p style="font-size: 13px; margin-left: 20px; color: #374151;">
+            文件 → 新建 → 项目... → <strong>2D/3D Graphics</strong> → <strong>EGE project</strong>
+          </p>
 
-          <p style="font-size: 13px; color: #6b7280; margin: 12px 0 8px 0;"><strong>方法二：从用户模板创建</strong></p>
-          <div class="guide-steps">
-            <ol>
-              <li>打开 <strong>Code::Blocks</strong></li>
-              <li>点击菜单：<strong>文件 → 从用户模板新建...</strong></li>
-              <li>在弹出的对话框中选择：<strong>EGE_Project</strong></li>
-              <li>输入项目名称和保存位置，点击确定</li>
-            </ol>
-          </div>
+          <p style="font-size: 13px; color: #6b7280; margin: 12px 0 8px 0;"><strong>方法二：用户模板</strong></p>
+          <p style="font-size: 13px; margin-left: 20px; color: #374151;">
+            文件 → 从用户模板新建... → 选择 <strong>EGE_Project</strong>
+          </p>
         </div>
 
         <div class="guide-section">
           <div class="guide-tips">
-            <h3 style="margin: 0 0 8px 0; font-size: 15px; color: #92400e;">💡 重要提示</h3>
+            <h3 style="margin: 0 0 8px 0; font-size: 15px; color: #92400e;">💡 快速提示</h3>
             <ul>
-              <li>模板已自动配置所有链接选项，<strong>无需手动设置</strong></li>
-              <li>可以直接使用 <code>#include &lt;graphics.h&gt;</code> 头文件</li>
-              <li>按 <strong>F9</strong> 即可编译并运行项目</li>
-              <li>首次编译可能需要几秒钟，请耐心等待</li>
+              <li>模板已配置所有选项，<strong>无需手动设置</strong></li>
+              <li>直接使用 <code>#include &lt;graphics.h&gt;</code></li>
+              <li>按 <strong>F9</strong> 编译运行</li>
+              <li>若模板未显示，请重启 Code::Blocks</li>
             </ul>
           </div>
         </div>
 
+        <div class="guide-section"
+          style="background: #f0f9ff; border-left: 3px solid #3b82f6; padding: 12px; margin-top: 16px;">
+          <p style="margin: 0; font-size: 13px; color: #1e40af;">
+            <span style="font-weight: 600;">📖 需要详细说明？</span><br>
+            包含编译器配置、手动配置方法、代码示例、常见问题等完整指南
+          </p>
+          <button class="btn-view-docs" onclick="openCodeBlocksFullDocs()"
+            style="margin-top: 8px; padding: 6px 12px; background: #3b82f6; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 12px;">
+            查看完整使用文档
+          </button>
+        </div>
+
         <div class="guide-section">
-          <h3><span class="section-icon">📚</span>获取更多帮助</h3>
+          <h3><span class="section-icon">📚</span>更多资源</h3>
           <p>
-            访问 <a href="javascript:void(0)" class="guide-link"
-              onclick="openUrl('https://xege.org/'); return false;">https://xege.org/</a> 查看详细文档和示例教程。
+            <a href="javascript:void(0)" class="guide-link"
+              onclick="openUrl('https://xege.org/'); return false;">官方网站</a> ·
+            <a href="javascript:void(0)" class="guide-link"
+              onclick="openUrl('https://github.com/wysaid/xege'); return false;">GitHub 源码</a>
           </p>
         </div>
       </div>
@@ -949,52 +953,51 @@
         </div>
 
         <div class="guide-section">
-          <h3><span class="section-icon">📝</span>如何创建新的 EGE 项目</h3>
+          <h3><span class="section-icon">📝</span>创建 EGE 项目</h3>
 
-          <p style="font-size: 13px; color: #6b7280; margin-bottom: 8px;"><strong>方法一：使用项目模板（推荐）</strong></p>
-          <div class="guide-steps">
-            <ol>
-              <li>打开 <strong>Dev-C++</strong></li>
-              <li>点击菜单：<strong>文件 → 新建 → 项目...</strong></li>
-              <li>选择 <strong>Multimedia</strong> 标签页</li>
-              <li>点击 <strong>EGE Graphics</strong>，输入项目名称</li>
-              <li>点击<strong>确定</strong>，项目创建完成！</li>
-            </ol>
-          </div>
+          <p style="font-size: 13px; color: #6b7280; margin-bottom: 8px;"><strong>方法一：项目模板（推荐）</strong></p>
+          <p style="font-size: 13px; margin-left: 20px; color: #374151;">
+            文件 → 新建 → 项目... → <strong>Multimedia</strong> → <strong>EGE Graphics</strong>
+          </p>
 
-          <p style="font-size: 13px; color: #6b7280; margin: 12px 0 8px 0;"><strong>方法二：手动配置现有项目</strong></p>
-          <div class="guide-steps">
-            <ol>
-              <li>打开 <strong>Dev-C++</strong>，创建一个空项目或新建源文件</li>
-              <li>点击菜单：<strong>项目 → 项目属性</strong></li>
-              <li>切换到 <strong>参数</strong> 标签页</li>
-              <li>在 <strong>链接器</strong> 中添加以下内容：<br>
-                <code
-                  style="background:#f3f4f6; padding:2px 4px; border-radius:3px; font-size:12px;">-lgraphics -lgdiplus -lgdi32 -limm32 -lmsimg32 -lole32 -loleaut32 -lwinmm -luuid -mwindows -static</code>
-              </li>
-              <li>点击<strong>确定</strong>保存设置</li>
-            </ol>
-          </div>
+          <p style="font-size: 13px; color: #6b7280; margin: 12px 0 8px 0;"><strong>方法二：手动配置</strong></p>
+          <p style="font-size: 13px; margin-left: 20px; color: #374151;">
+            项目属性 → 参数 → 链接器，添加库选项（详见完整文档）
+          </p>
         </div>
 
         <div class="guide-section">
           <div class="guide-tips">
-            <h3 style="margin: 0 0 8px 0; font-size: 15px; color: #92400e;">💡 重要提示</h3>
+            <h3 style="margin: 0 0 8px 0; font-size: 15px; color: #92400e;">💡 快速提示</h3>
             <ul>
-              <li><strong>⚠️ 此模板仅支持 64-bit 编译！</strong>请确保编译器架构设置为 <code>x86_64</code>（工具 → 编译器选项 → 设置 → 代码生成 → 架构）</li>
-              <li>使用项目模板创建的项目已自动配置所有链接选项，<strong>无需手动设置</strong></li>
-              <li>可以直接使用 <code>#include &lt;graphics.h&gt;</code> 头文件</li>
-              <li>按 <strong>F11</strong> 即可编译并运行项目</li>
-              <li>如果在 Multimedia 中没有看到 EGE Graphics，请<strong>关闭并重新打开</strong> Dev-C++</li>
+              <li><strong>⚠️ 仅支持 64-bit 编译！</strong>确保架构设置为 <code>x86_64</code></li>
+              <li>模板已配置所有选项，<strong>无需手动设置</strong></li>
+              <li>直接使用 <code>#include &lt;graphics.h&gt;</code></li>
+              <li>按 <strong>F11</strong> 编译运行</li>
+              <li>若模板未显示，请重启 Dev-C++</li>
             </ul>
           </div>
         </div>
 
+        <div class="guide-section"
+          style="background: #f0f9ff; border-left: 3px solid #3b82f6; padding: 12px; margin-top: 16px;">
+          <p style="margin: 0; font-size: 13px; color: #1e40af;">
+            <span style="font-weight: 600;">📖 需要详细说明？</span><br>
+            包含编译器架构配置、手动配置步骤、代码示例、常见问题等完整指南
+          </p>
+          <button class="btn-view-docs" onclick="openDevCppFullDocs()"
+            style="margin-top: 8px; padding: 6px 12px; background: #3b82f6; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 12px;">
+            查看完整使用文档
+          </button>
+        </div>
+
         <div class="guide-section">
-          <h3><span class="section-icon">📚</span>获取更多帮助</h3>
+          <h3><span class="section-icon">📚</span>更多资源</h3>
           <p>
-            访问 <a href="javascript:void(0)" class="guide-link"
-              onclick="openUrl('https://xege.org/'); return false;">https://xege.org/</a> 查看详细文档和示例教程。
+            <a href="javascript:void(0)" class="guide-link"
+              onclick="openUrl('https://xege.org/'); return false;">官方网站</a> ·
+            <a href="javascript:void(0)" class="guide-link"
+              onclick="openUrl('https://github.com/wysaid/xege'); return false;">GitHub 源码</a>
           </p>
         </div>
       </div>
