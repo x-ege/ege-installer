@@ -29,9 +29,18 @@ function GetFilesDir()
 
 function SetupProject(project)
 {
-    // Compiler warnings - manually add for GCC-based compilers
+    // Compiler warnings - add appropriate options based on compiler type
     // This avoids the "wizard doesn't know how to setup warning flags" error
-    project.AddCompilerOption(_T("-Wall"));
+    local compilerID = Wizard.GetCompilerID();
+    if (GetCompilerFactory().CompilerInheritsFrom(compilerID, _T("gcc")) ||
+        GetCompilerFactory().CompilerInheritsFrom(compilerID, _T("clang")))
+    {
+        project.AddCompilerOption(_T("-Wall"));
+    }
+    else if (GetCompilerFactory().CompilerInheritsFrom(compilerID, _T("msvc*")))
+    {
+        project.AddCompilerOption(_T("/W3"));
+    }
 
     // Linker options (EGE required libraries)
     project.AddLinkerOption(_T("-mwindows"));
