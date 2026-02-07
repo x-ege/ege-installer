@@ -357,7 +357,13 @@ function renderIDEItem(ide, index, isFound) {
 
   var html = '<div class="ide-item" id="' + prefix + '_' + index + '">';
   html += '<div class="ide-info">';
-  html += '<div class="ide-name">' + ide.name + '</div>';
+  // Code::Blocks 无编译器警告标识
+  var cbNoCompiler = ide.type === 'codeblocks' && ide.found && (!ide.includePath || !ide.libPath);
+  html += '<div class="ide-name">' + ide.name;
+  if (cbNoCompiler) {
+    html += '<span class="cb-warning-icon" title="此 Code::Blocks 未自带编译器，将只安装项目模板">无编译器</span>';
+  }
+  html += '</div>';
   // 对于有 msvcPath 的项（不同工具集），显示完整工具集路径；否则显示 IDE 路径
   var displayPath = ide.msvcPath || ide.path || '未安装';
   html += '<div class="ide-path">' + displayPath + '</div>';
@@ -434,11 +440,66 @@ function getBuiltinEgeWarning(ide, isInstall) {
 }
 
 /**
+ * 检查 Code::Blocks 安装前的特殊情况
+ * 返回 true 表示可以继续，false 表示用户取消
+ */
+function checkCodeBlocksInstallWarning(ide) {
+  // Code::Blocks 无编译器的特殊处理
+  if (ide.type === 'codeblocks' && (!ide.includePath || !ide.libPath)) {
+    // 检测是否有可用的 MinGW
+    var mingw64Found = false;
+    var mingw32Found = false;
+    var mingwNames = [];
+    
+    for (var i = 0; i < detectedIDEs.length; i++) {
+      var item = detectedIDEs[i];
+      if (item.type === 'mingw' && item.found) {
+        mingwNames.push(item.name);
+        if (item.name.toLowerCase().indexOf('mingw64') >= 0) {
+          mingw64Found = true;
+        } else if (item.name.toLowerCase().indexOf('mingw32') >= 0) {
+          mingw32Found = true;
+        }
+      }
+    }
+    
+    var msg = '⚠️ Code::Blocks 无编译器检测\n\n';
+    msg += '此 Code::Blocks 未自带 MinGW 编译器。\n';
+    msg += '本次安装将只能配置项目模板，无法安装 EGE 库文件。\n\n';
+    
+    if (mingw64Found || mingw32Found) {
+      msg += '✅ 检测到以下编译器：\n';
+      for (var j = 0; j < mingwNames.length; j++) {
+        msg += '   • ' + mingwNames[j] + '\n';
+      }
+      msg += '\n📌 强烈建议同时勾选这些编译器进行安装！\n';
+      msg += '   （批量安装：按住 Ctrl 点击编译器的"安装"按钮）\n\n';
+    } else {
+      msg += '❌ 未检测到独立的 MinGW 编译器\n\n';
+      msg += '💡 解决方案：\n';
+      msg += '   1. 安装 MSYS2 MinGW-w64（推荐）\n';
+      msg += '   2. 在 Code::Blocks 中配置外部编译器路径\n';
+      msg += '   3. 重新运行本安装程序，选择对应的 MinGW 进行安装\n\n';
+    }
+    
+    msg += '确定要继续吗？';
+    
+    return confirm(msg);
+  }
+  return true;
+}
+
+/**
  * 执行安装
  */
 function doInstall(index, isFound) {
   var ide = isFound ? detectedIDEs[index] : notFoundIDEs[index];
   if (!ide || !ide.found) return;
+
+  // Code::Blocks 特殊检查
+  if (!checkCodeBlocksInstallWarning(ide)) {
+    return; // 用户取消
+  }
 
   // 对于内置EGE的IDE，显示额外提示
   if (isBuiltinEgeIDE(ide)) {
