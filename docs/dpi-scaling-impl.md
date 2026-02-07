@@ -72,10 +72,10 @@ Testing tool revealed that Ctrl+Wheel modifies:
 
 1. `screen.deviceXDPI` is read-only, managed by IE engine
 2. CSS `zoom` affects layout causing overflow issues
-3. CSS `transform: scale()` works in opposite direction (shrinks instead of enlarges)
+3. CSS `transform: scale()` doesn't reproduce IE text zoom and causes layout/overflow issues
 4. mshta.exe is DPI-unaware, Windows DWM handles stretching automatically
 
-```
+```text
 Expected: JavaScript → deviceXDPI → IE Engine → Text Size
 Actual:   IE Engine → deviceXDPI (read-only) ← JavaScript (no access)
 ```
@@ -102,7 +102,8 @@ Actual:   IE Engine → deviceXDPI (read-only) ← JavaScript (no access)
   var initWidth = Math.round(baseWidth * scaleFactor);
   ```
 
-- Removed all failed solution code (transform, zoom, resize listeners)
+- Removed all failed solution code (transform, zoom, and `getDpiScale()` function)
+- Kept minimal resize handler for enforcing minimum window size
 
 ### Rationale
 

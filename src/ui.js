@@ -3,35 +3,6 @@
  * 用户界面交互逻辑
  */
 
-// 获取DPI缩放比例
-function getDpiScale() {
-  try {
-    // 方案一：通过注册表读取系统DPI设置
-    var regDpi = null;
-    try {
-      // Windows 10/11 缩放设置
-      regDpi = shell.RegRead('HKCU\\Control Panel\\Desktop\\WindowMetrics\\AppliedDPI');
-    } catch (e1) {
-      try {
-        // 备用位置
-        regDpi = shell.RegRead('HKCU\\Control Panel\\Desktop\\LogPixels');
-      } catch (e2) { }
-    }
-    if (regDpi && regDpi >= 96) {
-      return regDpi / 96;
-    }
-
-    // 方案二：IE/HTA 获取DPI方式
-    if (screen.deviceXDPI && screen.logicalXDPI) {
-      return screen.deviceXDPI / screen.logicalXDPI;
-    }
-
-    return 1;
-  } catch (e) {
-    return 1;
-  }
-}
-
 /**
  * 窗口缩放策略：简单方案，根据屏幕逻辑分辨率调整
  * 
@@ -41,7 +12,6 @@ function getDpiScale() {
  * - 2560×1440: 窗口 1000×827 (1.33倍)
  * - 3840×2160: 窗口 1500×1240 (2倍)
  */
-var dpiScale = getDpiScale();
 var baseWidth = 750;
 var baseHeight = 620;
 
