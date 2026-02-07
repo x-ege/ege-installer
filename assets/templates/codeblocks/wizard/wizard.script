@@ -37,7 +37,7 @@ function SetupProject(project)
     {
         project.AddCompilerOption(_T("-Wall"));
     }
-    else if (GetCompilerFactory().CompilerInheritsFrom(compilerID, _T("msvc*")))
+    else if (GetCompilerFactory().CompilerInheritsFrom(compilerID, _T("msvc")))
     {
         project.AddCompilerOption(_T("/W3"));
     }

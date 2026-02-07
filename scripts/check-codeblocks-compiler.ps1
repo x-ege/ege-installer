@@ -1,15 +1,39 @@
 ﻿# Code::Blocks 编译器配置检查脚本
 # 用于诊断和修复 "Can't find compiler executable" 错误
 
+param(
+    [string]$cbPath
+)
+
 Write-Host "==================================" -ForegroundColor Cyan
 Write-Host "Code::Blocks 编译器配置检查工具" -ForegroundColor Cyan
 Write-Host "==================================" -ForegroundColor Cyan
 Write-Host ""
 
 # 检查 Code::Blocks 安装
-$cbPath = "C:\Program Files\CodeBlocks"
-if (-not (Test-Path $cbPath)) {
-    Write-Host "❌ 未找到 Code::Blocks 安装目录: $cbPath" -ForegroundColor Red
+if (-not $cbPath) {
+    $candidatePaths = @(
+        "C:\Program Files\CodeBlocks",
+        "C:\Program Files (x86)\CodeBlocks",
+        "${env:LOCALAPPDATA}\Programs\CodeBlocks"
+    )
+    foreach ($p in $candidatePaths) {
+        if (Test-Path $p) {
+            $cbPath = $p
+            break
+        }
+    }
+}
+
+if (-not $cbPath -or -not (Test-Path $cbPath)) {
+    Write-Host "❌ 未找到 Code::Blocks 安装目录" -ForegroundColor Red
+    Write-Host "  已检查以下路径：" -ForegroundColor Yellow
+    Write-Host "  - C:\Program Files\CodeBlocks" -ForegroundColor Gray
+    Write-Host "  - C:\Program Files (x86)\CodeBlocks" -ForegroundColor Gray
+    Write-Host "  - $env:LOCALAPPDATA\Programs\CodeBlocks" -ForegroundColor Gray
+    Write-Host ""
+    Write-Host "  请使用 -cbPath 参数指定路径，例如：" -ForegroundColor Yellow
+    Write-Host "  .\check-codeblocks-compiler.ps1 -cbPath 'D:\CodeBlocks'" -ForegroundColor Gray
     exit 1
 }
 Write-Host "✓ Code::Blocks 安装目录: $cbPath" -ForegroundColor Green
@@ -25,9 +49,13 @@ if (Test-Path $mingwPath) {
     
     if (Test-Path $gccPath) {
         Write-Host "  ✓ gcc.exe 存在" -ForegroundColor Green
-        $gccVersion = & $gccPath --version 2>$null | Select-Object -First 1
-        if ($gccVersion) {
-            Write-Host "    版本: $gccVersion" -ForegroundColor Gray
+        try {
+            $gccVersion = & $gccPath --version 2>$null | Select-Object -First 1
+            if ($gccVersion) {
+                Write-Host "    版本: $gccVersion" -ForegroundColor Gray
+            }
+        } catch {
+            Write-Host "    ⚠ 无法获取版本信息" -ForegroundColor Yellow
         }
     } else {
         Write-Host "  ❌ gcc.exe 不存在" -ForegroundColor Red
