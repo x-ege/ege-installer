@@ -18,7 +18,8 @@ function BeginWizard()
 
     Wizard.AddInfoPage(_T("EGEIntro"), intro_msg);
     Wizard.AddProjectPathPage();
-    Wizard.AddCompilerPage(_T(""), _T("gcc*"), true, true);
+    // Allow any valid compiler (not just gcc*) to avoid path configuration issues
+    Wizard.AddCompilerPage(_T(""), _T("*"), true, true);
 }
 
 function GetFilesDir()
@@ -28,8 +29,9 @@ function GetFilesDir()
 
 function SetupProject(project)
 {
-    // Compiler warnings
-    WarningsOn(project, Wizard.GetCompilerID());
+    // Compiler warnings - manually add for GCC-based compilers
+    // This avoids the "wizard doesn't know how to setup warning flags" error
+    project.AddCompilerOption(_T("-Wall"));
 
     // Linker options (EGE required libraries)
     project.AddLinkerOption(_T("-mwindows"));

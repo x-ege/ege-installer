@@ -6,6 +6,44 @@ EGE 图形库已成功安装到您的 Code::Blocks！
 
 ---
 
+## ⚙️ 首次使用：配置编译器（重要！）
+
+在创建 EGE 项目之前，请确保 Code::Blocks 的编译器配置正确：
+
+### 检查并配置编译器路径
+
+1. 打开 Code::Blocks
+2. 点击菜单：**Settings → Compiler...**
+3. 在 **Selected compiler** 下拉列表中，选择你要使用的编译器（推荐 **GNU GCC Compiler**）
+4. 点击 **Toolchain executables** 标签页
+5. **Compiler's installation directory** 应该指向：
+   - Code::Blocks 自带 MinGW：`C:\Program Files\CodeBlocks\MinGW`
+   - 或其他 MinGW 安装路径（如 `C:\mingw64`、`C:\msys64\mingw64` 等）
+6. 验证下方的程序文件名：
+   - C compiler: `gcc.exe`
+   - C++ compiler: `g++.exe`
+   - Linker for dynamic libs: `g++.exe`
+   - Linker for static libs: `ar.exe`
+7. 点击 **Auto-detect** 按钮可以自动检测
+8. 点击 **OK** 保存设置
+
+### 如果出现"Can't find compiler executable"错误
+
+说明当前选择的编译器路径未正确配置。请按以下步骤修复：
+
+1. **Settings → Compiler → Toolchain executables**
+2. 点击 **Auto-detect** 按钮
+3. 如果自动检测失败，手动选择 Code::Blocks自带的 MinGW：
+   - 点击路径输入框旁的 **...** 按钮
+   - 浏览到 `C:\Program Files\CodeBlocks\MinGW`
+   - 点击确定
+4. 验证编译器可执行文件（gcc.exe、g++.exe 等）
+5. 点击 **OK** 保存
+
+**提示**：如果有多个编译器，建议选择默认的 **GNU GCC Compiler** 并配置为 Code::Blocks 自带的 MinGW。
+
+---
+
 ## 📝 创建新的 EGE 项目
 
 ### 方法一：从项目向导创建（推荐，Code::Blocks 25.03+）
@@ -14,7 +52,9 @@ EGE 图形库已成功安装到您的 Code::Blocks！
 2. 点击菜单：**文件 → 新建 → 项目...**
 3. 在左侧选择 **Projects**，分类选择 **2D/3D Graphics**
 4. 找到 **EGE project**，点击 **Go**
-5. 按提示输入项目名称和保存路径，完成创建
+5. 按提示输入项目名称和保存路径
+6. **选择编译器**：选择已正确配置的编译器（如 **GNU GCC Compiler**）
+7. 完成创建
 
 **项目向导已自动配置好所有编译和链接选项，无需手动设置。**
 
