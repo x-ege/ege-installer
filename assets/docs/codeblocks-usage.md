@@ -56,6 +56,9 @@ EGE 图形库已成功安装到您的 Code::Blocks！
 6. **选择编译器**：选择已正确配置的编译器（如 **GNU GCC Compiler**）
 7. 完成创建
 
+![cb_new_proj](images/codeblocks_new_proj.png)
+![cb_new_proj2](images/codeblocks_new_proj2.png)
+
 **项目向导已自动配置好所有编译和链接选项，无需手动设置。**
 
 > ⚠ 如果在 2D/3D Graphics 中没有看到 EGE project，请关闭并重新打开 Code::Blocks 后再试。
@@ -72,6 +75,8 @@ EGE 图形库已成功安装到您的 Code::Blocks！
 5. 点击确定，项目创建完成！
 
 > ⚠ 如果模板列表里暂时看不到 **EGE_Project**，请关闭并重新打开 Code::Blocks 后再试（部分版本需要重启才能刷新模板缓存）。
+
+![cb_user_temp](images/codeblocks_user_template.png)
 
 > 如果您使用的 Code::Blocks 版本没有“从模板...”，也可以尝试：
 > **文件 → 从用户模板新建...** → 选择 **EGE_Project**
@@ -158,6 +163,8 @@ int main()
 ```
 
 点击 **Build and run** (F9) 即可运行程序！
+
+![run](images/codeblocks_new_proj3.png)
 
 ---
 
