@@ -1079,7 +1079,7 @@ function showInstallGuide(index, isFound) {
   }
 
   var bodyHtml;
-  var linkerFlags = '-lgraphics -lgdiplus -luuid -lmsimg32 -lgdi32 -limm32 -lole32 -loleaut32 -lwinmm';
+  var linkerFlags = '-lgraphics -lgdiplus -lgdi32 -limm32 -lmsimg32 -lole32 -loleaut32 -lwinmm -luuid -mwindows -static';
 
   if (type === 'vs' || type === 'vs-legacy') {
     bodyHtml = '<p style="color:#059669; font-weight:500;">\u2714 已完成安装</p>' +

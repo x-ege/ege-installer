@@ -452,7 +452,7 @@ var Installer = (function () {
 
     if (!fso.FolderExists(templateSrc)) {
       log("  模板源目录不存在: " + templateSrc, "warning");
-      return true; // 不影响主安装流程
+      return "skipped"; // 区分"跳过"和"安装成功"
     }
 
     var destDir = getDevCppTemplateDir(ide);
@@ -517,9 +517,12 @@ var Installer = (function () {
 
     // 验证
     if (!dryRunMode && !hasError) {
-      if (!fso.FileExists(destDir + "\\EGE_Graphics.template")) {
-        log("  ⚠ 缺少模板文件: EGE_Graphics.template", "warning");
-        hasError = true;
+      var requiredFiles = ["EGE_Graphics.template", "EGE_main_cpp.txt"];
+      for (var v = 0; v < requiredFiles.length; v++) {
+        if (!fso.FileExists(destDir + "\\" + requiredFiles[v])) {
+          log("  ⚠ 缺少模板文件: " + requiredFiles[v], "warning");
+          hasError = true;
+        }
       }
     }
 
@@ -1269,7 +1272,10 @@ var Installer = (function () {
     // 为 Dev-C++ 安装项目模板
     if (ide.type === "devcpp") {
       progressCallback(baseProgress + stepProgress * 0.9, "正在安装项目模板...");
-      if (!installDevCppTemplate(ide)) {
+      var devCppTemplateResult = installDevCppTemplate(ide);
+      if (devCppTemplateResult === "skipped") {
+        log("⚠ 项目模板源文件缺失，跳过模板安装", "warning");
+      } else if (!devCppTemplateResult) {
         log("⚠ 项目模板安装失败（不影响库文件安装）", "warning");
         templateSuccess = false;
       } else {
@@ -1345,7 +1351,7 @@ var Installer = (function () {
     if (!fso.FolderExists(egeLibsPath)) {
       log("找不到 EGE 库文件目录!", "error");
       log("请确保 xege_libs 目录位于正确位置", "error");
-      completeCallback(false, "找不到 EGE 库文件目录: " + egeLibsPath, false);
+      completeCallback(false, "找不到 EGE 库文件目录: " + egeLibsPath, false, false);
       return;
     }
 
@@ -1353,7 +1359,7 @@ var Installer = (function () {
     var successCount = 0;
     var failCount = 0;
     var codeBlocksInstalled = false;
-    var devCppInstalled = false;
+    var devCppTemplateInstalled = false;
 
     for (var i = 0; i < selectedIDEs.length; i++) {
       var ide = selectedIDEs[i];
@@ -1370,9 +1376,9 @@ var Installer = (function () {
           if (ide.type === "codeblocks") {
             codeBlocksInstalled = true;
           }
-          // 记录 Dev-C++ 安装成功
-          if (ide.type === "devcpp") {
-            devCppInstalled = true;
+          // 记录 Dev-C++ 模板安装成功（仅在模板实际安装时标记）
+          if (ide.type === "devcpp" && ide.templatesPath) {
+            devCppTemplateInstalled = true;
           }
         } else {
           failCount++;
@@ -1397,10 +1403,10 @@ var Installer = (function () {
 
     if (successCount > 0 && failCount === 0) {
       log("🎉 所有IDE安装成功！", "success");
-      completeCallback(true, "成功安装到 " + successCount + " 个 IDE", codeBlocksInstalled, devCppInstalled);
+      completeCallback(true, "成功安装到 " + successCount + " 个 IDE", codeBlocksInstalled, devCppTemplateInstalled);
     } else if (successCount > 0 && failCount > 0) {
       log("⚠ 部分IDE安装成功，" + failCount + " 个失败，请检查上方日志", "error");
-      completeCallback(false, "" + successCount + " 个成功，" + failCount + " 个失败", codeBlocksInstalled, devCppInstalled);
+      completeCallback(false, "" + successCount + " 个成功，" + failCount + " 个失败", codeBlocksInstalled, devCppTemplateInstalled);
     } else {
       log("❌ 所有安装均失败，请检查日志并重试", "error");
       completeCallback(false, "所有安装均失败，请检查日志", false, false);

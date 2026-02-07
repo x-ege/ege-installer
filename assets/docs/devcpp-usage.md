@@ -105,8 +105,6 @@ int main()
 ## 📚 更多资源
 
 - **官方网站**: <https://xege.org/>
-- **API 文档**: <https://xege.org/man/api/>
-- **示例教程**: <https://xege.org/man/tutorial/>
 - **GitHub**: <https://github.com/wysaid/xege>
 
 ---

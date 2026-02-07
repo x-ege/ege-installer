@@ -519,7 +519,9 @@ var Detector = (function () {
           type: "devcpp",
           found: false,
           includePath: "",
-          libPath: ""
+          libPath: "",
+          templatesPath: "",
+          templateInstalled: false
         });
       }
     }
