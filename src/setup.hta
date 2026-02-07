@@ -443,9 +443,11 @@
       background: white;
       border-radius: 8px;
       width: 500px;
-      max-height: 80%;
+      max-height: 80vh;
       overflow: hidden;
       box-shadow: 0 25px 50px rgba(0, 0, 0, 0.25);
+      display: flex;
+      flex-direction: column;
     }
 
     .modal-header {
@@ -455,18 +457,22 @@
       font-size: 16px;
       font-weight: 500;
       color: #1f2937;
+      flex-shrink: 0;
     }
 
     .modal-body {
       padding: 20px;
-      max-height: 300px;
       overflow-y: auto;
+      flex: 1 1 auto;
+      min-height: 0;
+      max-height: calc(80vh - 120px);
     }
 
     .modal-footer {
       padding: 12px 20px;
       border-top: 1px solid #e5e7eb;
       text-align: right;
+      flex-shrink: 0;
     }
 
     .log-area {
@@ -521,8 +527,10 @@
     .codeblocks-guide-modal {
       width: 800px;
       max-width: 90%;
-      max-height: 90%;
+      max-height: 90vh;
       animation: slideIn 0.3s ease-out;
+      display: flex;
+      flex-direction: column;
     }
 
     @keyframes slideIn {
@@ -547,9 +555,11 @@
 
     .codeblocks-guide-modal .modal-body {
       padding: 24px;
-      max-height: 600px;
       overflow-y: auto;
       line-height: 1.6;
+      flex: 1 1 auto;
+      min-height: 0;
+      max-height: calc(90vh - 150px);
     }
 
     .guide-section {
@@ -625,6 +635,7 @@
     .codeblocks-guide-modal .modal-footer {
       padding: 16px 24px;
       text-align: center;
+      flex-shrink: 0;
     }
 
     .btn-got-it {
@@ -646,8 +657,10 @@
     /* Unsupported VS Guide Modal */
     .unsupported-vs-guide-modal {
       width: 600px;
-      max-height: 85%;
+      max-height: 85vh;
       animation: slideIn 0.3s ease-out;
+      display: flex;
+      flex-direction: column;
     }
 
     .unsupported-vs-guide-modal .modal-header {
@@ -660,9 +673,11 @@
 
     .unsupported-vs-guide-modal .modal-body {
       padding: 24px;
-      max-height: 450px;
       overflow-y: auto;
       line-height: 1.6;
+      flex: 1 1 auto;
+      min-height: 0;
+      max-height: calc(85vh - 140px);
     }
 
     .warning-box {
@@ -745,7 +760,10 @@
     /* Install Guide Modal */
     .install-guide-modal {
       width: 560px;
+      max-height: 85vh;
       animation: slideIn 0.3s ease-out;
+      display: flex;
+      flex-direction: column;
     }
 
     .install-guide-modal .modal-header {
@@ -759,6 +777,10 @@
     .install-guide-modal .modal-body {
       padding: 24px;
       line-height: 1.6;
+      flex: 1 1 auto;
+      min-height: 0;
+      overflow-y: auto;
+      max-height: calc(85vh - 130px);
     }
 
     .install-guide-modal .modal-body p {
@@ -864,7 +886,7 @@
   </div>
 
   <!-- Operation Modal -->
-  <div id="operationModal" class="modal-overlay">
+  <div id="operationModal" class="modal-overlay" onclick="handleModalOverlayClick(event, 'operationModal')">
     <div class="modal">
       <div class="modal-header" id="modalTitle">正在安装...</div>
       <div class="modal-body">
@@ -882,7 +904,7 @@
   </div>
 
   <!-- CodeBlocks 使用说明模态窗口 -->
-  <div id="codeBlocksGuideModal" class="modal-overlay">
+  <div id="codeBlocksGuideModal" class="modal-overlay" onclick="handleModalOverlayClick(event, 'codeBlocksGuideModal')">
     <div class="modal codeblocks-guide-modal">
       <div class="modal-header">
         <span class="section-icon">🎉</span>
@@ -963,7 +985,7 @@
   </div>
 
   <!-- Dev-C++ 使用说明模态窗口 -->
-  <div id="devCppGuideModal" class="modal-overlay">
+  <div id="devCppGuideModal" class="modal-overlay" onclick="handleModalOverlayClick(event, 'devCppGuideModal')">
     <div class="modal codeblocks-guide-modal">
       <div class="modal-header">
         <span class="section-icon">🎉</span>
@@ -1045,7 +1067,8 @@
   </div>
 
   <!-- 不支持的 VS 版本安装说明模态窗口 -->
-  <div id="unsupportedVSGuideModal" class="modal-overlay">
+  <div id="unsupportedVSGuideModal" class="modal-overlay"
+    onclick="handleModalOverlayClick(event, 'unsupportedVSGuideModal')">
 
     <div class="modal unsupported-vs-guide-modal">
       <div class="modal-header">
@@ -1208,7 +1231,7 @@
   </script>
 
   <!-- 安装说明模态窗口 -->
-  <div id="installGuideModal" class="modal-overlay">
+  <div id="installGuideModal" class="modal-overlay" onclick="handleModalOverlayClick(event, 'installGuideModal')">
     <div class="modal install-guide-modal">
       <div class="modal-header" id="installGuideTitle">安装说明</div>
       <div class="modal-body" id="installGuideBody"></div>

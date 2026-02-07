@@ -7,13 +7,13 @@
  * 窗口缩放策略：简单方案，根据屏幕逻辑分辨率调整
  * 
  * 不考虑 DPI，只看 screen.width：
- * - 1280×720: 窗口 750×620 (基准)
- * - 1920×1080: 窗口 750×620 (基准)
+ * - 1280×720: 窗口 860×720 (基准)
+ * - 1920×1080: 窗口 860×720 (基准)
  * - 2560×1440: 窗口 1000×827 (1.33倍)
  * - 3840×2160: 窗口 1500×1240 (2倍)
  */
-var baseWidth = 750;
-var baseHeight = 620;
+var baseWidth = 860;
+var baseHeight = 720;
 
 // 直接根据逻辑分辨率计算缩放因子
 var scaleFactor = Math.max(1, screen.width / 1920);
@@ -1308,4 +1308,29 @@ function updateStatus() {
   }
   document.getElementById('statusText').innerText =
     '检测到 ' + detectedIDEs.length + ' 个开发环境，' + installedCount + ' 个已安装 EGE';
+}
+
+/**
+ * 处理模态框背景点击事件（点击灰色区域关闭）
+ */
+function handleModalOverlayClick(event, modalId) {
+  // 只有点击灰色背景区域（overlay本身）时才关闭，点击模态框内容区域不关闭
+  if (event.target.id === modalId) {
+    // 根据不同的模态框调用对应的关闭函数
+    if (modalId === 'codeBlocksGuideModal') {
+      closeCodeBlocksGuide();
+    } else if (modalId === 'devCppGuideModal') {
+      closeDevCppGuide();
+    } else if (modalId === 'unsupportedVSGuideModal') {
+      closeUnsupportedVSGuide();
+    } else if (modalId === 'installGuideModal') {
+      closeInstallGuide();
+    } else if (modalId === 'operationModal') {
+      // operationModal 只有在完成后才能关闭（按钮未禁用时）
+      var closeBtn = document.getElementById('modalCloseBtn');
+      if (closeBtn && !closeBtn.disabled) {
+        closeModal();
+      }
+    }
+  }
 }
