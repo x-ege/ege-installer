@@ -18,6 +18,8 @@ EGE 图形库已成功安装到您的 Dev-C++！现在就可以开始创建图�
 4. 点击 **EGE Graphics**，输入项目名称
 5. 点击**确定**，项目创建完成！
 
+![new_proj](images/devcpp_new_proj.png)
+
 **模板已自动配置好所有编译和链接选项，无需手动设置。**
 
 > ⚠ 如果在 Multimedia 标签页中没有看到 EGE Graphics，请关闭并重新打开 Dev-C++ 后再试。
@@ -84,6 +86,8 @@ int main()
 3. 确保未选择 i686（32-bit 模式不支持）
 
 **说明**：EGE 模板仅提供 64-bit 库文件，必须使用 x86_64 架构编译。
+
+![64bit](images/devcpp_choose_64bit.png)
 
 ---
 
