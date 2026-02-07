@@ -33,7 +33,7 @@ EGE 图形库已成功安装到您的 Code::Blocks！
 
 1. **Settings → Compiler → Toolchain executables**
 2. 点击 **Auto-detect** 按钮
-3. 如果自动检测失败，手动选择 Code::Blocks自带的 MinGW：
+3. 如果自动检测失败，手动选择 Code::Blocks 自带的 MinGW：
    - 点击路径输入框旁的 **...** 按钮
    - 浏览到 `C:\Program Files\CodeBlocks\MinGW`
    - 点击确定
