@@ -181,11 +181,98 @@ function detectAllIDEs() {
 }
 
 /**
+ * 获取 IDE/编译器的官网下载页面（尽量使用稳定的落地页）
+ * @param {object} ide
+ * @returns {string} url
+ */
+function getOfficialDownloadUrl(ide) {
+  if (!ide) return '';
+
+  var type = (ide.type || '').toLowerCase();
+  var name = (ide.name || '').toLowerCase();
+
+  if (type === 'codeblocks') {
+    return 'https://www.codeblocks.org/downloads/binaries/';
+  }
+  if (type === 'devcpp') {
+    // 两种 Dev-C++：Embarcadero 官方版 vs Orwell/旧版（SourceForge）
+    if (name.indexOf('embarcadero') >= 0) {
+      return 'https://www.embarcadero.com/free-tools/dev-cpp';
+    }
+    return 'https://sourceforge.net/projects/orwelldevcpp/';
+  }
+  if (type === 'redpanda') {
+    // Red Panda Dev-C++ 官方下载页（作者站点，包含镜像）
+    return 'http://royqh.net/redpandacpp/download/';
+  }
+  if (type === 'vs' || type === 'vs-legacy') {
+    // Visual Studio / MSVC 下载中心
+    return 'https://visualstudio.microsoft.com/zh-hans/downloads/';
+  }
+  if (type === 'clion') {
+    return 'https://www.jetbrains.com/clion/download/';
+  }
+  if (type === 'mingw') {
+    // 对 MinGW 家族给一个相对“官方”的入口：MSYS2
+    //（MinGW-w64 项目本身不提供统一安装包，MSYS2 是最常用的发行方式）
+    if (name.indexOf('msys2') >= 0) {
+      return 'https://www.msys2.org/';
+    }
+    return 'https://www.msys2.org/';
+  }
+
+  return '';
+}
+
+/**
+ * 打开官网下载页
+ */
+function openOfficialDownloadPage(index, isFound) {
+  var ide = isFound ? detectedIDEs[index] : notFoundIDEs[index];
+  if (!ide) return;
+
+  var url = getOfficialDownloadUrl(ide);
+  if (!url) return;
+
+  try {
+    openUrl(url);
+  } catch (e) {
+    alert('无法打开链接：' + e.message + '\n\n请手动访问：\n' + url);
+  }
+}
+
+/**
  * 完成检测，处理结果
  */
 function finishDetection(allIDEs) {
   updateDetectionProgress(100, '检测完成');
   detectionLog('检测完成，正在整理结果...', 'success');
+
+  // 如果完全没有检测到任何 VS/MSVC 记录，则追加一个“未检测到 MSVC”的占位项
+  // 目的：给用户一个明确入口可直达官网下载页面
+  var hasAnyMsvcRecord = false;
+  for (var t = 0; t < allIDEs.length; t++) {
+    var item = allIDEs[t];
+    if (!item) continue;
+    if (item.type === 'vs' || item.type === 'vs-legacy') {
+      hasAnyMsvcRecord = true;
+      break;
+    }
+  }
+  if (!hasAnyMsvcRecord) {
+    allIDEs.push({
+      name: 'Microsoft Visual Studio (MSVC)',
+      path: '未安装',
+      type: 'vs',
+      found: false,
+      supported: true,
+      includePath: '',
+      libPath: '',
+      isPlaceholder: true
+    });
+    // 自动展开“未检测到的环境”，避免用户错过下载入口
+    notFoundExpanded = true;
+  }
 
   // 分离已检测到和未检测到的
   detectedIDEs = [];
@@ -329,6 +416,17 @@ function renderIDEList() {
       notFoundHtml += renderIDEItem(notFoundIDEs[j], j, false);
     }
     document.getElementById('notFoundList').innerHTML = notFoundHtml;
+
+    // 根据 notFoundExpanded 同步 UI 状态
+    var btn = document.getElementById('notFoundSection').getElementsByTagName('button')[0];
+    var list = document.getElementById('notFoundList');
+    if (notFoundExpanded) {
+      btn.innerText = '▼ 隐藏未检测到的环境';
+      list.style.display = 'block';
+    } else {
+      btn.innerText = '▶ 显示未检测到的环境';
+      list.style.display = 'none';
+    }
   }
 
   updateStatus();
@@ -389,6 +487,12 @@ function renderIDEItem(ide, index, isFound) {
   // 打开目录按钮（只有找到的IDE才显示）
   if (ide.found && ide.path) {
     html += '<button class="btn btn-open" onclick="openFolder(' + index + ', ' + isFound + ')">打开目录</button>';
+  }
+
+  // 官网下载按钮：即使未检测到，也允许跳转（放在最后，显得低调）
+  var officialUrl = getOfficialDownloadUrl(ide);
+  if (officialUrl) {
+    html += '<button class="btn btn-site" onclick="openOfficialDownloadPage(' + index + ', ' + isFound + ')">官网</button>';
   }
 
   html += '</div>';
