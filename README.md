@@ -27,7 +27,7 @@ Modern installer for [EGE (Easy Graphics Engine)](https://github.com/x-ege/xege)
 | **Red Panda C++** | Predefined Paths | Dedicated Library | Independent IDE with built-in MinGW |
 | **CLion** | Toolbox + Direct Install | Shared with Red Panda | Toolbox/Direct installation |
 | **Dev-C++** | Predefined Paths | Embarcadero, Legacy | Standard Dev-C++ variants |
-| **Code::Blocks** | Predefined Paths | Latest | MinGW bundled version |
+| **[Code::Blocks](https://www.codeblocks.org/downloads/binaries/)** | Predefined Paths | Latest | MinGW bundled version |
 
 ## 📦 Tech Stack
 
