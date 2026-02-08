@@ -18,6 +18,39 @@ $ScriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
 $ProjectRoot = Split-Path -Parent $ScriptDir
 $SrcDir = Join-Path $ProjectRoot "src"
 
+# 验证目录是否是有效的 EGE 库目录
+function Test-EgeLibsDirectory {
+    param([string]$Path)
+    
+    if (-not (Test-Path $Path)) {
+        return $false
+    }
+    
+    # 检查必需的目录和文件
+    $requiredDirs = @("include", "lib")
+    $requiredFiles = @("version.txt")
+    
+    foreach ($dir in $requiredDirs) {
+        if (-not (Test-Path (Join-Path $Path $dir))) {
+            return $false
+        }
+    }
+    
+    foreach ($file in $requiredFiles) {
+        if (-not (Test-Path (Join-Path $Path $file))) {
+            return $false
+        }
+    }
+    
+    # 额外验证：检查 include 目录下是否有 ege.h
+    $egeHeader = Join-Path $Path "include\ege.h"
+    if (-not (Test-Path $egeHeader)) {
+        return $false
+    }
+    
+    return $true
+}
+
 # 确定 EGE 库目录
 if ($XegeLibsPath) {
     # 处理 Unix 风格路径 (如 /c/Users/...)
@@ -28,8 +61,37 @@ if ($XegeLibsPath) {
     }
     $EgeLibsDir = $XegeLibsPath
 } else {
-    # 默认路径：项目父目录下的 xege_libs
-    $EgeLibsDir = Join-Path (Split-Path -Parent $ProjectRoot) "xege_libs"
+    # 尝试多个可能的路径
+    $ParentDir = Split-Path -Parent $ProjectRoot
+    $candidatePaths = @(
+        (Join-Path $ParentDir "xege_libs"),  # ../xege_libs (默认)
+        $ParentDir                            # .. (如果父目录本身就是 xege-sdk)
+    )
+    
+    $EgeLibsDir = $null
+    foreach ($candidate in $candidatePaths) {
+        if (Test-EgeLibsDirectory $candidate) {
+            $EgeLibsDir = $candidate
+            break
+        }
+    }
+    
+    if (-not $EgeLibsDir) {
+        Write-Host "Error: Could not find valid EGE libs directory." -ForegroundColor Red
+        Write-Host ""
+        Write-Host "Searched locations:" -ForegroundColor Yellow
+        foreach ($path in $candidatePaths) {
+            Write-Host "  - $path" -ForegroundColor Gray
+        }
+        Write-Host ""
+        Write-Host "Please ensure the directory contains:" -ForegroundColor Yellow
+        Write-Host "  - include/ (with ege.h)" -ForegroundColor Gray
+        Write-Host "  - lib/" -ForegroundColor Gray
+        Write-Host "  - version.txt" -ForegroundColor Gray
+        Write-Host ""
+        Write-Host "Or specify path explicitly with -XegeLibsPath parameter" -ForegroundColor Yellow
+        exit 1
+    }
 }
 
 # 从 xege_libs/version.txt 读取 EGE 库版本号
@@ -122,12 +184,7 @@ if (-not $nsisPath) {
 
 Log "Using NSIS: $nsisPath"
 
-# 检查 EGE 库目录
-if (-not (Test-Path $EgeLibsDir)) {
-    Log "Error: EGE libs directory not found: $EgeLibsDir"
-    Log "Please ensure xege_libs is in the parent directory."
-    exit 1
-}
+# EgeLibsDir 已在前面通过 Test-EgeLibsDirectory 验证，这里不需要再次检查
 
 # 创建输出目录
 $OutputPath = Join-Path $ProjectRoot $OutputDir
