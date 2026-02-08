@@ -6,7 +6,7 @@ Installer for [EGE (Easy Graphics Engine)](https://github.com/x-ege/xege) - conf
 
 - **UI**: HTA + JScript
 - **Packaging**: NSIS (Nullsoft Scriptable Install System)
-- **Supported IDEs**: Visual Studio 2017-2026, MinGW-w64/MSYS2, Dev-C++, Code::Blocks, Red Panda Dev-C++
+- **Supported IDEs**: Visual Studio 2017-2026, MinGW-w64/MSYS2, Dev-C++, Code::Blocks, Red Panda C++, CLion
 
 ## Key Files
 

@@ -95,7 +95,7 @@
 5. 在 **解决方案资源管理器** 中，右键 **源文件** → **添加 → 新建项...**
 6. 选择 **C++ 文件(.cpp)**，输入 `main.cpp`，点击 **"添加"**
 
-**Visual Studio 2017 及更早版本:**
+**Visual Studio 2017（旧版界面，不支持 VS 2015 及更早版本）:**
 
 1. **文件 → 新建 → 项目...**
 2. 选择 **Visual C++ → Win32 → Win32 控制台应用程序**
@@ -180,7 +180,7 @@ EGE 库使用了 `#pragma comment(lib, ...)` 自动链接特性，编译时会�
    ```
 
 2. **编写代码**
-   创建 `main.cpp`，内容参见上方 [Visual Studio 示例](#📝-编写代码)
+   创建 `main.cpp`，内容参见上方 [Visual Studio 示例](#编写代码)
 
 3. **编译程序**
 
@@ -282,7 +282,7 @@ Red Panda C++ 是一款现代化的 C/C++ IDE，内置 MinGW-w64 编译器，界
    - 切换到 **参数** 标签页
    - 在 **链接器** 文本框中添加：
 
-     ```
+     ```text
      -lgraphics -lgdiplus -lgdi32 -limm32 -lmsimg32 -lole32 -loleaut32 -lwinmm -luuid -mwindows -static
      ```
 
@@ -291,7 +291,7 @@ Red Panda C++ 是一款现代化的 C/C++ IDE，内置 MinGW-w64 编译器，界
 
 #### 📝 编写代码
 
-在 `main.cpp` 中输入代码（参见上方 [Visual Studio 示例](#📝-编写代码)）
+在 `main.cpp` 中输入代码（参见上方 [Visual Studio 示例](#编写代码-1)）
 
 #### ▶️ 运行程序
 
@@ -340,7 +340,7 @@ Red Panda C++ 是一款现代化的 C/C++ IDE，内置 MinGW-w64 编译器，界
    - **工具 → 编译选项**
    - 在 **链接器** 输入框添加：
 
-     ```
+     ```text
      -lgraphics -lgdiplus -lgdi32 -limm32 -lmsimg32 -lole32 -loleaut32 -lwinmm -luuid -mwindows -static
      ```
 
@@ -413,7 +413,7 @@ Red Panda C++ 是一款现代化的 C/C++ IDE，内置 MinGW-w64 编译器，界
 3. 右键项目名称 → **Build options...**
 4. 在 **Linker settings** 标签页的 **Link libraries** 添加：
 
-   ```
+   ```text
    graphics
    gdiplus
    gdi32
@@ -427,7 +427,7 @@ Red Panda C++ 是一款现代化的 C/C++ IDE，内置 MinGW-w64 编译器，界
 
 5. 在 **Other linker options** 添加：
 
-   ```
+   ```text
    -mwindows
    -static
    ```
@@ -480,16 +480,16 @@ CLion 是 JetBrains 出品的跨平台 C/C++ IDE，支持 CMake 构建系统。C
    - 添加 **MinGW** 工具链
    - 设置 **Environment** 指向 MinGW 安装目录
 
-![CLion 工具链配置](assets/docs/images/clion_plugin_install.png)
+   ![CLion 工具链配置](assets/docs/images/clion_plugin_install.png)
 
-1. **创建新项目**
+3. **创建新项目**
    - **File → New Project**
    - 选择 **C++ Executable**
    - 输入项目名称
 
-![CLion 新建项目](assets/docs/images/clion_plugin_new_proj.png)
+   ![CLion 新建项目](assets/docs/images/clion_plugin_new_proj.png)
 
-1. **配置 CMakeLists.txt**
+4. **配置 CMakeLists.txt**
 
    在 `CMakeLists.txt` 中添加 EGE 链接配置：
 
@@ -520,9 +520,9 @@ CLion 是 JetBrains 出品的跨平台 C/C++ IDE，支持 CMake 构建系统。C
    endif()
    ```
 
-2. **编写代码**
+5. **编写代码**
 
-   在 `main.cpp` 中输入代码（参见上方 [Visual Studio 示例](#📝-编写代码)）
+   在 `main.cpp` 中输入代码（参见上方 [Visual Studio 示例](#编写代码-1)）
 
 #### ▶️ 运行程序
 
