@@ -5,6 +5,8 @@
 
 Modern installer for [EGE (Easy Graphics Engine)](https://github.com/x-ege/xege) - automatically detects and configures EGE library for various IDEs and compilers.
 
+![EGE Installer Interface](docs/ege-installer.png)
+
 ## ✨ Features
 
 - 🔍 **Smart Detection** - Automatically detects installed IDEs using registry, vswhere, and filesystem scanning
@@ -22,11 +24,11 @@ Modern installer for [EGE (Easy Graphics Engine)](https://github.com/x-ege/xege)
 
 | IDE | Detection Methods | Library Support | Notes |
 | ----- | ------------------ | ----------------- | ------- |
-| **Visual Studio** | vswhere + Registry | VS 2010-2026 | x86/x64 auto-detection, VS2017+ use unified msvc library |
+| **Visual Studio** | vswhere + Registry | VS 2017-2026 | x86/x64 auto-detection, VS2017+ use unified msvc library |
 | **MinGW-w64** | Filesystem Scan | MSYS2, Standalone | Support for 32/64-bit variants |
 | **Red Panda C++** | Predefined Paths | Dedicated Library | Independent IDE with built-in MinGW |
 | **CLion** | Toolbox + Direct Install | Shared with Red Panda | Toolbox/Direct installation |
-| **Dev-C++** | Predefined Paths | Embarcadero, Legacy | Standard Dev-C++ variants |
+| **Dev-C++** | Predefined Paths | Embarcadero, Legacy | 64-bit only, standard variants |
 | **[Code::Blocks](https://www.codeblocks.org/downloads/binaries/)** | Predefined Paths | Latest | MinGW bundled version |
 
 ## 📦 Tech Stack
@@ -40,10 +42,16 @@ Modern installer for [EGE (Easy Graphics Engine)](https://github.com/x-ege/xege)
 
 ### For Users
 
+**📖 [Installation Guide](INSTALLATION.md)** - Complete tutorial for installing and using EGE with various IDEs (Chinese)
+
+**Quick steps:**
+
 1. Download `ege-setup-x.x.x.exe` from [Releases](https://github.com/x-ege/ege-installer/releases)
 2. Run installer with administrator privileges
 3. Select IDEs to install EGE library
 4. Click "Install" button for each IDE
+
+For detailed instructions, IDE-specific guides, and troubleshooting, see the [Installation Guide](INSTALLATION.md).
 
 ### For Developers
 
@@ -122,7 +130,7 @@ ege-installer/
 │   │   ├── msvcToolsetMapping         # MSVC version to toolset mapping
 │   │   ├── getMsvcToolsetInfo()       # Parse MSVC version (14.xx.xxxxx)
 │   │   ├── detectVSWithVswhere()      # VS 2017+ multi-toolset detection
-│   │   ├── detectVSFromRegistry()     # VS 2010-2015 detection
+│   │   ├── detectVSFromRegistry()     # VS 2010-2015 detection (not supported)
 │   │   ├── detectMinGW()              # MinGW installations
 │   │   ├── detectRedPanda()           # Red Panda C++ (independent)
 │   │   ├── detectDevCpp()             # Other Dev-C++ variants
@@ -177,7 +185,6 @@ xege_libs/
 │   ├── msvc/             # Visual Studio 2017-2026 (unified)
 │   │   ├── x64/
 │   │   └── x86/
-│   ├── vs2010/           # Visual Studio 2010
 │   ├── mingw32/          # MinGW 32-bit
 │   ├── mingw64/          # MinGW 64-bit
 │   ├── redpanda/         # Red Panda & CLion
@@ -221,7 +228,7 @@ If your MinGW installation is not automatically detected, use the "Scan MinGW" b
 
 - ✨ **MSVC Library Consolidation**: Adapted to xege-sdk's unified MSVC library structure
   - VS2017-VS2026 now use unified `msvc/` directory (60% size reduction)
-  - VS2010 maintains separate `vs2010/` directory for compatibility
+  - VS2010-2015 are no longer supported by the installer
   - Improved installer logic to handle version-specific library mapping
 - 📚 **Documentation Update**: Updated library structure documentation to reflect unified MSVC directory
 

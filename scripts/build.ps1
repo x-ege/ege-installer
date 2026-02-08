@@ -207,6 +207,23 @@ try {
         }
     }
     
+    # 移除不再支持的 VS2010-2015 库文件
+    $UnsupportedVSLibs = @("vs2010", "vs2012", "vs2013", "vs2015", "vc2015")
+    foreach ($libDir in $UnsupportedVSLibs) {
+        $pathToRemove = Join-Path (Join-Path $LibsDir "lib") $libDir
+        if (Test-Path $pathToRemove) {
+            Log "  Removing unsupported VS library: $libDir"
+            Remove-Item -Recurse -Force $pathToRemove
+        }
+    }
+    
+    # 移除 Dev-C++ 32位库文件（仅支持 64 位编译）
+    $devCpp32Path = Join-Path (Join-Path $LibsDir "lib") "devcpp\32"
+    if (Test-Path $devCpp32Path) {
+        Log "  Removing Dev-C++ 32-bit library (unsupported)"
+        Remove-Item -Recurse -Force $devCpp32Path
+    }
+    
     # 创建版本信息文件
     @"
 EGE Installer
