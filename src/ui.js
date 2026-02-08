@@ -491,7 +491,9 @@ function renderIDEItem(ide, index, isFound) {
   var isUnsupportedVS = ide.type && (ide.type === 'vs' || ide.type === 'vs-legacy') && ide.supported === false;
 
   // 检查是否有使用说明（CodeBlocks、Dev-C++、Red Panda、MSVC）
-  var hasUsageGuide = ide.type === 'codeblocks' || ide.type === 'devcpp' || ide.type === 'redpanda' || ide.type === 'vs' || ide.type === 'vs-legacy';
+  // 注意：不支持的 VS 版本不显示使用说明，避免误导用户
+  var hasUsageGuide = ide.type === 'codeblocks' || ide.type === 'devcpp' || ide.type === 'redpanda' || 
+    ((ide.type === 'vs' || ide.type === 'vs-legacy') && ide.supported !== false);
 
   var html = '<div class="ide-item" id="' + prefix + '_' + index + '">';
   html += '<div class="ide-info">';
@@ -724,6 +726,15 @@ function proceedWithInstall(index, isFound) {
         if (isRedPanda && success) {
           document.getElementById('modalGuideBtn').style.display = 'inline-block';
           document.getElementById('modalGuideBtn').onclick = function () { showRedPandaGuideModal(); };
+          modalLog('', '');
+          modalLog('💡 提示：可以点击下方的"查看使用说明"按钮查看详细使用指南', 'info');
+        }
+
+        // 如果是 MSVC/Visual Studio 安装成功，显示"查看使用说明"按钮
+        var isMsvc = ide.type === 'vs' || ide.type === 'vs-legacy';
+        if (isMsvc && success) {
+          document.getElementById('modalGuideBtn').style.display = 'inline-block';
+          document.getElementById('modalGuideBtn').onclick = function () { showMsvcGuideModal(); };
           modalLog('', '');
           modalLog('💡 提示：可以点击下方的"查看使用说明"按钮查看详细使用指南', 'info');
         }

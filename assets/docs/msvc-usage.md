@@ -5,7 +5,7 @@
 本指南介绍如何在 Visual Studio 中创建和使用 EGE 图形库项目。
 
 > **提示**：如果您还未安装 EGE，请先使用安装程序将 EGE 安装到 Visual Studio。
-
+>
 > **✨ 优势**：Visual Studio 使用 EGE 无需手动配置链接器选项，自动链接所需库文件！
 
 ---
