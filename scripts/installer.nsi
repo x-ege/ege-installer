@@ -6,7 +6,7 @@
 ; 基本设置
 
 Name "EGE 图形库安装程序"
-OutFile "..\dist\ege-setup-${VERSION}.exe"
+OutFile "..\dist\ege-installer-${VERSION}.exe"
 Icon "..\assets\ege-icon.ico"  ; 设置安装程序图标
 Unicode True
 RequestExecutionLevel admin  ; 启动时申请管理员权限

@@ -46,7 +46,7 @@ Modern installer for [EGE (Easy Graphics Engine)](https://github.com/x-ege/xege)
 
 **Quick steps:**
 
-1. Download `ege-setup-x.x.x.exe` from [Releases](https://github.com/x-ege/ege-installer/releases)
+1. Download `ege-installer-x.x.x.exe` from [Releases](https://github.com/x-ege/ege-installer/releases)
 2. Run installer with administrator privileges
 3. Select IDEs to install EGE library
 4. Click "Install" button for each IDE
@@ -111,7 +111,7 @@ mshta.exe .\src\setup.hta
 2. `xege_libs/version.txt` (EGE library version)
 3. Fallback to `1.0.0` if version.txt not found
 
-**Output**: `dist/ege-setup-<version>.exe` (~20 MB)
+**Output**: `dist/ege-installer-<version>.exe` (~20 MB)
 
 #### Build Tasks (VSCode)
 
