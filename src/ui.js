@@ -490,8 +490,8 @@ function renderIDEItem(ide, index, isFound) {
   // 检查是否为不支持的 VS 版本
   var isUnsupportedVS = ide.type && (ide.type === 'vs' || ide.type === 'vs-legacy') && ide.supported === false;
 
-  // 检查是否有使用说明（CodeBlocks、Dev-C++、Red Panda）
-  var hasUsageGuide = ide.type === 'codeblocks' || ide.type === 'devcpp' || ide.type === 'redpanda';
+  // 检查是否有使用说明（CodeBlocks、Dev-C++、Red Panda、MSVC）
+  var hasUsageGuide = ide.type === 'codeblocks' || ide.type === 'devcpp' || ide.type === 'redpanda' || ide.type === 'vs' || ide.type === 'vs-legacy';
 
   var html = '<div class="ide-item" id="' + prefix + '_' + index + '">';
   html += '<div class="ide-info">';
@@ -932,6 +932,31 @@ function showRedPandaGuideModal() {
  */
 function closeRedPandaGuide() {
   document.getElementById('redPandaGuideModal').className = 'modal-overlay';
+}
+
+/**
+ * 显示 MSVC/Visual Studio 使用说明窗口
+ */
+function showMsvcGuideModal() {
+  document.getElementById('msvcGuideModal').className = 'modal-overlay show';
+}
+
+/**
+ * 关闭 MSVC/Visual Studio 使用说明窗口
+ */
+function closeMsvcGuide() {
+  document.getElementById('msvcGuideModal').className = 'modal-overlay';
+}
+
+/**
+ * 打开 MSVC 完整使用文档
+ */
+function openMsvcFullDocs() {
+  try {
+    shell.Run('https://github.com/x-ege/ege-installer/blob/main/assets/docs/msvc-usage.md');
+  } catch (e) {
+    alert('无法打开浏览器：' + e.message + '\n\n请手动访问：\nhttps://github.com/x-ege/ege-installer/blob/main/assets/docs/msvc-usage.md');
+  }
 }
 
 /**
@@ -1389,6 +1414,12 @@ function showUsageGuide(index, isFound) {
     showRedPandaGuideModal();
     return;
   }
+
+  // MSVC/Visual Studio 显示使用说明
+  if (type === 'vs' || type === 'vs-legacy') {
+    showMsvcGuideModal();
+    return;
+  }
 }
 
 /**
@@ -1493,12 +1524,14 @@ function handleModalOverlayClick(event, modalId) {
       closeCodeBlocksGuide();
     } else if (modalId === 'devCppGuideModal') {
       closeDevCppGuide();
+    } else if (modalId === 'redPandaGuideModal') {
+      closeRedPandaGuide();
+    } else if (modalId === 'msvcGuideModal') {
+      closeMsvcGuide();
     } else if (modalId === 'unsupportedVSGuideModal') {
       closeUnsupportedVSGuide();
     } else if (modalId === 'installGuideModal') {
       closeInstallGuide();
-    } else if (modalId === 'redPandaGuideModal') {
-      closeRedPandaGuide();
     } else if (modalId === 'clionPluginModal') {
       closeClionPluginModal();
     } else if (modalId === 'operationModal') {
@@ -1516,7 +1549,7 @@ function handleModalOverlayClick(event, modalId) {
  */
 document.onkeydown = function (event) {
   event = event || window.event;
-  
+
   // 检测 ESC 键（keyCode 27）
   if (event.keyCode === 27) {
     // 查找当前显示的模态窗口
@@ -1524,18 +1557,21 @@ document.onkeydown = function (event) {
       { id: 'codeBlocksGuideModal', close: closeCodeBlocksGuide },
       { id: 'devCppGuideModal', close: closeDevCppGuide },
       { id: 'redPandaGuideModal', close: closeRedPandaGuide },
+      { id: 'msvcGuideModal', close: closeMsvcGuide },
       { id: 'unsupportedVSGuideModal', close: closeUnsupportedVSGuide },
       { id: 'installGuideModal', close: closeInstallGuide },
       { id: 'clionPluginModal', close: closeClionPluginModal },
-      { id: 'operationModal', close: function() {
-        // 操作进度窗口只有在完成后才能关闭
-        var closeBtn = document.getElementById('modalCloseBtn');
-        if (closeBtn && !closeBtn.disabled) {
-          closeModal();
+      {
+        id: 'operationModal', close: function () {
+          // 操作进度窗口只有在完成后才能关闭
+          var closeBtn = document.getElementById('modalCloseBtn');
+          if (closeBtn && !closeBtn.disabled) {
+            closeModal();
+          }
         }
-      }}
+      }
     ];
-    
+
     // 遍历所有模态窗口，找到显示的那个并关闭
     for (var i = 0; i < modals.length; i++) {
       var modal = document.getElementById(modals[i].id);
