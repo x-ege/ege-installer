@@ -832,8 +832,8 @@
       border-color: #059669;
     }
 
-    /* CLion 插件推荐模态窗口 */
-    .clion-plugin-modal {
+    /* 通用指南模态窗口样式 */
+    .guide-modal-common {
       width: 700px;
       max-width: 90%;
       max-height: 90vh;
@@ -842,15 +842,14 @@
       flex-direction: column;
     }
 
-    .clion-plugin-modal .modal-header {
-      background: linear-gradient(135deg, #7c3aed 0%, #4f46e5 100%);
+    .guide-modal-common .modal-header {
       color: white;
       padding: 20px 24px;
       font-size: 20px;
       font-weight: 600;
     }
 
-    .clion-plugin-modal .modal-body {
+    .guide-modal-common .modal-body {
       padding: 24px;
       overflow-y: auto;
       line-height: 1.6;
@@ -859,10 +858,18 @@
       max-height: calc(90vh - 150px);
     }
 
-    .clion-plugin-modal .modal-footer {
+    .guide-modal-common .modal-footer {
       padding: 16px 24px;
       text-align: center;
       flex-shrink: 0;
+    }
+
+    /* CLion 插件推荐模态窗口 */
+    .clion-plugin-modal .modal-header {
+      background: linear-gradient(135deg, #7c3aed 0%, #4f46e5 100%);
+    }
+
+    .clion-plugin-modal .modal-footer {
       display: flex;
       justify-content: center;
       gap: 12px;
@@ -901,36 +908,8 @@
     }
 
     /* Red Panda 使用说明模态窗口 */
-    .redpanda-guide-modal {
-      width: 700px;
-      max-width: 90%;
-      max-height: 90vh;
-      animation: slideIn 0.3s ease-out;
-      display: flex;
-      flex-direction: column;
-    }
-
     .redpanda-guide-modal .modal-header {
       background: linear-gradient(135deg, #dc2626 0%, #991b1b 100%);
-      color: white;
-      padding: 20px 24px;
-      font-size: 20px;
-      font-weight: 600;
-    }
-
-    .redpanda-guide-modal .modal-body {
-      padding: 24px;
-      overflow-y: auto;
-      line-height: 1.6;
-      flex: 1 1 auto;
-      min-height: 0;
-      max-height: calc(90vh - 150px);
-    }
-
-    .redpanda-guide-modal .modal-footer {
-      padding: 16px 24px;
-      text-align: center;
-      flex-shrink: 0;
     }
   </style>
 </head>
@@ -1223,17 +1202,34 @@
   <script language="JScript">
     // ========== 日志系统（用于调试 Windows 7 兼容性问题）==========
     var logFilePath = "";
+    var debugMode = false;
+    var cachedFso = null;
 
     function writeLog(message) {
       try {
+        // 初始化配置（首次调用）
         if (!logFilePath) {
-          var tempFso = new ActiveXObject("Scripting.FileSystemObject");
+          if (!cachedFso) {
+            cachedFso = new ActiveXObject("Scripting.FileSystemObject");
+          }
           var tempShell = new ActiveXObject("WScript.Shell");
           var tempDir = tempShell.ExpandEnvironmentStrings("%TEMP%");
           logFilePath = tempDir + "\\ege_installer_log.txt";
+
+          // 检查 debug mode 标志
+          var debugFlag = tempDir + "\\.ege-debug";
+          debugMode = cachedFso.FileExists(debugFlag);
         }
-        var tempFso2 = new ActiveXObject("Scripting.FileSystemObject");
-        var file = tempFso2.OpenTextFile(logFilePath, 8, true);
+
+        // 非 debug 模式下只记录错误
+        if (!debugMode && message.indexOf("ERROR") !== 0) {
+          return;
+        }
+
+        if (!cachedFso) {
+          cachedFso = new ActiveXObject("Scripting.FileSystemObject");
+        }
+        var file = cachedFso.OpenTextFile(logFilePath, 8, true);
         file.WriteLine("[" + new Date().toLocaleTimeString() + "] " + message);
         file.Close();
       } catch (e) {
@@ -1241,16 +1237,29 @@
       }
     }
 
-    // 初始化日志
+    // 初始化日志（清空旧日志文件）
     try {
-      var tempFso = new ActiveXObject("Scripting.FileSystemObject");
+      cachedFso = new ActiveXObject("Scripting.FileSystemObject");
       var tempShell = new ActiveXObject("WScript.Shell");
       var tempDir = tempShell.ExpandEnvironmentStrings("%TEMP%");
       logFilePath = tempDir + "\\ege_installer_log.txt";
-      if (tempFso.FileExists(logFilePath)) {
-        tempFso.DeleteFile(logFilePath);
+
+      // 检查 debug mode 标志
+      var debugFlag = tempDir + "\\.ege-debug";
+      debugMode = cachedFso.FileExists(debugFlag);
+
+      // 清空旧日志
+      if (cachedFso.FileExists(logFilePath)) {
+        cachedFso.DeleteFile(logFilePath);
       }
-      writeLog("EGE Installer Started - " + navigator.userAgent);
+
+      // 写入启动日志
+      if (debugMode) {
+        var file = cachedFso.OpenTextFile(logFilePath, 8, true);
+        file.WriteLine("[" + new Date().toLocaleTimeString() + "] EGE Installer Started - " + navigator.userAgent);
+        file.WriteLine("[" + new Date().toLocaleTimeString() + "] Debug mode ENABLED");
+        file.Close();
+      }
     } catch (e) { }
 
     // 全局错误处理
@@ -1289,8 +1298,8 @@
 
       if (fso.FolderExists(devLibsPath)) {
         // 打包后的路径
-        writeLog("找到打包路径:  " + libsPath);
         libsPath = devLibsPath;
+        writeLog("找到打包路径: " + libsPath);
       } else {
         // 开发环境：尝试在项目父目录查找 xege_libs
         var grandParentDir = fso.GetParentFolderName(projectRoot);
@@ -1320,7 +1329,6 @@
       writeLog("读取版本号...");
       // 读取版本号（从 version.txt 读取 EGE 库版本）
       // 优先尝试打包后的位置，如果不存在则尝试开发环境位置
-      var projectRoot = fso.GetParentFolderName(currentPath);
       var versionFile = projectRoot + '\\version.txt';
 
       // 如果打包位置不存在，尝试开发环境位置
@@ -1391,7 +1399,7 @@
 
   <!-- Red Panda 使用说明模态窗口 -->
   <div id="redPandaGuideModal" class="modal-overlay" onclick="handleModalOverlayClick(event, 'redPandaGuideModal')">
-    <div class="modal redpanda-guide-modal">
+    <div class="modal guide-modal-common redpanda-guide-modal">
       <div class="modal-header">
         <span class="section-icon">📚</span>
         Red Panda C++ EGE 使用指南
@@ -1478,7 +1486,7 @@
 
   <!-- CLion 插件推荐模态窗口 -->
   <div id="clionPluginModal" class="modal-overlay" onclick="handleModalOverlayClick(event, 'clionPluginModal')">
-    <div class="modal clion-plugin-modal">
+    <div class="modal guide-modal-common clion-plugin-modal">
       <div class="modal-header">
         <span class="section-icon">💡</span>
         推荐使用 CLion 插件
