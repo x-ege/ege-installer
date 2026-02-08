@@ -3,12 +3,14 @@
  * 用户界面交互逻辑
  */
 
-// 日志辅助函数（使用 setup.hta 中定义的 writeLog，仅 debugMode 时输出）
+// 日志辅助函数（使用 setup.hta 中定义的 writeLog）
 function uiLog(message) {
-  if (typeof writeLog === 'function' && typeof debugMode !== 'undefined' && debugMode) {
+  if (typeof writeLog === 'function') {
     writeLog("[UI] " + message);
   }
 }
+
+uiLog("UI 模块加载开始");
 
 /**
  * 窗口缩放策略：简单方案，根据屏幕逻辑分辨率调整
@@ -19,7 +21,10 @@ function uiLog(message) {
  * - 2560×1440: 窗口 1000×827 (1.33倍)
  * - 3840×2160: 窗口 1500×1240 (2倍)
  */
+uiLog("开始窗口初始化...");
 try {
+  uiLog("屏幕尺寸: " + screen.width + "x" + screen.height);
+
   var baseWidth = 860;
   var baseHeight = 720;
 
@@ -38,11 +43,12 @@ try {
     initHeight = Math.round(screen.availHeight * 0.9);
   }
 
-  uiLog("窗口尺寸: " + initWidth + "x" + initHeight + ", scale=" + scaleFactor);
+  uiLog("窗口尺寸: " + initWidth + "x" + initHeight);
   window.resizeTo(initWidth, initHeight);
   window.moveTo(Math.round((screen.width - initWidth) / 2), Math.round((screen.height - initHeight) / 2));
+  uiLog("窗口初始化完成");
 
-  // 支持 resize 但限制最小尺寸
+  // 支持 resize 但限制最小尺寸 (Windows 7 兼容版本)
   var minWidth = initWidth / 2;
   var minHeight = initHeight / 2;
   var resizeTimer = null;
@@ -55,9 +61,9 @@ try {
     }
     resizeTimer = setTimeout(function () {
       try {
-        // outerWidth 优先，IE7/8 不支持时回退到 clientWidth
-        var currentWidth = window.outerWidth || document.body.clientWidth;
-        var currentHeight = window.outerHeight || document.body.clientHeight;
+        // Windows 7 兼容：使用 document.body.clientWidth/Height
+        var currentWidth = document.body.clientWidth;
+        var currentHeight = document.body.clientHeight;
 
         // 如果窗口小于最小尺寸，调整回最小尺寸
         if (currentWidth < minWidth || currentHeight < minHeight) {
@@ -83,15 +89,20 @@ try {
 }
 
 // 检查脚本加载
+uiLog("检查模块加载...");
 if (typeof Detector === 'undefined' || typeof Installer === 'undefined') {
+  uiLog("ERROR: 模块未加载");
   document.getElementById('ideList').innerHTML =
     '<div class="empty-message"><p style="color:#dc2626;">加载错误：无法加载检测或安装模块</p></div>';
 } else {
+  uiLog("模块加载成功");
   // 设置 dry-run 模式（如果在 setup.hta 中检测到标志）
   if (typeof dryRunMode !== 'undefined' && dryRunMode) {
+    uiLog("设置 dry-run 模式");
     Installer.setDryRunMode(true);
   }
   // 立即启动检测（不延迟，让用户尽快看到进度）
+  uiLog("启动 IDE 检测...");
   detectAllIDEs();
 }
 
@@ -1499,3 +1510,39 @@ function handleModalOverlayClick(event, modalId) {
     }
   }
 }
+
+/**
+ * 全局键盘事件处理 - 支持 ESC 键关闭模态窗口
+ */
+document.onkeydown = function (event) {
+  event = event || window.event;
+  
+  // 检测 ESC 键（keyCode 27）
+  if (event.keyCode === 27) {
+    // 查找当前显示的模态窗口
+    var modals = [
+      { id: 'codeBlocksGuideModal', close: closeCodeBlocksGuide },
+      { id: 'devCppGuideModal', close: closeDevCppGuide },
+      { id: 'redPandaGuideModal', close: closeRedPandaGuide },
+      { id: 'unsupportedVSGuideModal', close: closeUnsupportedVSGuide },
+      { id: 'installGuideModal', close: closeInstallGuide },
+      { id: 'clionPluginModal', close: closeClionPluginModal },
+      { id: 'operationModal', close: function() {
+        // 操作进度窗口只有在完成后才能关闭
+        var closeBtn = document.getElementById('modalCloseBtn');
+        if (closeBtn && !closeBtn.disabled) {
+          closeModal();
+        }
+      }}
+    ];
+    
+    // 遍历所有模态窗口，找到显示的那个并关闭
+    for (var i = 0; i < modals.length; i++) {
+      var modal = document.getElementById(modals[i].id);
+      if (modal && modal.className.indexOf('show') >= 0) {
+        modals[i].close();
+        break; // 只关闭第一个找到的
+      }
+    }
+  }
+};
