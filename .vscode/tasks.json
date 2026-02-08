@@ -66,6 +66,36 @@
       }
     },
     {
+      "label": "Enable Debug Mode",
+      "type": "shell",
+      "command": "powershell.exe",
+      "args": [
+        "-Command",
+        "New-Item -ItemType File -Path '$env:TEMP\\.ege-debug' -Force | Out-Null; Write-Host 'Debug mode ENABLED. Detailed logs will be written to $env:TEMP\\ege_installer_log.txt'"
+      ],
+      "problemMatcher": [],
+      "group": "test",
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared"
+      }
+    },
+    {
+      "label": "Disable Debug Mode",
+      "type": "shell",
+      "command": "powershell.exe",
+      "args": [
+        "-Command",
+        "Remove-Item -Path '$env:TEMP\\.ege-debug' -Force -ErrorAction SilentlyContinue; Write-Host 'Debug mode DISABLED. Only error logs will be written.'"
+      ],
+      "problemMatcher": [],
+      "group": "test",
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared"
+      }
+    },
+    {
       "label": "Build Package",
       "type": "shell",
       "command": "powershell.exe",
