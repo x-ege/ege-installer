@@ -523,8 +523,8 @@
       margin-bottom: 8px;
     }
 
-    /* CodeBlocks Guide Modal - 更大更醒目 */
-    .codeblocks-guide-modal {
+    /* Large Guide Modal - 详细使用指南通用样式（适用于 CodeBlocks/Dev-C++/MSVC 等）*/
+    .large-guide-modal {
       width: 800px;
       max-width: 90%;
       max-height: 90vh;
@@ -545,7 +545,7 @@
       }
     }
 
-    .codeblocks-guide-modal .modal-header {
+    .large-guide-modal .modal-header {
       background: linear-gradient(135deg, #10b981 0%, #059669 100%);
       color: white;
       padding: 20px 24px;
@@ -553,7 +553,7 @@
       font-weight: 600;
     }
 
-    .codeblocks-guide-modal .modal-body {
+    .large-guide-modal .modal-body {
       padding: 24px;
       overflow-y: auto;
       line-height: 1.6;
@@ -632,7 +632,7 @@
       text-decoration: underline;
     }
 
-    .codeblocks-guide-modal .modal-footer {
+    .large-guide-modal .modal-footer {
       padding: 16px 24px;
       text-align: center;
       flex-shrink: 0;
@@ -985,7 +985,7 @@
 
   <!-- CodeBlocks 使用说明模态窗口 -->
   <div id="codeBlocksGuideModal" class="modal-overlay" onclick="handleModalOverlayClick(event, 'codeBlocksGuideModal')">
-    <div class="modal codeblocks-guide-modal">
+    <div class="modal large-guide-modal">
       <div class="modal-header">
         <span class="section-icon">📚</span>
         Code::Blocks EGE 使用指南
@@ -1069,7 +1069,7 @@
 
   <!-- Dev-C++ 使用说明模态窗口 -->
   <div id="devCppGuideModal" class="modal-overlay" onclick="handleModalOverlayClick(event, 'devCppGuideModal')">
-    <div class="modal codeblocks-guide-modal">
+    <div class="modal large-guide-modal">
       <div class="modal-header">
         <span class="section-icon">📚</span>
         Dev-C++ EGE 使用指南
@@ -1486,7 +1486,7 @@
 
   <!-- MSVC/Visual Studio 使用说明模态窗口 -->
   <div id="msvcGuideModal" class="modal-overlay" onclick="handleModalOverlayClick(event, 'msvcGuideModal')">
-    <div class="modal codeblocks-guide-modal">
+    <div class="modal large-guide-modal">
       <div class="modal-header">
         <span class="section-icon">📚</span>
         Visual Studio EGE 使用指南
