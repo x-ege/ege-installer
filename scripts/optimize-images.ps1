@@ -27,39 +27,50 @@ Write-Host "找到 $($pngFiles.Count) 个 PNG 文件`n" -ForegroundColor Green
 $pngquant = Get-Command pngquant -ErrorAction SilentlyContinue
 
 if (-not $pngquant) {
-    Write-Host "未找到 pngquant，尝试下载..." -ForegroundColor Yellow
+    # 检查项目 temp 目录是否已经下载过
+    $projectTempDir = "$PSScriptRoot\..\temp\pngquant"
+    $localPngquant = Get-ChildItem -Path $projectTempDir -Filter "pngquant.exe" -Recurse -ErrorAction SilentlyContinue | Select-Object -First 1
     
-    # 创建临时目录
-    $tempDir = "$env:TEMP\pngquant"
-    New-Item -ItemType Directory -Path $tempDir -Force | Out-Null
-    
-    # 下载 pngquant (Windows 64-bit)
-    $pngquantUrl = "https://pngquant.org/pngquant-windows.zip"
-    $zipPath = "$tempDir\pngquant.zip"
-    
-    try {
-        Write-Host "下载 pngquant..." -ForegroundColor Yellow
-        Invoke-WebRequest -Uri $pngquantUrl -OutFile $zipPath -UseBasicParsing
+    if ($localPngquant) {
+        $pngquant = $localPngquant.FullName
+        Write-Host "使用项目缓存的 pngquant: $pngquant`n" -ForegroundColor Green
+    } else {
+        Write-Host "未找到 pngquant，尝试下载到项目目录..." -ForegroundColor Yellow
         
-        # 解压
-        Expand-Archive -Path $zipPath -DestinationPath $tempDir -Force
+        # 创建项目 temp 目录
+        New-Item -ItemType Directory -Path $projectTempDir -Force | Out-Null
         
-        # 查找 pngquant.exe
-        $pngquantExe = Get-ChildItem -Path $tempDir -Filter "pngquant.exe" -Recurse | Select-Object -First 1
-        if ($pngquantExe) {
-            $pngquant = $pngquantExe.FullName
-            Write-Host "pngquant 已下载到: $pngquant`n" -ForegroundColor Green
-        } else {
-            throw "无法找到 pngquant.exe"
+        # 下载 pngquant (Windows 64-bit)
+        $pngquantUrl = "https://pngquant.org/pngquant-windows.zip"
+        $zipPath = "$projectTempDir\pngquant.zip"
+        
+        try {
+            Write-Host "下载 pngquant..." -ForegroundColor Yellow
+            Invoke-WebRequest -Uri $pngquantUrl -OutFile $zipPath -UseBasicParsing
+            
+            # 解压
+            Expand-Archive -Path $zipPath -DestinationPath $projectTempDir -Force
+            
+            # 删除 zip 文件
+            Remove-Item $zipPath -Force -ErrorAction SilentlyContinue
+            
+            # 查找 pngquant.exe
+            $pngquantExe = Get-ChildItem -Path $projectTempDir -Filter "pngquant.exe" -Recurse | Select-Object -First 1
+            if ($pngquantExe) {
+                $pngquant = $pngquantExe.FullName
+                Write-Host "pngquant 已下载到: $pngquant`n" -ForegroundColor Green
+            } else {
+                throw "无法找到 pngquant.exe"
+            }
+        } catch {
+            Write-Host "下载 pngquant 失败: $_" -ForegroundColor Red
+            Write-Host "将使用 .NET 方法进行基本优化..." -ForegroundColor Yellow
+            $pngquant = $null
         }
-    } catch {
-        Write-Host "下载 pngquant 失败: $_" -ForegroundColor Red
-        Write-Host "将使用 .NET 方法进行基本优化..." -ForegroundColor Yellow
-        $pngquant = $null
     }
 } else {
     $pngquant = $pngquant.Source
-    Write-Host "使用已安装的 pngquant: $pngquant`n" -ForegroundColor Green
+    Write-Host "使用系统已安装的 pngquant: $pngquant`n" -ForegroundColor Green
 }
 
 # 统计信息

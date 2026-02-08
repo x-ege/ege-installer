@@ -202,7 +202,7 @@ function getOfficialDownloadUrl(ide) {
     return 'https://sourceforge.net/projects/orwelldevcpp/';
   }
   if (type === 'redpanda') {
-    // Red Panda Dev-C++ 官方下载页（作者站点，包含镜像）
+    // Red Panda C++ 官方下载页（作者站点，包含镜像）
     return 'http://royqh.net/redpandacpp/download/';
   }
   if (type === 'vs' || type === 'vs-legacy') {
@@ -399,7 +399,7 @@ function renderIDEList() {
   if (detectedIDEs.length === 0) {
     listEl.innerHTML = '<div class="empty-message">' +
       '<p>未检测到任何已安装的开发环境</p>' +
-      '<p style="font-size:12px;">请先安装 Visual Studio、MinGW 或 Red Panda 等开发工具</p></div>';
+      '<p style="font-size:12px;">请先安装 Visual Studio、MinGW 或 Red Panda C++ 等开发工具</p></div>';
   } else {
     var html = '';
     for (var i = 0; i < detectedIDEs.length; i++) {
@@ -453,6 +453,9 @@ function renderIDEItem(ide, index, isFound) {
   // 检查是否为不支持的 VS 版本
   var isUnsupportedVS = ide.type && (ide.type === 'vs' || ide.type === 'vs-legacy') && ide.supported === false;
 
+  // 检查是否有使用说明（CodeBlocks、Dev-C++、Red Panda）
+  var hasUsageGuide = ide.type === 'codeblocks' || ide.type === 'devcpp' || ide.type === 'redpanda';
+
   var html = '<div class="ide-item" id="' + prefix + '_' + index + '">';
   html += '<div class="ide-info">';
   // Code::Blocks 无编译器警告标识
@@ -466,22 +469,34 @@ function renderIDEItem(ide, index, isFound) {
   var displayPath = ide.msvcPath || ide.path || '未安装';
   html += '<div class="ide-path">' + displayPath + '</div>';
   html += '</div>';
-  if (ide.egeInstalled && ide.found) {
-    html += '<button class="btn-status-guide" onclick="showInstallGuide(' + index + ', ' + isFound + ')">查看安装说明</button>';
-  } else {
+  
+  // 状态显示：未安装时显示状态标签，已安装时不显示
+  if (!ide.egeInstalled || !ide.found) {
     html += '<span class="ide-status ' + statusClass + '">' + statusText + '</span>';
   }
+  
   html += '<div class="ide-actions">';
+
+  // 使用说明按钮（CodeBlocks、Dev-C++、Red Panda 始终显示，无论是否安装）
+  if (hasUsageGuide) {
+    html += '<button class="btn btn-guide" onclick="showUsageGuide(' + index + ', ' + isFound + ')">使用说明</button>';
+  }
 
   if (isUnsupportedVS) {
     // 不支持的 VS 版本：显示 "安装说明" 按钮
     html += '<button class="btn btn-guide" onclick="showUnsupportedVSGuide()">安装说明</button>';
   } else {
-    // 支持的版本：显示 "安装" 和 "卸载" 按钮
+    // 支持的版本：显示安装/重新安装和卸载按钮
     var installDisabled = !ide.found ? 'disabled' : '';
-    var uninstallDisabled = (!ide.found || !ide.egeInstalled) ? 'disabled' : '';
-    html += '<button class="btn btn-install" onclick="doInstall(' + index + ', ' + isFound + ')" ' + installDisabled + '>安装</button>';
-    html += '<button class="btn btn-uninstall" onclick="doUninstall(' + index + ', ' + isFound + ')" ' + uninstallDisabled + '>卸载</button>';
+    var installBtnText = (ide.egeInstalled && ide.found) ? '重新安装' : '安装';
+    var installBtnTitle = (ide.egeInstalled && ide.found) ? '点击可重新安装 EGE 库' : '安装 EGE 库到此开发环境';
+    
+    html += '<button class="btn btn-install" onclick="doInstall(' + index + ', ' + isFound + ')" ' + installDisabled + ' title="' + installBtnTitle + '">' + installBtnText + '</button>';
+    
+    // 卸载按钮：只在已安装时显示
+    if (ide.egeInstalled && ide.found) {
+      html += '<button class="btn btn-uninstall" onclick="doUninstall(' + index + ', ' + isFound + ')">卸载</button>';
+    }
   }
 
   // 打开目录按钮（只有找到的IDE才显示）
@@ -531,7 +546,7 @@ function isBuiltinEgeIDE(ide) {
  * 获取内置EGE IDE的提示信息
  */
 function getBuiltinEgeWarning(ide, isInstall) {
-  var ideName = 'Red Panda';
+  var ideName = 'Red Panda C++';
   if (isInstall) {
     return ideName + ' 已内置 EGE 图形库，通常无需手动安装。\n\n' +
       '手动安装会将最新版 EGE 添加到编译器的标准搜索路径，优先于内置版本。\n\n' +
@@ -596,7 +611,35 @@ function checkCodeBlocksInstallWarning(ide) {
 /**
  * 执行安装
  */
+var pendingClionInstall = null;
+
 function doInstall(index, isFound) {
+  var ide = isFound ? detectedIDEs[index] : notFoundIDEs[index];
+  if (!ide || !ide.found) return;
+
+  // 如果已安装，弹出重新安装确认
+  if (ide.egeInstalled) {
+    var confirmMsg = '检测到 ' + ide.name + ' 已安装 EGE 库。\n\n';
+    confirmMsg += '重新安装将覆盖现有文件，是否继续？';
+    if (!confirm(confirmMsg)) {
+      return; // 用户取消
+    }
+  }
+
+  // CLion: 先显示插件推荐弹窗
+  if (ide.type === 'clion') {
+    pendingClionInstall = { index: index, isFound: isFound };
+    showClionPluginModal();
+    return;
+  }
+
+  proceedWithInstall(index, isFound);
+}
+
+/**
+ * 继续执行安装（CLion 插件确认后或非 CLion IDE 直接调用）
+ */
+function proceedWithInstall(index, isFound) {
   var ide = isFound ? detectedIDEs[index] : notFoundIDEs[index];
   if (!ide || !ide.found) return;
 
@@ -639,6 +682,15 @@ function doInstall(index, isFound) {
           modalLog('💡 提示：可以点击下方的"查看使用说明"按钮查看详细使用指南', 'info');
         }
 
+        // 如果是 Red Panda 安装成功，显示"查看使用说明"按钮
+        var isRedPanda = ide.type === 'redpanda';
+        if (isRedPanda && success) {
+          document.getElementById('modalGuideBtn').style.display = 'inline-block';
+          document.getElementById('modalGuideBtn').onclick = function () { showRedPandaGuideModal(); };
+          modalLog('', '');
+          modalLog('💡 提示：可以点击下方的"查看使用说明"按钮查看详细使用指南', 'info');
+        }
+
         enableModalClose();
         renderIDEList();
       }, libsPath);
@@ -647,6 +699,44 @@ function doInstall(index, isFound) {
       enableModalClose();
     }
   }, 100);
+}
+
+/**
+ * 显示 CLion 插件推荐窗口
+ */
+function showClionPluginModal() {
+  document.getElementById('clionPluginModal').className = 'modal-overlay show';
+}
+
+/**
+ * 关闭 CLion 插件推荐窗口
+ */
+function closeClionPluginModal() {
+  document.getElementById('clionPluginModal').className = 'modal-overlay';
+  pendingClionInstall = null;
+}
+
+/**
+ * 用户确认继续安装 CLion
+ */
+function confirmClionInstall() {
+  document.getElementById('clionPluginModal').className = 'modal-overlay';
+  if (pendingClionInstall) {
+    var info = pendingClionInstall;
+    pendingClionInstall = null;
+    proceedWithInstall(info.index, info.isFound);
+  }
+}
+
+/**
+ * 打开 CLion 插件页面
+ */
+function openClionPluginPage() {
+  try {
+    openUrl('https://plugins.jetbrains.com/plugin/28785-xege-creator/');
+  } catch (e) {
+    alert('无法打开浏览器\n\n请手动访问: https://plugins.jetbrains.com/plugin/28785-xege-creator/');
+  }
 }
 
 /**
@@ -791,6 +881,20 @@ function openDevCppFullDocs() {
  */
 function closeDevCppGuide() {
   document.getElementById('devCppGuideModal').className = 'modal-overlay';
+}
+
+/**
+ * 显示 Red Panda 使用说明窗口
+ */
+function showRedPandaGuideModal() {
+  document.getElementById('redPandaGuideModal').className = 'modal-overlay show';
+}
+
+/**
+ * 关闭 Red Panda 使用说明窗口
+ */
+function closeRedPandaGuide() {
+  document.getElementById('redPandaGuideModal').className = 'modal-overlay';
 }
 
 /**
@@ -1223,6 +1327,34 @@ function refreshPage() {
 }
 
 /**
+ * 显示使用说明（统一入口）
+ */
+function showUsageGuide(index, isFound) {
+  var ide = isFound ? detectedIDEs[index] : notFoundIDEs[index];
+  if (!ide) return;
+
+  var type = ide.type;
+
+  // CodeBlocks 显示详细的使用指南窗口
+  if (type === 'codeblocks') {
+    showCodeBlocksGuideModal();
+    return;
+  }
+
+  // Dev-C++ 显示详细的使用指南窗口
+  if (type === 'devcpp') {
+    showDevCppGuideModal();
+    return;
+  }
+
+  // Red Panda 显示简化说明
+  if (type === 'redpanda') {
+    showRedPandaGuideModal();
+    return;
+  }
+}
+
+/**
  * 查看安装说明（根据IDE类型显示不同内容）
  */
 function showInstallGuide(index, isFound) {
@@ -1243,6 +1375,12 @@ function showInstallGuide(index, isFound) {
     return;
   }
 
+  // Red Panda 显示详细的使用指南窗口
+  if (type === 'redpanda') {
+    showRedPandaGuideModal();
+    return;
+  }
+
   var bodyHtml;
   var linkerFlags = '-lgraphics -lgdiplus -lgdi32 -limm32 -lmsimg32 -lole32 -loleaut32 -lwinmm -luuid -mwindows -static';
 
@@ -1251,9 +1389,6 @@ function showInstallGuide(index, isFound) {
       '<p>Visual Studio 项目中可以直接使用：</p>' +
       '<div class="guide-command-box">#include &lt;graphics.h&gt;</div>' +
       '<p>无需额外配置编译选项。</p>';
-  } else if (type === 'redpanda') {
-    bodyHtml = '<p style="color:#059669; font-weight:500;">\u2714 已完成安装</p>' +
-      '<p>Red Panda Dev-C++ 已内置 EGE 支持，可直接通过「新建项目 \u2192 EGE」开始使用。</p>';
   } else {
     // mingw, clion, devcpp 等需要手动配置链接选项的环境
     bodyHtml = '<p style="color:#059669; font-weight:500;">\u2714 已完成安装</p>' +
@@ -1325,6 +1460,10 @@ function handleModalOverlayClick(event, modalId) {
       closeUnsupportedVSGuide();
     } else if (modalId === 'installGuideModal') {
       closeInstallGuide();
+    } else if (modalId === 'redPandaGuideModal') {
+      closeRedPandaGuide();
+    } else if (modalId === 'clionPluginModal') {
+      closeClionPluginModal();
     } else if (modalId === 'operationModal') {
       // operationModal 只有在完成后才能关闭（按钮未禁用时）
       var closeBtn = document.getElementById('modalCloseBtn');

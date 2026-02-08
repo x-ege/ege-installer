@@ -831,6 +831,107 @@
       color: white;
       border-color: #059669;
     }
+
+    /* CLion 插件推荐模态窗口 */
+    .clion-plugin-modal {
+      width: 700px;
+      max-width: 90%;
+      max-height: 90vh;
+      animation: slideIn 0.3s ease-out;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .clion-plugin-modal .modal-header {
+      background: linear-gradient(135deg, #7c3aed 0%, #4f46e5 100%);
+      color: white;
+      padding: 20px 24px;
+      font-size: 20px;
+      font-weight: 600;
+    }
+
+    .clion-plugin-modal .modal-body {
+      padding: 24px;
+      overflow-y: auto;
+      line-height: 1.6;
+      flex: 1 1 auto;
+      min-height: 0;
+      max-height: calc(90vh - 150px);
+    }
+
+    .clion-plugin-modal .modal-footer {
+      padding: 16px 24px;
+      text-align: center;
+      flex-shrink: 0;
+      display: flex;
+      justify-content: center;
+      gap: 12px;
+    }
+
+    .btn-clion-plugin {
+      padding: 10px 24px;
+      background: #7c3aed;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .btn-clion-plugin:hover {
+      background: #6d28d9;
+    }
+
+    .btn-clion-continue {
+      padding: 10px 24px;
+      background: #6b7280;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .btn-clion-continue:hover {
+      background: #4b5563;
+    }
+
+    /* Red Panda 使用说明模态窗口 */
+    .redpanda-guide-modal {
+      width: 700px;
+      max-width: 90%;
+      max-height: 90vh;
+      animation: slideIn 0.3s ease-out;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .redpanda-guide-modal .modal-header {
+      background: linear-gradient(135deg, #dc2626 0%, #991b1b 100%);
+      color: white;
+      padding: 20px 24px;
+      font-size: 20px;
+      font-weight: 600;
+    }
+
+    .redpanda-guide-modal .modal-body {
+      padding: 24px;
+      overflow-y: auto;
+      line-height: 1.6;
+      flex: 1 1 auto;
+      min-height: 0;
+      max-height: calc(90vh - 150px);
+    }
+
+    .redpanda-guide-modal .modal-footer {
+      padding: 16px 24px;
+      text-align: center;
+      flex-shrink: 0;
+    }
   </style>
 </head>
 
@@ -907,13 +1008,16 @@
   <div id="codeBlocksGuideModal" class="modal-overlay" onclick="handleModalOverlayClick(event, 'codeBlocksGuideModal')">
     <div class="modal codeblocks-guide-modal">
       <div class="modal-header">
-        <span class="section-icon">🎉</span>
-        Code::Blocks 安装成功！
+        <span class="section-icon">📚</span>
+        Code::Blocks EGE 使用指南
       </div>
       <div class="modal-body">
         <div class="guide-section">
-          <p style="font-size: 15px; color: #059669; font-weight: 500; margin-bottom: 16px;">
-            EGE 图形库和项目模板已成功安装到您的 Code::Blocks！
+          <p style="font-size: 15px; color: #1f2937; font-weight: 500; margin-bottom: 16px;">
+            本指南介绍如何在 Code::Blocks 中创建和使用 EGE 图形库项目。
+          </p>
+          <p style="font-size: 13px; color: #6b7280; margin-bottom: 16px;">
+            💡 <strong>提示：</strong>如果您还未安装 EGE，请先使用安装程序将 EGE 安装到 Code::Blocks。
           </p>
         </div>
 
@@ -988,13 +1092,17 @@
   <div id="devCppGuideModal" class="modal-overlay" onclick="handleModalOverlayClick(event, 'devCppGuideModal')">
     <div class="modal codeblocks-guide-modal">
       <div class="modal-header">
-        <span class="section-icon">🎉</span>
-        Dev-C++ 安装成功！
+        <span class="section-icon">📚</span>
+        Dev-C++ EGE 使用指南
       </div>
       <div class="modal-body">
         <div class="guide-section">
-          <p style="font-size: 15px; color: #059669; font-weight: 500; margin-bottom: 16px;">
-            EGE 图形库和项目模板已成功安装到您的 Dev-C++！
+          <p style="font-size: 15px; color: #1f2937; font-weight: 500; margin-bottom: 16px;">
+            本指南介绍如何在 Dev-C++ 中创建和使用 EGE 图形库项目。
+          </p>
+          <p style="font-size: 13px; color: #6b7280; margin-bottom: 16px;">
+            💡 <strong>提示：</strong>如果您还未安装 EGE，请先使用安装程序将 EGE 安装到 Dev-C++。<br>
+            ⚠️ <strong>重要：</strong>此模板仅支持 64-bit 编译，请确保编译器架构设置为 x86_64。
           </p>
         </div>
 
@@ -1237,6 +1345,156 @@
       <div class="modal-body" id="installGuideBody"></div>
       <div class="modal-footer">
         <button class="btn-got-it" onclick="closeInstallGuide()">知道了</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Red Panda 使用说明模态窗口 -->
+  <div id="redPandaGuideModal" class="modal-overlay" onclick="handleModalOverlayClick(event, 'redPandaGuideModal')">
+    <div class="modal redpanda-guide-modal">
+      <div class="modal-header">
+        <span class="section-icon">📚</span>
+        Red Panda C++ EGE 使用指南
+      </div>
+      <div class="modal-body">
+        <div class="guide-section">
+          <p style="font-size: 15px; color: #1f2937; font-weight: 500; margin-bottom: 16px;">
+            本指南介绍如何在 Red Panda C++ 中创建和使用 EGE 图形库项目。
+          </p>
+          <p style="font-size: 13px; color: #6b7280; margin-bottom: 16px;">
+            💡 <strong>提示：</strong>Red Panda C++ 已内置 EGE 支持。如需使用最新版本，请先使用安装程序进行更新。
+          </p>
+        </div>
+
+        <div class="guide-section">
+          <div class="info-box">
+            <h3>✨ Red Panda 已内置 EGE</h3>
+            <p>
+              Red Panda C++ 已经内置了 EGE 图形库，开箱即用。
+            </p>
+            <p>
+              本安装器将 EGE 更新到最新版本，自动添加到编译器的标准搜索路径，优先于内置版本。
+            </p>
+          </div>
+        </div>
+
+        <div class="guide-section">
+          <h3><span class="section-icon">📝</span>创建 EGE 项目</h3>
+
+          <p style="font-size: 13px; color: #6b7280; margin-bottom: 8px;"><strong>使用项目模板（推荐）</strong></p>
+          <p style="font-size: 13px; margin-left: 20px; color: #374151;">
+            文件 → 新建 → 项目... → <strong>Multimedia</strong> → <strong>EGE</strong>
+          </p>
+
+          <div style="margin: 12px 0; text-align: center;">
+            <img src="../assets/docs/images/redpanda_new_proj.png"
+              style="max-width: 100%; height: auto; border: 1px solid #e5e7eb; border-radius: 6px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);"
+              alt="Red Panda 项目模板" />
+          </div>
+
+          <p style="font-size: 13px; color: #6b7280; margin: 12px 0 8px 0;"><strong>手动配置</strong></p>
+          <p style="font-size: 13px; margin-left: 20px; color: #374151;">
+            如需手动配置，在项目属性中添加链接器选项（详见官方文档）
+          </p>
+        </div>
+
+        <div class="guide-section">
+          <div class="guide-tips">
+            <h3 style="margin: 0 0 8px 0; font-size: 15px; color: #92400e;">💡 快速提示</h3>
+            <ul>
+              <li>模板已配置所有选项，<strong>无需手动设置</strong></li>
+              <li>直接使用 <code>#include &lt;graphics.h&gt;</code></li>
+              <li>按 <strong>F11</strong> 编译运行</li>
+              <li>内置 EGE 版本与官方同步更新</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="guide-section"
+          style="background: #fef3c7; border-left: 3px solid #f59e0b; padding: 12px; margin-top: 16px;">
+          <p style="margin: 0; font-size: 13px; color: #78350f;">
+            <span style="font-weight: 600;">🔄 版本更新提示</span><br>
+            后续 EGE 版本更新时，重新运行本安装器即可更新到最新版本。
+          </p>
+        </div>
+
+        <div class="guide-section">
+          <h3><span class="section-icon">📚</span>更多资源</h3>
+          <p>
+            <a href="javascript:void(0)" class="guide-link"
+              onclick="openUrl('http://royqh.net/redpandacpp/'); return false;">Red Panda 官网</a> ·
+            <a href="javascript:void(0)" class="guide-link"
+              onclick="openUrl('https://xege.org/'); return false;">EGE 官网</a> ·
+            <a href="javascript:void(0)" class="guide-link"
+              onclick="openUrl('https://github.com/wysaid/xege'); return false;">GitHub 源码</a>
+          </p>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-got-it" onclick="closeRedPandaGuide()">知道了，开始使用 EGE！</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- CLion 插件推荐模态窗口 -->
+  <div id="clionPluginModal" class="modal-overlay" onclick="handleModalOverlayClick(event, 'clionPluginModal')">
+    <div class="modal clion-plugin-modal">
+      <div class="modal-header">
+        <span class="section-icon">💡</span>
+        推荐使用 CLion 插件
+      </div>
+      <div class="modal-body">
+        <div class="guide-section">
+          <div class="info-box">
+            <h3>🔌 EGE 已提供 JetBrains 插件</h3>
+            <p>
+              xege 已经在 JetBrains 插件商店提供了 CLion 专用插件，
+              可以直接在 CLion 中搜索安装，无需手动配置库文件路径。
+            </p>
+            <p>
+              插件提供一键新建 EGE 项目、自动配置 CMake 等功能，体验更佳且便于更新。
+            </p>
+          </div>
+        </div>
+
+        <div class="guide-section">
+          <h3><span class="section-icon">📥</span>步骤一：安装插件</h3>
+          <p style="font-size: 13px; color: #374151;">
+            在 CLion 中打开 <strong>Settings → Plugins → Marketplace</strong>，搜索 <strong>"EGE"</strong> 即可安装。
+          </p>
+          <div style="margin: 12px 0; text-align: center;">
+            <img src="../assets/docs/images/clion_plugin_install.png"
+              style="max-width: 100%; height: auto; border: 1px solid #e5e7eb; border-radius: 6px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);"
+              alt="CLion 安装 EGE 插件" />
+          </div>
+        </div>
+
+        <div class="guide-section">
+          <h3><span class="section-icon">📝</span>步骤二：新建 EGE 项目</h3>
+          <p style="font-size: 13px; color: #374151;">
+            安装插件后，通过 <strong>File → New Project</strong> 即可直接创建 EGE 项目。
+          </p>
+          <div style="margin: 12px 0; text-align: center;">
+            <img src="../assets/docs/images/clion_plugin_new_proj.png"
+              style="max-width: 100%; height: auto; border: 1px solid #e5e7eb; border-radius: 6px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);"
+              alt="CLion 新建 EGE 项目" />
+          </div>
+        </div>
+
+        <div class="guide-section">
+          <div class="guide-tips">
+            <h3 style="margin: 0 0 8px 0; font-size: 15px; color: #92400e;">💡 提示</h3>
+            <p style="font-size: 13px; color: #78350f;">
+              如果您仍然希望手动将 EGE 库文件安装到 CLion 的 MinGW 目录，
+              可以点击下方「继续安装」按钮。但推荐使用插件方式，体验更好。
+            </p>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-clion-plugin" onclick="openClionPluginPage()">前往插件页面</button>
+        <button class="btn-clion-continue" onclick="confirmClionInstall()">继续安装</button>
+        <button class="btn-cancel" onclick="closeClionPluginModal()">取消</button>
       </div>
     </div>
   </div>

@@ -448,7 +448,7 @@ var Detector = (function () {
       var hasValidMinGW = pathExists(mingwDir + "\\include") && pathExists(mingwDir + "\\lib");
 
       results.push({
-        name: "Red Panda (MinGW)",
+        name: "Red Panda C++",
         path: foundPath,
         type: "redpanda",
         found: hasValidMinGW,
@@ -457,7 +457,7 @@ var Detector = (function () {
       });
     } else {
       results.push({
-        name: "Red Panda (MinGW)",
+        name: "Red Panda C++",
         path: redPandaPaths[0],
         type: "redpanda",
         found: false,
