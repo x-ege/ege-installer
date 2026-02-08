@@ -6,7 +6,7 @@ Installer for [EGE (Easy Graphics Engine)](https://github.com/x-ege/xege) - conf
 
 - **UI**: HTA + JScript
 - **Packaging**: NSIS (Nullsoft Scriptable Install System)
-- **Supported IDEs**: Visual Studio 2010-2026, MinGW-w64/MSYS2, Dev-C++, Code::Blocks, Red Panda Dev-C++
+- **Supported IDEs**: Visual Studio 2017-2026, MinGW-w64/MSYS2, Dev-C++, Code::Blocks, Red Panda Dev-C++
 
 ## Key Files
 
@@ -23,7 +23,6 @@ Installer for [EGE (Easy Graphics Engine)](https://github.com/x-ege/xege) - conf
 Library files in sibling directory `../xege_libs/`:
 - `include/` - Headers (ege.h, graphics.h)
 - `lib/msvc/` - VS2017-2026 unified library (x64/x86)
-- `lib/vs2010/` - VS2010 library
 - `lib/mingw64/`, `lib/mingw32/` - MinGW libraries
 - `lib/redpanda/`, `lib/devcpp/`, `lib/codeblocks/` - IDE-specific libraries
 
