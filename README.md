@@ -105,6 +105,11 @@ mshta.exe .\src\setup.hta
 .\scripts\build.ps1 -XegeLibsPath "C:\path\to\xege_libs"
 ```
 
+**Library Path Auto-Detection** (when `-XegeLibsPath` is not provided):
+
+- `../xege_libs` (default sibling directory)
+- `..` (parent directory, useful when the repo is placed inside `xege-sdk`)
+
 **Version Source Priority**:
 
 1. `-Version` parameter (manual override)
@@ -177,6 +182,7 @@ Expected library structure in `../xege_libs/`:
 
 ```
 xege_libs/
+├── version.txt
 ├── include/
 │   ├── ege.h
 │   ├── graphics.h

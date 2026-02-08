@@ -8,7 +8,7 @@
 
 param(
     [string]$OutputDir = "dist",
-    [string]$Version,                              # 可选：手动指定版本（优先级低于 version.txt）
+    [string]$Version,                              # 可选：手动指定版本（优先级高于 version.txt）
     [string]$ProductVersion,                       # NSIS-compatible version (X.X.X.X)
     [string]$XegeLibsPath                          # 可选：自定义 xege_libs 路径
 )
@@ -58,6 +58,16 @@ if ($XegeLibsPath) {
         $driveLetter = $matches[1].ToUpper()
         $XegeLibsPath = $XegeLibsPath -replace "^/[a-zA-Z]/", "${driveLetter}:\\"
         $XegeLibsPath = $XegeLibsPath.Replace("/", "\")
+    }
+    if (-not (Test-EgeLibsDirectory $XegeLibsPath)) {
+        Write-Host "Error: Invalid EGE libs directory: $XegeLibsPath" -ForegroundColor Red
+        Write-Host "" 
+        Write-Host "Please ensure the directory contains:" -ForegroundColor Yellow
+        Write-Host "  - include/ (with ege.h)" -ForegroundColor Gray
+        Write-Host "  - lib/" -ForegroundColor Gray
+        Write-Host "  - version.txt" -ForegroundColor Gray
+        Write-Host "" 
+        exit 1
     }
     $EgeLibsDir = $XegeLibsPath
 } else {

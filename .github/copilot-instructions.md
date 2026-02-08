@@ -21,6 +21,7 @@ Installer for [EGE (Easy Graphics Engine)](https://github.com/x-ege/xege) - conf
 - xege-sdk: <https://github.com/x-ege/xege-sdk>
 
 Library files in sibling directory `../xege_libs/`:
+- `version.txt` - EGE library version
 - `include/` - Headers (ege.h, graphics.h)
 - `lib/msvc/` - VS2017-2026 unified library (x64/x86)
 - `lib/mingw64/`, `lib/mingw32/` - MinGW libraries
