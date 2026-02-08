@@ -44,11 +44,11 @@
 
 ### 1. 下载安装器
 
-访问 [GitHub Releases](https://github.com/x-ege/ege-installer/releases) 下载最新版本的 `ege-setup-x.x.x.exe`
+访问 [GitHub Releases](https://github.com/x-ege/ege-installer/releases) 下载最新版本的 `ege-installer-x.x.x.exe`
 
 ### 2. 运行安装器
 
-双击运行 `ege-setup-x.x.x.exe`，安装器会自动申请管理员权限。
+双击运行 `ege-installer-x.x.x.exe`，安装器会自动申请管理员权限。
 
 > ⚠️ **为什么需要管理员权限？**  
 > 安装器需要复制头文件和库文件到 IDE 的系统目录（如 Visual Studio 安装目录），这些目录受 Windows 保护，需要管理员权限才能写入。
@@ -634,7 +634,7 @@ int main()
 
 ### 使用安装器卸载
 
-1. 再次运行 `ege-setup-x.x.x.exe`（以管理员身份）
+1. 再次运行 `ege-installer-x.x.x.exe`（以管理员身份）
 2. 找到要卸载的 IDE
 3. 点击 **"卸载"** 按钮
 4. 等待卸载完成

@@ -259,7 +259,7 @@ Build Date: $(Get-Date -Format "yyyy-MM-dd HH:mm:ss")
         Pop-Location
     }
     
-    $FinalPath = Join-Path $OutputPath "ege-setup-$Version.exe"
+    $FinalPath = Join-Path $OutputPath "ege-installer-$Version.exe"
     
     if (-not (Test-Path $FinalPath)) {
         throw "Output file not created: $FinalPath"
