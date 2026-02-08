@@ -3,6 +3,13 @@
  * 用户界面交互逻辑
  */
 
+// 日志辅助函数（使用 setup.hta 中定义的 writeLog，仅 debugMode 时输出）
+function uiLog(message) {
+  if (typeof writeLog === 'function' && typeof debugMode !== 'undefined' && debugMode) {
+    writeLog("[UI] " + message);
+  }
+}
+
 /**
  * 窗口缩放策略：简单方案，根据屏幕逻辑分辨率调整
  * 
@@ -12,49 +19,68 @@
  * - 2560×1440: 窗口 1000×827 (1.33倍)
  * - 3840×2160: 窗口 1500×1240 (2倍)
  */
-var baseWidth = 860;
-var baseHeight = 720;
+try {
+  var baseWidth = 860;
+  var baseHeight = 720;
 
-// 直接根据逻辑分辨率计算缩放因子
-var scaleFactor = Math.max(1, screen.width / 1920);
+  // 直接根据逻辑分辨率计算缩放因子
+  var scaleFactor = Math.max(1, screen.width / 1920);
 
-// 窗口逻辑尺寸 = 基准 × 缩放因子
-var initWidth = Math.round(baseWidth * scaleFactor);
-var initHeight = Math.round(baseHeight * scaleFactor);
+  // 窗口逻辑尺寸 = 基准 × 缩放因子
+  var initWidth = Math.round(baseWidth * scaleFactor);
+  var initHeight = Math.round(baseHeight * scaleFactor);
 
-// 确保不超过屏幕 95%
-if (initWidth > screen.availWidth * 0.95) {
-  initWidth = Math.round(screen.availWidth * 0.9);
-}
-if (initHeight > screen.availHeight * 0.95) {
-  initHeight = Math.round(screen.availHeight * 0.9);
-}
-
-window.resizeTo(initWidth, initHeight);
-window.moveTo(Math.round((screen.width - initWidth) / 2), Math.round((screen.height - initHeight) / 2));
-
-// 支持 resize 但限制最小尺寸
-var minWidth = initWidth / 2;
-var minHeight = initHeight / 2;
-var resizeTimer = null;
-
-document.body.onresize = function () {
-  // 使用 setTimeout 避免频繁触发
-  if (resizeTimer) {
-    clearTimeout(resizeTimer);
+  // 确保不超过屏幕 95%
+  if (initWidth > screen.availWidth * 0.95) {
+    initWidth = Math.round(screen.availWidth * 0.9);
   }
-  resizeTimer = setTimeout(function () {
-    var currentWidth = window.outerWidth;
-    var currentHeight = window.outerHeight;
+  if (initHeight > screen.availHeight * 0.95) {
+    initHeight = Math.round(screen.availHeight * 0.9);
+  }
 
-    // 如果窗口小于最小尺寸，调整回最小尺寸
-    if (currentWidth < minWidth || currentHeight < minHeight) {
-      var newWidth = currentWidth < minWidth ? minWidth : currentWidth;
-      var newHeight = currentHeight < minHeight ? minHeight : currentHeight;
-      window.resizeTo(newWidth, newHeight);
+  uiLog("窗口尺寸: " + initWidth + "x" + initHeight + ", scale=" + scaleFactor);
+  window.resizeTo(initWidth, initHeight);
+  window.moveTo(Math.round((screen.width - initWidth) / 2), Math.round((screen.height - initHeight) / 2));
+
+  // 支持 resize 但限制最小尺寸
+  var minWidth = initWidth / 2;
+  var minHeight = initHeight / 2;
+  var resizeTimer = null;
+
+  // Windows 7 兼容：使用 window.onresize 而不是 document.body.onresize
+  window.onresize = function () {
+    // 使用 setTimeout 避免频繁触发
+    if (resizeTimer) {
+      clearTimeout(resizeTimer);
     }
-  }, 50);
-};
+    resizeTimer = setTimeout(function () {
+      try {
+        // outerWidth 优先，IE7/8 不支持时回退到 clientWidth
+        var currentWidth = window.outerWidth || document.body.clientWidth;
+        var currentHeight = window.outerHeight || document.body.clientHeight;
+
+        // 如果窗口小于最小尺寸，调整回最小尺寸
+        if (currentWidth < minWidth || currentHeight < minHeight) {
+          var newWidth = currentWidth < minWidth ? minWidth : currentWidth;
+          var newHeight = currentHeight < minHeight ? minHeight : currentHeight;
+          window.resizeTo(newWidth, newHeight);
+        }
+      } catch (e) {
+        uiLog("resize error: " + e.message);
+      }
+    }, 50);
+  };
+
+} catch (e) {
+  uiLog("ERROR in window setup: " + e.message);
+  // 尝试使用默认尺寸
+  try {
+    window.resizeTo(860, 720);
+    window.moveTo((screen.width - 860) / 2, (screen.height - 720) / 2);
+  } catch (e2) {
+    uiLog("ERROR in fallback resize: " + e2.message);
+  }
+}
 
 // 检查脚本加载
 if (typeof Detector === 'undefined' || typeof Installer === 'undefined') {
@@ -469,12 +495,12 @@ function renderIDEItem(ide, index, isFound) {
   var displayPath = ide.msvcPath || ide.path || '未安装';
   html += '<div class="ide-path">' + displayPath + '</div>';
   html += '</div>';
-  
+
   // 状态显示：未安装时显示状态标签，已安装时不显示
   if (!ide.egeInstalled || !ide.found) {
     html += '<span class="ide-status ' + statusClass + '">' + statusText + '</span>';
   }
-  
+
   html += '<div class="ide-actions">';
 
   // 使用说明按钮（CodeBlocks、Dev-C++、Red Panda 始终显示，无论是否安装）
@@ -490,9 +516,9 @@ function renderIDEItem(ide, index, isFound) {
     var installDisabled = !ide.found ? 'disabled' : '';
     var installBtnText = (ide.egeInstalled && ide.found) ? '重新安装' : '安装';
     var installBtnTitle = (ide.egeInstalled && ide.found) ? '点击可重新安装 EGE 库' : '安装 EGE 库到此开发环境';
-    
+
     html += '<button class="btn btn-install" onclick="doInstall(' + index + ', ' + isFound + ')" ' + installDisabled + ' title="' + installBtnTitle + '">' + installBtnText + '</button>';
-    
+
     // 卸载按钮：只在已安装时显示
     if (ide.egeInstalled && ide.found) {
       html += '<button class="btn btn-uninstall" onclick="doUninstall(' + index + ', ' + isFound + ')">卸载</button>';

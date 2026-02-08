@@ -1221,9 +1221,57 @@
   </div>
 
   <script language="JScript">
+    // ========== Polyfills (IE7/8 兼容) ==========
+    // String.prototype.trim - IE8 及以下不支持
+    if (!String.prototype.trim) {
+      String.prototype.trim = function () {
+        return this.replace(/^\s+|\s+$/g, '');
+      };
+    }
+
+    // ========== 日志系统 ==========
+    // 仅在 %TEMP%\.ege-debug 标志文件存在时启用详细日志
+    // 出错时始终写入日志，便于排查问题
+    var logFilePath = "";
+    var debugMode = false;
+
+    function writeLog(message) {
+      var fsoW, fileW;
+      try {
+        if (!logFilePath) { return; }
+        fsoW = new ActiveXObject("Scripting.FileSystemObject");
+        var d = new Date();
+        var ts = d.getHours() + ':' + (d.getMinutes() < 10 ? '0' : '') + d.getMinutes() + ':' + (d.getSeconds() < 10 ? '0' : '') + d.getSeconds();
+        if (fsoW.FileExists(logFilePath)) {
+          fileW = fsoW.OpenTextFile(logFilePath, 8, false);
+        } else {
+          fileW = fsoW.CreateTextFile(logFilePath, false, false);
+        }
+        fileW.WriteLine("[" + ts + "] " + message);
+        fileW.Close();
+      } catch (e) {
+        // 静默失败
+      }
+    }
+
+    // 初始化日志系统
+    try {
+      var _initFso = new ActiveXObject("Scripting.FileSystemObject");
+      var _tempDir = new ActiveXObject("WScript.Shell").ExpandEnvironmentStrings("%TEMP%");
+      logFilePath = _tempDir + "\\ege_installer_log.txt";
+      debugMode = _initFso.FileExists(_tempDir + "\\.ege-debug");
+      if (debugMode) {
+        if (_initFso.FileExists(logFilePath)) { _initFso.DeleteFile(logFilePath); }
+        writeLog("EGE Installer Started - " + navigator.userAgent);
+      }
+    } catch (e) { }
+
     // 全局错误处理
     window.onerror = function (msg, url, line) {
-      alert('脚本错误:\n' + msg + '\n文件: ' + url + '\n行号: ' + line);
+      writeLog("ERROR: " + msg + " at line " + line);
+      var errMsg = '脚本错误:\n' + msg + '\n行号: ' + line;
+      if (debugMode) { errMsg += '\n\n日志已保存到:\n' + logFilePath; }
+      alert(errMsg);
       return true;
     };
 
@@ -1325,7 +1373,10 @@
       }
 
     } catch (e) {
-      alert('初始化错误: ' + e.message);
+      writeLog("Initialization error: " + e.message);
+      var initErrMsg = '初始化错误: ' + e.message;
+      if (debugMode) { initErrMsg += '\n\n详细日志已保存到:\n' + logFilePath; }
+      alert(initErrMsg);
     }
 
     // 用默认浏览器打开 URL
@@ -1423,8 +1474,8 @@
           <p>
             <a href="javascript:void(0)" class="guide-link"
               onclick="openUrl('http://royqh.net/redpandacpp/'); return false;">Red Panda 官网</a> ·
-            <a href="javascript:void(0)" class="guide-link"
-              onclick="openUrl('https://xege.org/'); return false;">EGE 官网</a> ·
+            <a href="javascript:void(0)" class="guide-link" onclick="openUrl('https://xege.org/'); return false;">EGE
+              官网</a> ·
             <a href="javascript:void(0)" class="guide-link"
               onclick="openUrl('https://github.com/wysaid/xege'); return false;">GitHub 源码</a>
           </p>
