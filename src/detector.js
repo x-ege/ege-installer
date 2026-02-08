@@ -16,14 +16,26 @@ var Detector = (function () {
     { name: "Visual Studio 2015", version: "14.0", regKey: "14.0", year: "2015", supported: false },
     { name: "Visual Studio 2013", version: "12.0", regKey: "12.0", year: "2013", supported: false },
     { name: "Visual Studio 2012", version: "11.0", regKey: "11.0", year: "2012", supported: false },
-    { name: "Visual Studio 2010", version: "10.0", regKey: "10.0", year: "2010", supported: true }
+    { name: "Visual Studio 2010", version: "10.0", regKey: "10.0", year: "2010", supported: false }
   ];
 
   // MSVC 工具集版本映射 (根据 MSVC 版本号主版本推断对应的 VS 年份)
   // MSVC 目录格式: 14.xx.xxxxx，其中 xx 决定工具集版本
+  // 参考: https://learn.microsoft.com/en-us/cpp/overview/compiler-versions
   var msvcToolsetMapping = {
-    // 14.4x = v143 (VS2022/VS2026)
-    "44": { toolset: "v143", year: "2022", label: "VS2022/2026" },
+    // 14.5x = v145 (VS2026) — 微软跳过了 v144
+    "59": { toolset: "v145", year: "2026", label: "VS2026" },
+    "58": { toolset: "v145", year: "2026", label: "VS2026" },
+    "57": { toolset: "v145", year: "2026", label: "VS2026" },
+    "56": { toolset: "v145", year: "2026", label: "VS2026" },
+    "55": { toolset: "v145", year: "2026", label: "VS2026" },
+    "54": { toolset: "v145", year: "2026", label: "VS2026" },
+    "53": { toolset: "v145", year: "2026", label: "VS2026" },
+    "52": { toolset: "v145", year: "2026", label: "VS2026" },
+    "51": { toolset: "v145", year: "2026", label: "VS2026" },
+    "50": { toolset: "v145", year: "2026", label: "VS2026" },
+    // 14.4x = v143 (VS2022)
+    "44": { toolset: "v143", year: "2022", label: "VS2022" },
     "43": { toolset: "v143", year: "2022", label: "VS2022" },
     "42": { toolset: "v143", year: "2022", label: "VS2022" },
     "41": { toolset: "v143", year: "2022", label: "VS2022" },
@@ -173,6 +185,7 @@ var Detector = (function () {
     // 未知 minor：按区间兜底到最近支持的工具集，避免库目录指向不存在的 vs20xx
     var minor = parseInt(key, 10);
     if (!isNaN(minor)) {
+      if (minor >= 50) return msvcToolsetMapping["50"]; // v145 / VS2026
       if (minor >= 30) return msvcToolsetMapping["30"]; // v143 / VS2022
       if (minor >= 20) return msvcToolsetMapping["20"]; // v142 / VS2019
       if (minor >= 10) return msvcToolsetMapping["10"]; // v141 / VS2017

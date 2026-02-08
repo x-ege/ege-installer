@@ -1166,10 +1166,10 @@
         <div class="warning-box">
           <h3>当前版本说明</h3>
           <p>
-            您检测到的 <strong>Visual Studio 2012 / 2013 / 2015</strong> 目前不被本安装程序直接支持。
+            您检测到的 <strong>Visual Studio 2010 / 2012 / 2013 / 2015</strong> 目前不被本安装程序直接支持。
           </p>
           <p>
-            这是因为这些版本的 MSVC 编译器与 EGE 库的最新版本存在兼容性问题，本简化版安装程序不包含针对这些版本的库文件。
+            这些版本已经非常老旧，且微软已停止对其的官方支持。本安装程序不包含针对这些版本的库文件。
           </p>
         </div>
 
@@ -1480,6 +1480,99 @@
       </div>
       <div class="modal-footer">
         <button class="btn-got-it" onclick="closeRedPandaGuide()">知道了，开始使用 EGE！</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MSVC/Visual Studio 使用说明模态窗口 -->
+  <div id="msvcGuideModal" class="modal-overlay" onclick="handleModalOverlayClick(event, 'msvcGuideModal')">
+    <div class="modal codeblocks-guide-modal">
+      <div class="modal-header">
+        <span class="section-icon">📚</span>
+        Visual Studio EGE 使用指南
+      </div>
+      <div class="modal-body">
+        <div class="guide-section">
+          <p style="font-size: 15px; color: #1f2937; font-weight: 500; margin-bottom: 16px;">
+            本指南介绍如何在 Visual Studio 中创建和使用 EGE 图形库项目。
+          </p>
+          <p style="font-size: 13px; color: #6b7280; margin-bottom: 16px;">
+            💡 <strong>提示：</strong>如果您还未安装 EGE，请先使用安装程序将 EGE 安装到 Visual Studio。<br>
+            ✨ <strong>优势：</strong>Visual Studio 使用 EGE 无需手动配置链接器选项，自动链接所需库文件！
+          </p>
+        </div>
+
+        <div class="guide-section">
+          <h3><span class="section-icon">📝</span>创建 EGE 项目</h3>
+
+          <p style="font-size: 13px; color: #6b7280; margin-bottom: 8px;"><strong>Visual Studio 2019/2022/2026：</strong>
+          </p>
+          <p style="font-size: 13px; margin-left: 20px; color: #374151;">
+            创建新项目 → 搜索并选择 <strong>空项目</strong> 或 <strong>控制台应用</strong>
+          </p>
+
+          <p style="font-size: 13px; color: #6b7280; margin: 12px 0 8px 0;"><strong>Visual Studio 2017 及更早版本：</strong>
+          </p>
+          <p style="font-size: 13px; margin-left: 20px; color: #374151;">
+            文件 → 新建 → 项目... → Visual C++ → <strong>Win32 控制台应用程序</strong>
+          </p>
+
+          <p style="font-size: 13px; color: #6b7280; margin: 12px 0 8px 0;"><strong>添加源文件：</strong></p>
+          <p style="font-size: 13px; margin-left: 20px; color: #374151;">
+            解决方案资源管理器 → 右键 <strong>源文件</strong> → 添加 → 新建项 → <strong>C++ 文件</strong>
+          </p>
+        </div>
+
+        <div class="guide-section">
+          <div class="guide-tips">
+            <h3 style="margin: 0 0 8px 0; font-size: 15px; color: #92400e;">💡 快速提示</h3>
+            <ul>
+              <li><strong>✨ 无需配置链接器！</strong>VS 自动链接 EGE 库文件</li>
+              <li>直接使用 <code>#include &lt;graphics.h&gt;</code></li>
+              <li>按 <strong>Ctrl+F5</strong> 不调试运行（推荐）</li>
+              <li>支持 <strong>x86</strong> 和 <strong>x64</strong> 两种架构</li>
+              <li>推荐创建 <strong>空项目</strong>，无需删除模板代码</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="guide-section">
+          <div class="info-box">
+            <h3>✨ Visual Studio 优势</h3>
+            <p>
+              EGE 库使用了 Visual Studio 的<strong>自动链接</strong>特性，
+              编译时会自动链接所需的库文件（通过 <code>#pragma comment(lib, ...)</code> 实现）。
+            </p>
+            <p style="margin-top: 8px;">
+              这意味着您<strong>无需手动添加任何链接器选项</strong>，直接编译即可使用！
+            </p>
+          </div>
+        </div>
+
+        <div class="guide-section"
+          style="background: #f0f9ff; border-left: 3px solid #3b82f6; padding: 12px; margin-top: 16px;">
+          <p style="margin: 0; font-size: 13px; color: #1e40af;">
+            <span style="font-weight: 600;">📖 需要详细说明？</span><br>
+            包含字符集配置、故障排除、代码示例、常见问题等完整指南
+          </p>
+          <button class="btn-view-docs" onclick="openMsvcFullDocs()"
+            style="margin-top: 8px; padding: 6px 12px; background: #3b82f6; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 12px;">
+            查看完整使用文档
+          </button>
+        </div>
+
+        <div class="guide-section">
+          <h3><span class="section-icon">📚</span>更多资源</h3>
+          <p>
+            <a href="javascript:void(0)" class="guide-link"
+              onclick="openUrl('https://xege.org/'); return false;">官方网站</a> ·
+            <a href="javascript:void(0)" class="guide-link"
+              onclick="openUrl('https://github.com/wysaid/xege'); return false;">GitHub 源码</a>
+          </p>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-got-it" onclick="closeMsvcGuide()">知道了，开始使用 EGE！</button>
       </div>
     </div>
   </div>

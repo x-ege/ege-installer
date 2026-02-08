@@ -621,20 +621,12 @@ var Installer = (function () {
       };
     },
     "vs-legacy": function (ide) {
-      // VS2010 使用独立目录，VS2012-2015 尝试使用 msvc 统一版本
-      if (ide.year === "2010") {
-        return {
-          "x86": "vs2010",
-          "x64": "vs2010"
-        };
-      } else {
-        // VS2012-2015 尝试使用 msvc（可能需要 VS2015 Update 3+）
-        log("  注意: " + ide.name + " 使用统一的 msvc 库版本，建议升级到 VS2017+", "warning");
-        return {
-          "x86": "msvc",
-          "x64": "msvc"
-        };
-      }
+      // VS2010~VS2015 已不再支持（supported: false，正常流程不会走到这里）
+      log("  警告: " + ide.name + " 已不被支持，请升级到 VS2017+", "warning");
+      return {
+        "x86": "msvc",
+        "x64": "msvc"
+      };
     },
     "mingw": function (ide) {
       if (ide.name.indexOf("64") >= 0) {
@@ -882,18 +874,8 @@ var Installer = (function () {
       var srcLibDir = srcLib + "\\" + libDirs[arch];
 
       // 处理架构子目录
-      // msvc 使用标准的 x86/x64 子目录，vs2010 使用根目录+amd64
       if (arch !== "default") {
-        if (libDirs[arch] === "vs2010") {
-          // VS2010 特殊处理：x86 在根目录，x64 在 amd64 子目录
-          if (arch === "x64") {
-            srcLibDir += "\\amd64";
-          }
-          // x86 不追加子目录，使用根目录
-        } else {
-          // msvc 等其他目录使用标准的 arch 子目录
-          srcLibDir += "\\" + arch;
-        }
+        srcLibDir += "\\" + arch;
       }
 
       log("  使用库目录: " + srcLibDir + " (" + libDirs[arch] + "/" + arch + ")", "info");
