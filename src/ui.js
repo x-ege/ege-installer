@@ -13,13 +13,22 @@ function uiLog(message) {
 uiLog("UI 模块加载开始");
 
 /**
- * 窗口缩放策略：简单方案，根据屏幕逻辑分辨率调整
- * 
- * 不考虑 DPI，只看 screen.width：
- * - 1280×720: 窗口 860×720 (基准)
- * - 1920×1080: 窗口 860×720 (基准)
- * - 2560×1440: 窗口 1000×827 (1.33倍)
- * - 3840×2160: 窗口 1500×1240 (2倍)
+ * 窗口 + CSS 联动缩放策略：基于 rem 单位
+ *
+ * screen.width 返回逻辑分辨率（物理分辨率 ÷ DPI 缩放比）
+ * 利用这一特性，用 screen.width/1920 同时缩放窗口大小和 CSS 基准字号
+ * 使得在任意分辨率 × DPI 组合下，UI 布局始终保持等比
+ *
+ * CSS 使用 rem 单位，1rem = html font-size（默认 14px）
+ * JS 动态设置 html font-size = 14px × scaleFactor
+ *
+ * 示例（scaleFactor = max(0.75, screen.width / 1920)）：
+ * - 1080p@100% (sw=1920): scale=1.0, font=14px, win=860×720
+ * - 1080p@125% (sw=1536): scale=0.8, font=11px, win=688×576
+ * - 1080p@150% (sw=1280): scale=0.75, font=11px, win=645×540
+ * - 2K@100%   (sw=2560): scale=1.33, font=19px, win=1147×960
+ * - 4K@150%   (sw=2560): scale=1.33, font=19px, win=1147×960
+ * - 4K@200%   (sw=1920): scale=1.0, font=14px, win=860×720
  */
 uiLog("开始窗口初始化...");
 try {
@@ -28,8 +37,13 @@ try {
   var baseWidth = 860;
   var baseHeight = 720;
 
-  // 直接根据逻辑分辨率计算缩放因子
-  var scaleFactor = Math.max(1, screen.width / 1920);
+  // 根据逻辑分辨率计算缩放因子（最低 0.75，防止极小屏幕下 UI 不可用）
+  var scaleFactor = Math.max(0.75, screen.width / 1920);
+
+  // 设置 rem 基准字号：CSS 全部使用 rem 单位，随此值等比缩放
+  var rootFontSize = Math.max(10, Math.round(14 * scaleFactor));
+  document.documentElement.style.fontSize = rootFontSize + 'px';
+  uiLog("Root font-size: " + rootFontSize + "px (scaleFactor=" + scaleFactor.toFixed(3) + ")");
 
   // 窗口逻辑尺寸 = 基准 × 缩放因子
   var initWidth = Math.round(baseWidth * scaleFactor);
@@ -436,7 +450,7 @@ function renderIDEList() {
   if (detectedIDEs.length === 0) {
     listEl.innerHTML = '<div class="empty-message">' +
       '<p>未检测到任何已安装的开发环境</p>' +
-      '<p style="font-size:12px;">请先安装 Visual Studio、MinGW 或 Red Panda C++ 等开发工具</p></div>';
+      '<p style="font-size:0.857rem;">请先安装 Visual Studio、MinGW 或 Red Panda C++ 等开发工具</p></div>';
   } else {
     var html = '';
     for (var i = 0; i < detectedIDEs.length; i++) {

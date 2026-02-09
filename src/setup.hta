@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html>
 
 <head>
@@ -14,6 +14,11 @@
       padding: 0;
       box-sizing: border-box;
       font-family: "Microsoft YaHei", "Segoe UI", sans-serif;
+    }
+
+    /* rem 基准值：14px = 1rem，由 ui.js 根据屏幕分辨率动态调整 */
+    html {
+      font-size: 14px;
     }
 
     html,
@@ -39,40 +44,40 @@
     .header {
       background: linear-gradient(135deg, #4a5568 0%, #2d3748 100%);
       color: white;
-      padding: 16px 30px;
+      padding: 1.143rem 2.143rem;
       display: flex;
       align-items: center;
       justify-content: space-between;
     }
 
     .header-left h1 {
-      font-size: 22px;
+      font-size: 1.571rem;
       font-weight: 600;
     }
 
     .header-left p {
-      font-size: 13px;
+      font-size: 0.929rem;
       opacity: 0.85;
-      margin-top: 2px;
+      margin-top: 0.143rem;
     }
 
     .header-right {
       text-align: right;
       display: flex;
       align-items: center;
-      gap: 8px;
+      gap: 0.571rem;
     }
 
     .version-badge {
       background: rgba(255, 255, 255, 0.2);
-      padding: 4px 12px;
-      border-radius: 12px;
-      font-size: 12px;
+      padding: 0.286rem 0.857rem;
+      border-radius: 0.857rem;
+      font-size: 0.857rem;
     }
 
     .content {
       flex: 1;
-      padding: 20px 30px;
+      padding: 1.429rem 2.143rem;
       overflow: auto;
       display: flex;
       flex-direction: column;
@@ -80,36 +85,36 @@
 
     .intro {
       background: #f0f9ff;
-      border-left: 4px solid #3b82f6;
-      padding: 12px 16px;
-      margin-bottom: 16px;
-      border-radius: 0 6px 6px 0;
+      border-left: 0.286rem solid #3b82f6;
+      padding: 0.857rem 1.143rem;
+      margin-bottom: 1.143rem;
+      border-radius: 0 0.429rem 0.429rem 0;
     }
 
     .intro p {
-      font-size: 14px;
+      font-size: 1rem;
       color: #1e40af;
       line-height: 1.5;
     }
 
     .section-title {
-      font-size: 15px;
+      font-size: 1.071rem;
       color: #374151;
-      margin-bottom: 12px;
+      margin-bottom: 0.857rem;
       font-weight: 500;
     }
 
     .ide-list {
       flex: 1;
       border: 1px solid #e5e7eb;
-      border-radius: 8px;
+      border-radius: 0.571rem;
       overflow-y: auto;
     }
 
     .ide-item {
       display: flex;
       align-items: center;
-      padding: 12px 16px;
+      padding: 0.857rem 1.143rem;
       border-bottom: 1px solid #e5e7eb;
     }
 
@@ -126,23 +131,23 @@
     }
 
     .ide-name {
-      font-size: 14px;
+      font-size: 1rem;
       font-weight: 500;
       color: #1f2937;
     }
 
     .ide-path {
-      font-size: 12px;
+      font-size: 0.857rem;
       color: #6b7280;
-      margin-top: 2px;
+      margin-top: 0.143rem;
     }
 
     .ide-status {
-      margin: 0 12px;
-      padding: 3px 10px;
-      border-radius: 4px;
-      font-size: 12px;
-      min-width: 70px;
+      margin: 0 0.857rem;
+      padding: 0.214rem 0.714rem;
+      border-radius: 0.286rem;
+      font-size: 0.857rem;
+      min-width: 5rem;
       text-align: center;
     }
 
@@ -165,13 +170,13 @@
       background: #dcfce7;
       color: #166534;
       border: 1px solid #86efac;
-      padding: 3px 10px;
-      border-radius: 4px;
-      font-size: 12px;
+      padding: 0.214rem 0.714rem;
+      border-radius: 0.286rem;
+      font-size: 0.857rem;
       cursor: pointer;
-      min-width: 70px;
+      min-width: 5rem;
       text-align: center;
-      margin: 0 12px;
+      margin: 0 0.857rem;
       font-weight: 500;
       transition: all 0.15s;
     }
@@ -183,18 +188,18 @@
 
     .ide-actions {
       display: flex;
-      gap: 8px;
+      gap: 0.571rem;
     }
 
     .btn {
-      padding: 6px 16px;
+      padding: 0.429rem 1.143rem;
       border: none;
-      border-radius: 4px;
-      font-size: 13px;
+      border-radius: 0.286rem;
+      font-size: 0.929rem;
       font-weight: 500;
       cursor: pointer;
       transition: all 0.15s;
-      min-width: 64px;
+      min-width: 4.571rem;
     }
 
     .btn-install {
@@ -218,7 +223,7 @@
     .btn-guide {
       background: #f59e0b;
       color: white;
-      min-width: 80px;
+      min-width: 5.714rem;
     }
 
     .btn-guide:hover {
@@ -237,8 +242,8 @@
     .btn-site {
       background: #6b8676;
       color: white;
-      min-width: 56px;
-      padding: 6px 12px;
+      min-width: 4rem;
+      padding: 0.429rem 0.857rem;
     }
 
     .btn-site:hover {
@@ -255,12 +260,12 @@
     .cb-warning-icon {
       display: inline-flex;
       align-items: center;
-      margin-left: 8px;
-      padding: 2px 8px;
+      margin-left: 0.571rem;
+      padding: 0.143rem 0.571rem;
       background: #fef3c7;
       border: 1px solid #fbbf24;
-      border-radius: 4px;
-      font-size: 12px;
+      border-radius: 0.286rem;
+      font-size: 0.857rem;
       color: #92400e;
       cursor: help;
       transition: all 0.15s;
@@ -273,12 +278,12 @@
 
     .cb-warning-icon::before {
       content: "⚠";
-      margin-right: 4px;
-      font-size: 14px;
+      margin-right: 0.286rem;
+      font-size: 1rem;
     }
 
     .footer {
-      padding: 12px 30px;
+      padding: 0.857rem 2.143rem;
       border-top: 1px solid #e5e7eb;
       display: flex;
       justify-content: space-between;
@@ -287,22 +292,22 @@
     }
 
     .footer-left {
-      font-size: 12px;
+      font-size: 0.857rem;
       color: #6b7280;
     }
 
     .footer-right {
       display: flex;
-      gap: 10px;
+      gap: 0.714rem;
     }
 
     .btn-scan {
-      padding: 8px 20px;
+      padding: 0.571rem 1.429rem;
       background: #10b981;
       color: white;
       border: none;
-      border-radius: 4px;
-      font-size: 13px;
+      border-radius: 0.286rem;
+      font-size: 0.929rem;
       cursor: pointer;
     }
 
@@ -311,12 +316,12 @@
     }
 
     .btn-close {
-      padding: 8px 24px;
+      padding: 0.571rem 1.714rem;
       background: #6b7280;
       color: white;
       border: none;
-      border-radius: 4px;
-      font-size: 14px;
+      border-radius: 0.286rem;
+      font-size: 1rem;
       cursor: pointer;
     }
 
@@ -325,8 +330,8 @@
     }
 
     .toggle-section {
-      margin-top: 16px;
-      padding-top: 12px;
+      margin-top: 1.143rem;
+      padding-top: 0.857rem;
       border-top: 1px dashed #e5e7eb;
     }
 
@@ -334,9 +339,9 @@
       background: none;
       border: none;
       color: #6b7280;
-      font-size: 13px;
+      font-size: 0.929rem;
       cursor: pointer;
-      padding: 4px 0;
+      padding: 0.286rem 0;
     }
 
     .toggle-btn:hover {
@@ -353,17 +358,17 @@
 
     .loading {
       text-align: center;
-      padding: 40px;
+      padding: 2.857rem;
       color: #6b7280;
     }
 
     .loading-spinner {
-      width: 40px;
-      height: 40px;
-      border: 3px solid #e5e7eb;
+      width: 2.857rem;
+      height: 2.857rem;
+      border: 0.214rem solid #e5e7eb;
       border-top-color: #3b82f6;
       border-radius: 50%;
-      margin: 0 auto 16px;
+      margin: 0 auto 1.143rem;
       animation: spin 1s linear infinite;
     }
 
@@ -380,18 +385,18 @@
     .detection-log {
       background: #f9fafb;
       border: 1px solid #e5e7eb;
-      border-radius: 6px;
-      padding: 12px;
-      margin-top: 12px;
-      max-height: 150px;
+      border-radius: 0.429rem;
+      padding: 0.857rem;
+      margin-top: 0.857rem;
+      max-height: 10.714rem;
       overflow-y: auto;
-      font-size: 12px;
+      font-size: 0.857rem;
       color: #6b7280;
       font-family: 'Consolas', monospace;
     }
 
     .detection-log .log-line {
-      padding: 2px 0;
+      padding: 0.143rem 0;
     }
 
     .detection-log .log-line.info {
@@ -407,10 +412,10 @@
     }
 
     .detection-progress {
-      height: 4px;
+      height: 0.286rem;
       background: #e5e7eb;
-      border-radius: 2px;
-      margin: 12px 0;
+      border-radius: 0.143rem;
+      margin: 0.857rem 0;
       overflow: hidden;
     }
 
@@ -441,35 +446,35 @@
 
     .modal {
       background: white;
-      border-radius: 8px;
-      width: 500px;
+      border-radius: 0.571rem;
+      width: 35.714rem;
       max-height: 80vh;
       overflow: hidden;
-      box-shadow: 0 25px 50px rgba(0, 0, 0, 0.25);
+      box-shadow: 0 1.786rem 3.571rem rgba(0, 0, 0, 0.25);
       display: flex;
       flex-direction: column;
     }
 
     .modal-header {
-      padding: 16px 20px;
+      padding: 1.143rem 1.429rem;
       background: #f9fafb;
       border-bottom: 1px solid #e5e7eb;
-      font-size: 16px;
+      font-size: 1.143rem;
       font-weight: 500;
       color: #1f2937;
       flex-shrink: 0;
     }
 
     .modal-body {
-      padding: 20px;
+      padding: 1.429rem;
       overflow-y: auto;
       flex: 1 1 auto;
       min-height: 0;
-      max-height: calc(80vh - 120px);
+      max-height: calc(80vh - 8.571rem);
     }
 
     .modal-footer {
-      padding: 12px 20px;
+      padding: 0.857rem 1.429rem;
       border-top: 1px solid #e5e7eb;
       text-align: right;
       flex-shrink: 0;
@@ -478,11 +483,11 @@
     .log-area {
       background: #1f2937;
       color: #d1d5db;
-      padding: 12px;
-      border-radius: 6px;
+      padding: 0.857rem;
+      border-radius: 0.429rem;
       font-family: "Consolas", monospace;
-      font-size: 12px;
-      max-height: 200px;
+      font-size: 0.857rem;
+      max-height: 14.286rem;
       overflow-y: auto;
     }
 
@@ -499,10 +504,10 @@
     }
 
     .progress-bar {
-      height: 8px;
+      height: 0.571rem;
       background: #e5e7eb;
-      border-radius: 4px;
-      margin-bottom: 12px;
+      border-radius: 0.286rem;
+      margin-bottom: 0.857rem;
       overflow: hidden;
     }
 
@@ -515,17 +520,17 @@
 
     .empty-message {
       text-align: center;
-      padding: 40px 20px;
+      padding: 2.857rem 1.429rem;
       color: #6b7280;
     }
 
     .empty-message p {
-      margin-bottom: 8px;
+      margin-bottom: 0.571rem;
     }
 
     /* Large Guide Modal - 详细使用指南通用样式（适用于 CodeBlocks/Dev-C++/MSVC 等）*/
     .large-guide-modal {
-      width: 800px;
+      width: 57.143rem;
       max-width: 90%;
       max-height: 90vh;
       animation: slideIn 0.3s ease-out;
@@ -535,7 +540,7 @@
 
     @keyframes slideIn {
       from {
-        transform: translateY(-30px);
+        transform: translateY(-2.143rem);
         opacity: 0;
       }
 
@@ -548,78 +553,78 @@
     .large-guide-modal .modal-header {
       background: linear-gradient(135deg, #10b981 0%, #059669 100%);
       color: white;
-      padding: 20px 24px;
-      font-size: 20px;
+      padding: 1.429rem 1.714rem;
+      font-size: 1.429rem;
       font-weight: 600;
     }
 
     .large-guide-modal .modal-body {
-      padding: 24px;
+      padding: 1.714rem;
       overflow-y: auto;
       line-height: 1.6;
       flex: 1 1 auto;
       min-height: 0;
-      max-height: calc(90vh - 150px);
+      max-height: calc(90vh - 10.714rem);
     }
 
     .guide-section {
-      margin-bottom: 20px;
+      margin-bottom: 1.429rem;
     }
 
     .guide-section .section-icon {
-      font-size: 24px;
-      margin-right: 8px;
+      font-size: 1.714rem;
+      margin-right: 0.571rem;
     }
 
     .guide-section h3 {
-      font-size: 16px;
+      font-size: 1.143rem;
       color: #1f2937;
-      margin-bottom: 12px;
+      margin-bottom: 0.857rem;
       font-weight: 600;
     }
 
     .guide-section p {
       color: #4b5563;
-      margin-bottom: 8px;
-      font-size: 14px;
+      margin-bottom: 0.571rem;
+      font-size: 1rem;
     }
 
     .guide-steps {
       background: #f9fafb;
-      border-left: 3px solid #10b981;
-      padding: 16px;
-      border-radius: 6px;
-      margin: 12px 0;
+      border-left: 0.214rem solid #10b981;
+      padding: 1.143rem;
+      border-radius: 0.429rem;
+      margin: 0.857rem 0;
     }
 
     .guide-steps ol {
       margin: 0;
-      padding-left: 24px;
+      padding-left: 1.714rem;
     }
 
     .guide-steps li {
       color: #374151;
-      margin-bottom: 8px;
-      font-size: 14px;
+      margin-bottom: 0.571rem;
+      font-size: 1rem;
     }
 
     .guide-tips {
       background: #fef3c7;
-      border-left: 3px solid #f59e0b;
-      padding: 12px 16px;
-      border-radius: 6px;
-      margin: 12px 0;
+      border-left: 0.214rem solid #f59e0b;
+      padding: 0.857rem 1.143rem;
+      border-radius: 0.429rem;
+      margin: 0.857rem 0;
     }
 
     .guide-tips ul {
-      margin: 8px 0 0 0;
-      padding-left: 24px;
+      margin: 0.571rem 0 0 0;
+      padding-left: 1.714rem;
     }
 
     .guide-tips li {
       color: #78350f;
-      margin-bottom: 6px;
-      font-size: 13px;
+      margin-bottom: 0.429rem;
+      font-size: 0.929rem;
     }
 
     .guide-link {
@@ -633,18 +638,18 @@
     }
 
     .large-guide-modal .modal-footer {
-      padding: 16px 24px;
+      padding: 1.143rem 1.714rem;
       text-align: center;
       flex-shrink: 0;
     }
 
     .btn-got-it {
-      padding: 10px 32px;
+      padding: 0.714rem 2.286rem;
       background: #10b981;
       color: white;
       border: none;
-      border-radius: 6px;
-      font-size: 15px;
+      border-radius: 0.429rem;
+      font-size: 1.071rem;
       font-weight: 500;
       cursor: pointer;
       transition: background 0.2s;
@@ -656,7 +661,7 @@
 
     /* Unsupported VS Guide Modal */
     .unsupported-vs-guide-modal {
-      width: 600px;
+      width: 42.857rem;
       max-height: 85vh;
       animation: slideIn 0.3s ease-out;
       display: flex;
@@ -666,75 +671,75 @@
     .unsupported-vs-guide-modal .modal-header {
       background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
       color: white;
-      padding: 20px 24px;
-      font-size: 19px;
+      padding: 1.429rem 1.714rem;
+      font-size: 1.357rem;
       font-weight: 600;
     }
 
     .unsupported-vs-guide-modal .modal-body {
-      padding: 24px;
+      padding: 1.714rem;
       overflow-y: auto;
       line-height: 1.6;
       flex: 1 1 auto;
       min-height: 0;
-      max-height: calc(85vh - 140px);
+      max-height: calc(85vh - 10rem);
     }
 
     .warning-box {
       background: #fef3c7;
-      border-left: 4px solid #f59e0b;
-      padding: 16px;
-      border-radius: 6px;
-      margin: 16px 0;
+      border-left: 0.286rem solid #f59e0b;
+      padding: 1.143rem;
+      border-radius: 0.429rem;
+      margin: 1.143rem 0;
     }
 
     .warning-box h3 {
       color: #92400e;
-      font-size: 16px;
-      margin-bottom: 12px;
+      font-size: 1.143rem;
+      margin-bottom: 0.857rem;
       font-weight: 600;
     }
 
     .warning-box p {
       color: #78350f;
-      font-size: 14px;
-      margin-bottom: 8px;
+      font-size: 1rem;
+      margin-bottom: 0.571rem;
       line-height: 1.6;
     }
 
     .info-box {
       background: #f0f9ff;
-      border-left: 4px solid #3b82f6;
-      padding: 16px;
-      border-radius: 6px;
-      margin: 16px 0;
+      border-left: 0.286rem solid #3b82f6;
+      padding: 1.143rem;
+      border-radius: 0.429rem;
+      margin: 1.143rem 0;
     }
 
     .info-box h3 {
       color: #1e40af;
-      font-size: 16px;
-      margin-bottom: 12px;
+      font-size: 1.143rem;
+      margin-bottom: 0.857rem;
       font-weight: 600;
     }
 
     .info-box p {
       color: #1e40af;
-      font-size: 14px;
-      margin-bottom: 8px;
+      font-size: 1rem;
+      margin-bottom: 0.571rem;
       line-height: 1.6;
     }
 
     .btn-visit-site {
-      padding: 12px 28px;
+      padding: 0.857rem 2rem;
       background: #3b82f6;
       color: white;
       border: none;
-      border-radius: 6px;
-      font-size: 15px;
+      border-radius: 0.429rem;
+      font-size: 1.071rem;
       font-weight: 500;
       cursor: pointer;
       transition: background 0.2s;
-      margin-right: 12px;
+      margin-right: 0.857rem;
     }
 
     .btn-visit-site:hover {
@@ -742,12 +747,12 @@
     }
 
     .btn-cancel {
-      padding: 12px 28px;
+      padding: 0.857rem 2rem;
       background: #6b7280;
       color: white;
       border: none;
-      border-radius: 6px;
-      font-size: 15px;
+      border-radius: 0.429rem;
+      font-size: 1.071rem;
       font-weight: 500;
       cursor: pointer;
       transition: background 0.2s;
@@ -759,7 +764,7 @@
 
     /* Install Guide Modal */
     .install-guide-modal {
-      width: 560px;
+      width: 40rem;
       max-height: 85vh;
       animation: slideIn 0.3s ease-out;
       display: flex;
@@ -769,40 +774,40 @@
     .install-guide-modal .modal-header {
       background: linear-gradient(135deg, #10b981 0%, #059669 100%);
       color: white;
-      padding: 18px 24px;
-      font-size: 18px;
+      padding: 1.286rem 1.714rem;
+      font-size: 1.286rem;
       font-weight: 600;
     }
 
     .install-guide-modal .modal-body {
-      padding: 24px;
+      padding: 1.714rem;
       line-height: 1.6;
       flex: 1 1 auto;
       min-height: 0;
       overflow-y: auto;
-      max-height: calc(85vh - 130px);
+      max-height: calc(85vh - 9.286rem);
     }
 
     .install-guide-modal .modal-body p {
-      font-size: 14px;
+      font-size: 1rem;
       color: #374151;
-      margin-bottom: 12px;
+      margin-bottom: 0.857rem;
     }
 
     .guide-command-wrapper {
       display: flex;
-      gap: 8px;
+      gap: 0.571rem;
       align-items: flex-start;
-      margin: 12px 0;
+      margin: 0.857rem 0;
     }
 
     .guide-command-box {
       background: #1f2937;
       color: #e5e7eb;
-      padding: 12px 16px;
-      border-radius: 6px;
+      padding: 0.857rem 1.143rem;
+      border-radius: 0.429rem;
       font-family: "Consolas", monospace;
-      font-size: 13px;
+      font-size: 0.929rem;
       line-height: 1.8;
       flex: 1;
       word-break: break-all;
@@ -810,12 +815,12 @@
     }
 
     .btn-copy {
-      padding: 6px 14px;
+      padding: 0.429rem 1rem;
       background: rgba(255, 255, 255, 0.15);
       color: #d1d5db;
       border: 1px solid rgba(255, 255, 255, 0.2);
-      border-radius: 4px;
-      font-size: 12px;
+      border-radius: 0.286rem;
+      font-size: 0.857rem;
       cursor: pointer;
       white-space: nowrap;
       flex-shrink: 0;
@@ -834,7 +839,7 @@
 
     /* 通用指南模态窗口样式 */
     .guide-modal-common {
-      width: 700px;
+      width: 50rem;
       max-width: 90%;
       max-height: 90vh;
       animation: slideIn 0.3s ease-out;
@@ -844,22 +849,22 @@
 
     .guide-modal-common .modal-header {
       color: white;
-      padding: 20px 24px;
-      font-size: 20px;
+      padding: 1.429rem 1.714rem;
+      font-size: 1.429rem;
       font-weight: 600;
     }
 
     .guide-modal-common .modal-body {
-      padding: 24px;
+      padding: 1.714rem;
       overflow-y: auto;
       line-height: 1.6;
       flex: 1 1 auto;
       min-height: 0;
-      max-height: calc(90vh - 150px);
+      max-height: calc(90vh - 10.714rem);
     }
 
     .guide-modal-common .modal-footer {
-      padding: 16px 24px;
+      padding: 1.143rem 1.714rem;
       text-align: center;
       flex-shrink: 0;
     }
@@ -872,16 +877,16 @@
     .clion-plugin-modal .modal-footer {
       display: flex;
       justify-content: center;
-      gap: 12px;
+      gap: 0.857rem;
     }
 
     .btn-clion-plugin {
-      padding: 10px 24px;
+      padding: 0.714rem 1.714rem;
       background: #7c3aed;
       color: white;
       border: none;
-      border-radius: 6px;
-      font-size: 14px;
+      border-radius: 0.429rem;
+      font-size: 1rem;
       font-weight: 500;
       cursor: pointer;
       transition: background 0.2s;
@@ -892,12 +897,12 @@
     }
 
     .btn-clion-continue {
-      padding: 10px 24px;
+      padding: 0.714rem 1.714rem;
       background: #6b7280;
       color: white;
       border: none;
-      border-radius: 6px;
-      font-size: 14px;
+      border-radius: 0.429rem;
+      font-size: 1rem;
       font-weight: 500;
       cursor: pointer;
       transition: background 0.2s;
@@ -922,7 +927,7 @@
         <p>Easy Graphics Engine - 简易图形引擎</p>
       </div>
       <div class="header-right">
-        <div style="font-size: 20px; color: rgba(255, 255, 255, 0.8); margin-right: 12px;">
+        <div style="font-size: 1.429rem; color: rgba(255, 255, 255, 0.8); margin-right: 0.857rem;">
           💡 按 Ctrl+鼠标滚轮 调整文字大小
         </div>
         <span id="versionBadge" class="version-badge">v1.0.0</span>
@@ -950,7 +955,7 @@
 
       <div id="notFoundSection" class="toggle-section hidden-section">
         <button class="toggle-btn" onclick="toggleNotFound()">▶ 显示未检测到的环境</button>
-        <div id="notFoundList" class="ide-list" style="margin-top: 12px; display: none;"></div>
+        <div id="notFoundList" class="ide-list" style="margin-top: 0.857rem; display: none;"></div>
       </div>
     </div>
 
@@ -977,7 +982,7 @@
       </div>
       <div class="modal-footer">
         <button id="modalGuideBtn" class="btn btn-install" onclick="openGuideFromModal()"
-          style="display:none; margin-right: 8px;">查看使用说明</button>
+          style="display:none; margin-right: 0.571rem;">查看使用说明</button>
         <button id="modalCloseBtn" class="btn btn-install" onclick="closeModal()" disabled>完成</button>
       </div>
     </div>
@@ -992,10 +997,10 @@
       </div>
       <div class="modal-body">
         <div class="guide-section">
-          <p style="font-size: 15px; color: #1f2937; font-weight: 500; margin-bottom: 16px;">
+          <p style="font-size: 1.071rem; color: #1f2937; font-weight: 500; margin-bottom: 1.143rem;">
             本指南介绍如何在 Code::Blocks 中创建和使用 EGE 图形库项目。
           </p>
-          <p style="font-size: 13px; color: #6b7280; margin-bottom: 16px;">
+          <p style="font-size: 0.929rem; color: #6b7280; margin-bottom: 1.143rem;">
             💡 <strong>提示：</strong>如果您还未安装 EGE，请先使用安装程序将 EGE 安装到 Code::Blocks。
           </p>
         </div>
@@ -1003,33 +1008,33 @@
         <div class="guide-section">
           <h3><span class="section-icon">📝</span>创建 EGE 项目</h3>
 
-          <p style="font-size: 13px; color: #6b7280; margin-bottom: 8px;"><strong>方法一：项目向导（推荐，Code::Blocks
+          <p style="font-size: 0.929rem; color: #6b7280; margin-bottom: 0.571rem;"><strong>方法一：项目向导（推荐，Code::Blocks
               25.03+）</strong></p>
-          <p style="font-size: 13px; margin-left: 20px; color: #374151;">
+          <p style="font-size: 0.929rem; margin-left: 1.429rem; color: #374151;">
             文件 → 新建 → 项目... → <strong>2D/3D Graphics</strong> → <strong>EGE project</strong>
           </p>
 
-          <div style="margin: 12px 0; text-align: center;">
+          <div style="margin: 0.857rem 0; text-align: center;">
             <img src="../assets/docs/images/codeblocks_new_proj.png"
-              style="max-width: 100%; height: auto; border: 1px solid #e5e7eb; border-radius: 6px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);"
+              style="max-width: 100%; height: auto; border: 1px solid #e5e7eb; border-radius: 0.429rem; box-shadow: 0 0.143rem 0.286rem rgba(0,0,0,0.1);"
               alt="Code::Blocks 项目向导" />
           </div>
 
-          <p style="font-size: 13px; color: #6b7280; margin: 12px 0 8px 0;"><strong>方法二：用户模板</strong></p>
-          <p style="font-size: 13px; margin-left: 20px; color: #374151;">
+          <p style="font-size: 0.929rem; color: #6b7280; margin: 0.857rem 0 0.571rem 0;"><strong>方法二：用户模板</strong></p>
+          <p style="font-size: 0.929rem; margin-left: 1.429rem; color: #374151;">
             文件 → 从用户模板新建... → 选择 <strong>EGE_Project</strong>
           </p>
 
-          <div style="margin: 12px 0; text-align: center;">
+          <div style="margin: 0.857rem 0; text-align: center;">
             <img src="../assets/docs/images/codeblocks_user_template.png"
-              style="max-width: 100%; height: auto; border: 1px solid #e5e7eb; border-radius: 6px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);"
+              style="max-width: 100%; height: auto; border: 1px solid #e5e7eb; border-radius: 0.429rem; box-shadow: 0 0.143rem 0.286rem rgba(0,0,0,0.1);"
               alt="Code::Blocks 用户模板" />
           </div>
         </div>
 
         <div class="guide-section">
           <div class="guide-tips">
-            <h3 style="margin: 0 0 8px 0; font-size: 15px; color: #92400e;">💡 快速提示</h3>
+            <h3 style="margin: 0 0 0.571rem 0; font-size: 1.071rem; color: #92400e;">💡 快速提示</h3>
             <ul>
               <li>模板已配置所有选项，<strong>无需手动设置</strong></li>
               <li>直接使用 <code>#include &lt;graphics.h&gt;</code></li>
@@ -1040,13 +1045,13 @@
         </div>
 
         <div class="guide-section"
-          style="background: #f0f9ff; border-left: 3px solid #3b82f6; padding: 12px; margin-top: 16px;">
-          <p style="margin: 0; font-size: 13px; color: #1e40af;">
+          style="background: #f0f9ff; border-left: 0.214rem solid #3b82f6; padding: 0.857rem; margin-top: 1.143rem;">
+          <p style="margin: 0; font-size: 0.929rem; color: #1e40af;">
             <span style="font-weight: 600;">📖 需要详细说明？</span><br>
             包含编译器配置、手动配置方法、代码示例、常见问题等完整指南
           </p>
           <button class="btn-view-docs" onclick="openCodeBlocksFullDocs()"
-            style="margin-top: 8px; padding: 6px 12px; background: #3b82f6; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 12px;">
+            style="margin-top: 0.571rem; padding: 0.429rem 0.857rem; background: #3b82f6; color: white; border: none; border-radius: 0.286rem; cursor: pointer; font-size: 0.857rem;">
             查看完整使用文档
           </button>
         </div>
@@ -1076,10 +1081,10 @@
       </div>
       <div class="modal-body">
         <div class="guide-section">
-          <p style="font-size: 15px; color: #1f2937; font-weight: 500; margin-bottom: 16px;">
+          <p style="font-size: 1.071rem; color: #1f2937; font-weight: 500; margin-bottom: 1.143rem;">
             本指南介绍如何在 Dev-C++ 中创建和使用 EGE 图形库项目。
           </p>
-          <p style="font-size: 13px; color: #6b7280; margin-bottom: 16px;">
+          <p style="font-size: 0.929rem; color: #6b7280; margin-bottom: 1.143rem;">
             💡 <strong>提示：</strong>如果您还未安装 EGE，请先使用安装程序将 EGE 安装到 Dev-C++。<br>
             ⚠️ <strong>重要：</strong>此模板仅支持 64-bit 编译，请确保编译器架构设置为 x86_64。
           </p>
@@ -1088,26 +1093,26 @@
         <div class="guide-section">
           <h3><span class="section-icon">📝</span>创建 EGE 项目</h3>
 
-          <p style="font-size: 13px; color: #6b7280; margin-bottom: 8px;"><strong>方法一：项目模板（推荐）</strong></p>
-          <p style="font-size: 13px; margin-left: 20px; color: #374151;">
+          <p style="font-size: 0.929rem; color: #6b7280; margin-bottom: 0.571rem;"><strong>方法一：项目模板（推荐）</strong></p>
+          <p style="font-size: 0.929rem; margin-left: 1.429rem; color: #374151;">
             文件 → 新建 → 项目... → <strong>Multimedia</strong> → <strong>EGE Graphics</strong>
           </p>
 
-          <div style="margin: 12px 0; text-align: center;">
+          <div style="margin: 0.857rem 0; text-align: center;">
             <img src="../assets/docs/images/devcpp_new_proj.png"
-              style="max-width: 100%; height: auto; border: 1px solid #e5e7eb; border-radius: 6px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);"
+              style="max-width: 100%; height: auto; border: 1px solid #e5e7eb; border-radius: 0.429rem; box-shadow: 0 0.143rem 0.286rem rgba(0,0,0,0.1);"
               alt="Dev-C++ 项目模板" />
           </div>
 
-          <p style="font-size: 13px; color: #6b7280; margin: 12px 0 8px 0;"><strong>方法二：手动配置</strong></p>
-          <p style="font-size: 13px; margin-left: 20px; color: #374151;">
+          <p style="font-size: 0.929rem; color: #6b7280; margin: 0.857rem 0 0.571rem 0;"><strong>方法二：手动配置</strong></p>
+          <p style="font-size: 0.929rem; margin-left: 1.429rem; color: #374151;">
             项目属性 → 参数 → 链接器，添加库选项（详见完整文档）
           </p>
         </div>
 
         <div class="guide-section">
           <div class="guide-tips">
-            <h3 style="margin: 0 0 8px 0; font-size: 15px; color: #92400e;">💡 快速提示</h3>
+            <h3 style="margin: 0 0 0.571rem 0; font-size: 1.071rem; color: #92400e;">💡 快速提示</h3>
             <ul>
               <li><strong>⚠️ 仅支持 64-bit 编译！</strong>确保架构设置为 <code>x86_64</code></li>
               <li>模板已配置所有选项，<strong>无需手动设置</strong></li>
@@ -1116,23 +1121,23 @@
               <li>若模板未显示，请重启 Dev-C++</li>
             </ul>
 
-            <div style="margin: 12px 0 0 0; text-align: center;">
+            <div style="margin: 0.857rem 0 0 0; text-align: center;">
               <img src="../assets/docs/images/devcpp_choose_64bit.png"
-                style="max-width: 100%; height: auto; border: 1px solid #e5e7eb; border-radius: 6px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);"
+                style="max-width: 100%; height: auto; border: 1px solid #e5e7eb; border-radius: 0.429rem; box-shadow: 0 0.143rem 0.286rem rgba(0,0,0,0.1);"
                 alt="Dev-C++ 64-bit 架构设置" />
-              <p style="font-size: 12px; color: #6b7280; margin-top: 6px;">确保编译器架构为 x86_64</p>
+              <p style="font-size: 0.857rem; color: #6b7280; margin-top: 0.429rem;">确保编译器架构为 x86_64</p>
             </div>
           </div>
         </div>
 
         <div class="guide-section"
-          style="background: #f0f9ff; border-left: 3px solid #3b82f6; padding: 12px; margin-top: 16px;">
-          <p style="margin: 0; font-size: 13px; color: #1e40af;">
+          style="background: #f0f9ff; border-left: 0.214rem solid #3b82f6; padding: 0.857rem; margin-top: 1.143rem;">
+          <p style="margin: 0; font-size: 0.929rem; color: #1e40af;">
             <span style="font-weight: 600;">📖 需要详细说明？</span><br>
             包含编译器架构配置、手动配置步骤、代码示例、常见问题等完整指南
           </p>
           <button class="btn-view-docs" onclick="openDevCppFullDocs()"
-            style="margin-top: 8px; padding: 6px 12px; background: #3b82f6; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 12px;">
+            style="margin-top: 0.571rem; padding: 0.429rem 0.857rem; background: #3b82f6; color: white; border: none; border-radius: 0.286rem; cursor: pointer; font-size: 0.857rem;">
             查看完整使用文档
           </button>
         </div>
@@ -1178,7 +1183,7 @@
           <p>
             如果您需要在这些版本的 Visual Studio 中使用 EGE 图形库，请访问 EGE 官方网站下载更完整的离线安装包。
           </p>
-          <p style="margin-top: 12px;">
+          <p style="margin-top: 0.857rem;">
             <strong>官方安装指南：</strong><br>
             <a href="javascript:void(0)" class="guide-link"
               onclick="openUrl('https://xege.org/install_and_config'); return false;">https://xege.org/install_and_config</a>
@@ -1406,10 +1411,10 @@
       </div>
       <div class="modal-body">
         <div class="guide-section">
-          <p style="font-size: 15px; color: #1f2937; font-weight: 500; margin-bottom: 16px;">
+          <p style="font-size: 1.071rem; color: #1f2937; font-weight: 500; margin-bottom: 1.143rem;">
             本指南介绍如何在 Red Panda C++ 中创建和使用 EGE 图形库项目。
           </p>
-          <p style="font-size: 13px; color: #6b7280; margin-bottom: 16px;">
+          <p style="font-size: 0.929rem; color: #6b7280; margin-bottom: 1.143rem;">
             💡 <strong>提示：</strong>Red Panda C++ 已内置 EGE 支持。如需使用最新版本，请先使用安装程序进行更新。
           </p>
         </div>
@@ -1429,26 +1434,26 @@
         <div class="guide-section">
           <h3><span class="section-icon">📝</span>创建 EGE 项目</h3>
 
-          <p style="font-size: 13px; color: #6b7280; margin-bottom: 8px;"><strong>使用项目模板（推荐）</strong></p>
-          <p style="font-size: 13px; margin-left: 20px; color: #374151;">
+          <p style="font-size: 0.929rem; color: #6b7280; margin-bottom: 0.571rem;"><strong>使用项目模板（推荐）</strong></p>
+          <p style="font-size: 0.929rem; margin-left: 1.429rem; color: #374151;">
             文件 → 新建 → 项目... → <strong>Multimedia</strong> → <strong>EGE</strong>
           </p>
 
-          <div style="margin: 12px 0; text-align: center;">
+          <div style="margin: 0.857rem 0; text-align: center;">
             <img src="../assets/docs/images/redpanda_new_proj.png"
-              style="max-width: 100%; height: auto; border: 1px solid #e5e7eb; border-radius: 6px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);"
+              style="max-width: 100%; height: auto; border: 1px solid #e5e7eb; border-radius: 0.429rem; box-shadow: 0 0.143rem 0.286rem rgba(0,0,0,0.1);"
               alt="Red Panda 项目模板" />
           </div>
 
-          <p style="font-size: 13px; color: #6b7280; margin: 12px 0 8px 0;"><strong>手动配置</strong></p>
-          <p style="font-size: 13px; margin-left: 20px; color: #374151;">
+          <p style="font-size: 0.929rem; color: #6b7280; margin: 0.857rem 0 0.571rem 0;"><strong>手动配置</strong></p>
+          <p style="font-size: 0.929rem; margin-left: 1.429rem; color: #374151;">
             如需手动配置，在项目属性中添加链接器选项（详见官方文档）
           </p>
         </div>
 
         <div class="guide-section">
           <div class="guide-tips">
-            <h3 style="margin: 0 0 8px 0; font-size: 15px; color: #92400e;">💡 快速提示</h3>
+            <h3 style="margin: 0 0 0.571rem 0; font-size: 1.071rem; color: #92400e;">💡 快速提示</h3>
             <ul>
               <li>模板已配置所有选项，<strong>无需手动设置</strong></li>
               <li>直接使用 <code>#include &lt;graphics.h&gt;</code></li>
@@ -1459,8 +1464,8 @@
         </div>
 
         <div class="guide-section"
-          style="background: #fef3c7; border-left: 3px solid #f59e0b; padding: 12px; margin-top: 16px;">
-          <p style="margin: 0; font-size: 13px; color: #78350f;">
+          style="background: #fef3c7; border-left: 0.214rem solid #f59e0b; padding: 0.857rem; margin-top: 1.143rem;">
+          <p style="margin: 0; font-size: 0.929rem; color: #78350f;">
             <span style="font-weight: 600;">🔄 版本更新提示</span><br>
             后续 EGE 版本更新时，重新运行本安装器即可更新到最新版本。
           </p>
@@ -1493,10 +1498,10 @@
       </div>
       <div class="modal-body">
         <div class="guide-section">
-          <p style="font-size: 15px; color: #1f2937; font-weight: 500; margin-bottom: 16px;">
+          <p style="font-size: 1.071rem; color: #1f2937; font-weight: 500; margin-bottom: 1.143rem;">
             本指南介绍如何在 Visual Studio 中创建和使用 EGE 图形库项目。
           </p>
-          <p style="font-size: 13px; color: #6b7280; margin-bottom: 16px;">
+          <p style="font-size: 0.929rem; color: #6b7280; margin-bottom: 1.143rem;">
             💡 <strong>提示：</strong>如果您还未安装 EGE，请先使用安装程序将 EGE 安装到 Visual Studio。<br>
             ✨ <strong>优势：</strong>Visual Studio 使用 EGE 无需手动配置链接器选项，自动链接所需库文件！
           </p>
@@ -1505,27 +1510,27 @@
         <div class="guide-section">
           <h3><span class="section-icon">📝</span>创建 EGE 项目</h3>
 
-          <p style="font-size: 13px; color: #6b7280; margin-bottom: 8px;"><strong>Visual Studio 2019/2022/2026：</strong>
+          <p style="font-size: 0.929rem; color: #6b7280; margin-bottom: 0.571rem;"><strong>Visual Studio 2019/2022/2026：</strong>
           </p>
-          <p style="font-size: 13px; margin-left: 20px; color: #374151;">
+          <p style="font-size: 0.929rem; margin-left: 1.429rem; color: #374151;">
             创建新项目 → 搜索并选择 <strong>空项目</strong> 或 <strong>控制台应用</strong>
           </p>
 
-          <p style="font-size: 13px; color: #6b7280; margin: 12px 0 8px 0;"><strong>Visual Studio 2017 及更早版本：</strong>
+          <p style="font-size: 0.929rem; color: #6b7280; margin: 0.857rem 0 0.571rem 0;"><strong>Visual Studio 2017 及更早版本：</strong>
           </p>
-          <p style="font-size: 13px; margin-left: 20px; color: #374151;">
+          <p style="font-size: 0.929rem; margin-left: 1.429rem; color: #374151;">
             文件 → 新建 → 项目... → Visual C++ → <strong>Win32 控制台应用程序</strong>
           </p>
 
-          <p style="font-size: 13px; color: #6b7280; margin: 12px 0 8px 0;"><strong>添加源文件：</strong></p>
-          <p style="font-size: 13px; margin-left: 20px; color: #374151;">
+          <p style="font-size: 0.929rem; color: #6b7280; margin: 0.857rem 0 0.571rem 0;"><strong>添加源文件：</strong></p>
+          <p style="font-size: 0.929rem; margin-left: 1.429rem; color: #374151;">
             解决方案资源管理器 → 右键 <strong>源文件</strong> → 添加 → 新建项 → <strong>C++ 文件</strong>
           </p>
         </div>
 
         <div class="guide-section">
           <div class="guide-tips">
-            <h3 style="margin: 0 0 8px 0; font-size: 15px; color: #92400e;">💡 快速提示</h3>
+            <h3 style="margin: 0 0 0.571rem 0; font-size: 1.071rem; color: #92400e;">💡 快速提示</h3>
             <ul>
               <li><strong>✨ 无需配置链接器！</strong>VS 自动链接 EGE 库文件</li>
               <li>直接使用 <code>#include &lt;graphics.h&gt;</code></li>
@@ -1543,20 +1548,20 @@
               EGE 库使用了 Visual Studio 的<strong>自动链接</strong>特性，
               编译时会自动链接所需的库文件（通过 <code>#pragma comment(lib, ...)</code> 实现）。
             </p>
-            <p style="margin-top: 8px;">
+            <p style="margin-top: 0.571rem;">
               这意味着您<strong>无需手动添加任何链接器选项</strong>，直接编译即可使用！
             </p>
           </div>
         </div>
 
         <div class="guide-section"
-          style="background: #f0f9ff; border-left: 3px solid #3b82f6; padding: 12px; margin-top: 16px;">
-          <p style="margin: 0; font-size: 13px; color: #1e40af;">
+          style="background: #f0f9ff; border-left: 0.214rem solid #3b82f6; padding: 0.857rem; margin-top: 1.143rem;">
+          <p style="margin: 0; font-size: 0.929rem; color: #1e40af;">
             <span style="font-weight: 600;">📖 需要详细说明？</span><br>
             包含字符集配置、故障排除、代码示例、常见问题等完整指南
           </p>
           <button class="btn-view-docs" onclick="openMsvcFullDocs()"
-            style="margin-top: 8px; padding: 6px 12px; background: #3b82f6; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 12px;">
+            style="margin-top: 0.571rem; padding: 0.429rem 0.857rem; background: #3b82f6; color: white; border: none; border-radius: 0.286rem; cursor: pointer; font-size: 0.857rem;">
             查看完整使用文档
           </button>
         </div>
@@ -1600,32 +1605,32 @@
 
         <div class="guide-section">
           <h3><span class="section-icon">📥</span>步骤一：安装插件</h3>
-          <p style="font-size: 13px; color: #374151;">
+          <p style="font-size: 0.929rem; color: #374151;">
             在 CLion 中打开 <strong>Settings → Plugins → Marketplace</strong>，搜索 <strong>"EGE"</strong> 即可安装。
           </p>
-          <div style="margin: 12px 0; text-align: center;">
+          <div style="margin: 0.857rem 0; text-align: center;">
             <img src="../assets/docs/images/clion_plugin_install.png"
-              style="max-width: 100%; height: auto; border: 1px solid #e5e7eb; border-radius: 6px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);"
+              style="max-width: 100%; height: auto; border: 1px solid #e5e7eb; border-radius: 0.429rem; box-shadow: 0 0.143rem 0.286rem rgba(0,0,0,0.1);"
               alt="CLion 安装 EGE 插件" />
           </div>
         </div>
 
         <div class="guide-section">
           <h3><span class="section-icon">📝</span>步骤二：新建 EGE 项目</h3>
-          <p style="font-size: 13px; color: #374151;">
+          <p style="font-size: 0.929rem; color: #374151;">
             安装插件后，通过 <strong>File → New Project</strong> 即可直接创建 EGE 项目。
           </p>
-          <div style="margin: 12px 0; text-align: center;">
+          <div style="margin: 0.857rem 0; text-align: center;">
             <img src="../assets/docs/images/clion_plugin_new_proj.png"
-              style="max-width: 100%; height: auto; border: 1px solid #e5e7eb; border-radius: 6px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);"
+              style="max-width: 100%; height: auto; border: 1px solid #e5e7eb; border-radius: 0.429rem; box-shadow: 0 0.143rem 0.286rem rgba(0,0,0,0.1);"
               alt="CLion 新建 EGE 项目" />
           </div>
         </div>
 
         <div class="guide-section">
           <div class="guide-tips">
-            <h3 style="margin: 0 0 8px 0; font-size: 15px; color: #92400e;">💡 提示</h3>
-            <p style="font-size: 13px; color: #78350f;">
+            <h3 style="margin: 0 0 0.571rem 0; font-size: 1.071rem; color: #92400e;">💡 提示</h3>
+            <p style="font-size: 0.929rem; color: #78350f;">
               如果您仍然希望手动将 EGE 库文件安装到 CLion 的 MinGW 目录，
               可以点击下方「继续安装」按钮。但推荐使用插件方式，体验更好。
             </p>
