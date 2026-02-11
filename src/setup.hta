@@ -916,6 +916,85 @@
     .redpanda-guide-modal .modal-header {
       background: linear-gradient(135deg, #dc2626 0%, #991b1b 100%);
     }
+
+    /* 脚本预览模态窗口 (Debug 模式) */
+    .script-preview-modal {
+      width: 64.286rem;
+      max-width: 95%;
+      max-height: 90vh;
+      animation: slideIn 0.3s ease-out;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .script-preview-modal .modal-header {
+      background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+      color: white;
+      padding: 1.143rem 1.429rem;
+      font-size: 1.286rem;
+      font-weight: 600;
+    }
+
+    .script-preview-modal .modal-body {
+      padding: 1.429rem;
+      overflow-y: auto;
+      flex: 1 1 auto;
+      min-height: 0;
+    }
+
+    .script-preview-modal .modal-footer {
+      padding: 1.143rem 1.429rem;
+      border-top: 1px solid #e5e7eb;
+      flex-shrink: 0;
+    }
+
+    .btn-script-execute {
+      padding: 0.714rem 2rem;
+      background: #10b981;
+      color: white;
+      border: none;
+      border-radius: 0.429rem;
+      font-size: 1rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .btn-script-execute:hover {
+      background: #059669;
+    }
+
+    .btn-script-export {
+      padding: 0.714rem 2rem;
+      background: #3b82f6;
+      color: white;
+      border: none;
+      border-radius: 0.429rem;
+      font-size: 1rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .btn-script-export:hover {
+      background: #2563eb;
+    }
+
+    .btn-script-cancel {
+      padding: 0.714rem 2rem;
+      background: #6b7280;
+      color: white;
+      border: none;
+      border-radius: 0.429rem;
+      font-size: 1rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .btn-script-cancel:hover {
+      background: #4b5563;
+    }
   </style>
 </head>
 
@@ -981,6 +1060,8 @@
         <div id="modalLog" class="log-area"></div>
       </div>
       <div class="modal-footer">
+        <button id="modalExportBtn" class="btn btn-open" onclick=""
+          style="display:none; margin-right: 0.571rem;">导出脚本</button>
         <button id="modalGuideBtn" class="btn btn-install" onclick="openGuideFromModal()"
           style="display:none; margin-right: 0.571rem;">查看使用说明</button>
         <button id="modalCloseBtn" class="btn btn-install" onclick="closeModal()" disabled>完成</button>
@@ -1331,9 +1412,15 @@
         dryRunMode = true;
       }
 
-      writeLog("读取版本号...");
-      // 读取版本号（从 version.txt 读取 EGE 库版本）
-      // 优先尝试打包后的位置，如果不存在则尝试开发环境位置
+      // 自动检测管理员权限（替代 .noadmin 标志文件）
+      // net session 仅在管理员权限下返回 0
+      var noAdminMode = true;
+      try {
+        var exitCode = shell.Run('cmd /c "net session >nul 2>&1"', 0, true);
+        noAdminMode = (exitCode !== 0);
+      } catch (e) {
+        noAdminMode = true;
+      }
       var versionFile = projectRoot + '\\version.txt';
 
       // 如果打包位置不存在，尝试开发环境位置
@@ -1374,6 +1461,11 @@
         document.title = 'EGE 图形库安装程序 v' + egeVersion + ' [DRY-RUN]';
         // 设置 Installer 的 dry-run 模式
         // 注意：Installer 对象在下面的 script 标签中加载，需要延迟设置
+      }
+
+      // no-admin 模式下记录日志（不再修改标题，这是正常行为）
+      if (noAdminMode) {
+        writeLog("非管理员模式：安装/卸载将通过 UAC 提权执行");
       }
 
     } catch (e) {
@@ -1510,13 +1602,15 @@
         <div class="guide-section">
           <h3><span class="section-icon">📝</span>创建 EGE 项目</h3>
 
-          <p style="font-size: 0.929rem; color: #6b7280; margin-bottom: 0.571rem;"><strong>Visual Studio 2019/2022/2026：</strong>
+          <p style="font-size: 0.929rem; color: #6b7280; margin-bottom: 0.571rem;"><strong>Visual Studio
+              2019/2022/2026：</strong>
           </p>
           <p style="font-size: 0.929rem; margin-left: 1.429rem; color: #374151;">
             创建新项目 → 搜索并选择 <strong>空项目</strong> 或 <strong>控制台应用</strong>
           </p>
 
-          <p style="font-size: 0.929rem; color: #6b7280; margin: 0.857rem 0 0.571rem 0;"><strong>Visual Studio 2017 及更早版本：</strong>
+          <p style="font-size: 0.929rem; color: #6b7280; margin: 0.857rem 0 0.571rem 0;"><strong>Visual Studio 2017
+              及更早版本：</strong>
           </p>
           <p style="font-size: 0.929rem; margin-left: 1.429rem; color: #374151;">
             文件 → 新建 → 项目... → Visual C++ → <strong>Win32 控制台应用程序</strong>
@@ -1578,6 +1672,36 @@
       </div>
       <div class="modal-footer">
         <button class="btn-got-it" onclick="closeMsvcGuide()">知道了，开始使用 EGE！</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 脚本预览模态窗口 (Debug 模式) -->
+  <div id="scriptPreviewModal" class="modal-overlay">
+    <div class="modal script-preview-modal">
+      <div class="modal-header">
+        <span class="section-icon">🔍</span>
+        <span id="scriptPreviewTitle">PowerShell 脚本预览 (Debug 模式)</span>
+      </div>
+      <div class="modal-body">
+        <div class="guide-section">
+          <div class="warning-box" style="margin-bottom: 1.143rem;">
+            <h3>⚠️ 安全提示</h3>
+            <p>您已启用 Debug 模式。请仔细检查下方的 PowerShell 脚本，确认所有操作符合预期后再执行。</p>
+            <p>如有疑问，建议先「导出脚本」保存到桌面，用文本编辑器仔细审查。</p>
+          </div>
+        </div>
+        <div style="margin-bottom: 0.857rem; font-weight: 500; color: #374151;">即将执行的 PowerShell 脚本：</div>
+        <div
+          style="background: #1f2937; border-radius: 0.429rem; padding: 1.143rem; overflow: auto; max-height: 28.571rem;">
+          <pre id="scriptPreviewContent"
+            style="margin: 0; font-family: 'Consolas', 'Courier New', monospace; font-size: 0.857rem; color: #e5e7eb; line-height: 1.5; white-space: pre; overflow-x: auto;"></pre>
+        </div>
+      </div>
+      <div class="modal-footer" style="display: flex; justify-content: center; gap: 0.857rem;">
+        <button class="btn-script-execute" onclick="confirmScriptExecution()">✓ 执行</button>
+        <button class="btn-script-export" onclick="exportScriptFromPreview()">💾 导出</button>
+        <button class="btn-script-cancel" onclick="closeScriptPreview()">✗ 取消</button>
       </div>
     </div>
   </div>
@@ -1645,8 +1769,11 @@
     </div>
   </div>
 
+  <script language="JScript" src="utils.js"></script>
+  <script language="JScript" src="templates.js"></script>
   <script language="JScript" src="detector.js"></script>
   <script language="JScript" src="installer.js"></script>
+  <script language="JScript" src="elevate.js"></script>
   <script language="JScript" src="ui.js"></script>
 </body>
 

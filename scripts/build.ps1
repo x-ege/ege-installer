@@ -10,7 +10,8 @@ param(
     [string]$OutputDir = "dist",
     [string]$Version,                              # 可选：手动指定版本（优先级高于 version.txt）
     [string]$ProductVersion,                       # NSIS-compatible version (X.X.X.X)
-    [string]$XegeLibsPath                          # 可选：自定义 xege_libs 路径
+    [string]$XegeLibsPath,                         # 可选：自定义 xege_libs 路径
+    [switch]$NoAdmin                               # 构建免管理员版本（RequestExecutionLevel user）
 )
 
 $ErrorActionPreference = "Stop"
@@ -240,8 +241,11 @@ try {
     New-Item -ItemType Directory -Path $InstallDir | Out-Null
     
     Copy-Item "$SrcDir\setup.hta" $InstallDir -Force
+    Copy-Item "$SrcDir\utils.js" $InstallDir -Force
+    Copy-Item "$SrcDir\templates.js" $InstallDir -Force
     Copy-Item "$SrcDir\detector.js" $InstallDir -Force
     Copy-Item "$SrcDir\installer.js" $InstallDir -Force
+    Copy-Item "$SrcDir\elevate.js" $InstallDir -Force
     Copy-Item "$SrcDir\ui.js" $InstallDir -Force
 
     # 复制 assets（图标 / 模板 / 文档等）到临时根目录，供 NSIS 解压到 $TEMP\...\assets
@@ -300,7 +304,19 @@ Build Date: $(Get-Date -Format "yyyy-MM-dd HH:mm:ss")
     
     # 调用 NSIS 编译
     Log "  Compiling with NSIS..."
-    $nsiScript = Join-Path $ScriptDir "installer.nsi"
+    $nsiScript = if ($NoAdmin) {
+        Join-Path $ScriptDir "installer-noadmin.nsi"
+    } else {
+        Join-Path $ScriptDir "installer.nsi"
+    }
+    
+    if (-not (Test-Path $nsiScript)) {
+        throw "NSIS script not found: $nsiScript"
+    }
+
+    if ($NoAdmin) {
+        Log "  Building NO-ADMIN variant (RequestExecutionLevel user)" "Cyan"
+    }
     
     # 切换到脚本目录执行 NSIS（因为 nsi 文件使用相对路径）
     Push-Location $ScriptDir
@@ -326,7 +342,8 @@ Build Date: $(Get-Date -Format "yyyy-MM-dd HH:mm:ss")
         Pop-Location
     }
     
-    $FinalPath = Join-Path $OutputPath "ege-installer-$Version.exe"
+    $suffix = if ($NoAdmin) { "-noadmin" } else { "" }
+    $FinalPath = Join-Path $OutputPath "ege-installer-$Version$suffix.exe"
     
     if (-not (Test-Path $FinalPath)) {
         throw "Output file not created: $FinalPath"

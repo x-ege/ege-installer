@@ -113,7 +113,15 @@ if (typeof Detector === 'undefined' || typeof Installer === 'undefined') {
   // 设置 dry-run 模式（如果在 setup.hta 中检测到标志）
   if (typeof dryRunMode !== 'undefined' && dryRunMode) {
     uiLog("设置 dry-run 模式");
-    Installer.setDryRunMode(true);
+    EgeUtils.setDryRunMode(true);
+  }
+  // No-Admin 模式提示（自动检测到非管理员权限时）
+  if (typeof noAdminMode !== 'undefined' && noAdminMode) {
+    uiLog("非管理员权限，安装/卸载将通过 UAC 提权执行");
+    var introEl = document.querySelector('.intro');
+    if (introEl) {
+      introEl.innerHTML += '<p style="color:#2563eb; margin-top:0.5rem;">🔒 当前以普通用户运行，安装/卸载时将弹出 UAC 权限确认窗口。您也可以选择「导出脚本」自行检查后手动执行。</p>';
+    }
   }
   // 立即启动检测（不延迟，让用户尽快看到进度）
   uiLog("启动 IDE 检测...");
@@ -506,7 +514,7 @@ function renderIDEItem(ide, index, isFound) {
 
   // 检查是否有使用说明（CodeBlocks、Dev-C++、Red Panda、MSVC）
   // 注意：不支持的 VS 版本不显示使用说明，避免误导用户
-  var hasUsageGuide = ide.type === 'codeblocks' || ide.type === 'devcpp' || ide.type === 'redpanda' || 
+  var hasUsageGuide = ide.type === 'codeblocks' || ide.type === 'devcpp' || ide.type === 'redpanda' ||
     ((ide.type === 'vs' || ide.type === 'vs-legacy') && ide.supported !== false);
 
   var html = '<div class="ide-item" id="' + prefix + '_' + index + '">';
@@ -709,6 +717,56 @@ function proceedWithInstall(index, isFound) {
 
   showModal('正在安装到 ' + ide.name + '...');
 
+  // No-Admin 模式：使用提权脚本执行安装
+  if (typeof noAdminMode !== 'undefined' && noAdminMode) {
+    // 显示导出脚本按钮
+    document.getElementById('modalExportBtn').style.display = 'inline-block';
+    document.getElementById('modalExportBtn').onclick = function () {
+      Elevate.exportScript([ide], libsPath, 'install');
+    };
+
+    window.setTimeout(function () {
+      try {
+        Elevate.executeViaElevatedScript([ide], libsPath, 'install', updateModalProgress, function (success, message, showCodeBlocksGuide, showDevCppGuide) {
+          if (success) {
+            modalLog('安装完成！', 'success');
+            ide.egeInstalled = true;
+          } else {
+            modalLog('安装失败: ' + message, 'error');
+          }
+
+          // 显示使用说明按钮（与正常模式相同的逻辑）
+          if (showCodeBlocksGuide && success) {
+            document.getElementById('modalGuideBtn').style.display = 'inline-block';
+            document.getElementById('modalGuideBtn').onclick = function () { showCodeBlocksGuideModal(); };
+          }
+          if (showDevCppGuide && success) {
+            document.getElementById('modalGuideBtn').style.display = 'inline-block';
+            document.getElementById('modalGuideBtn').onclick = function () { showDevCppGuideModal(); };
+          }
+          var isRedPanda = ide.type === 'redpanda';
+          if (isRedPanda && success) {
+            document.getElementById('modalGuideBtn').style.display = 'inline-block';
+            document.getElementById('modalGuideBtn').onclick = function () { showRedPandaGuideModal(); };
+          }
+          var isMsvc = ide.type === 'vs' || ide.type === 'vs-legacy';
+          if (isMsvc && success) {
+            document.getElementById('modalGuideBtn').style.display = 'inline-block';
+            document.getElementById('modalGuideBtn').onclick = function () { showMsvcGuideModal(); };
+          }
+
+          enableModalClose();
+          renderIDEList();
+        });
+      } catch (e) {
+        modalLog('安装出错: ' + e.message, 'error');
+        enableModalClose();
+      }
+    }, 100);
+    return;
+  }
+
+  // 正常 Admin 模式
   window.setTimeout(function () {
     try {
       Installer.install([ide], updateModalProgress, function (success, message, showCodeBlocksGuide, showDevCppGuide) {
@@ -819,6 +877,34 @@ function doUninstall(index, isFound) {
 
   showModal('正在从 ' + ide.name + ' 卸载...');
 
+  // No-Admin 模式：使用提权脚本执行卸载
+  if (typeof noAdminMode !== 'undefined' && noAdminMode) {
+    // 显示导出脚本按钮
+    document.getElementById('modalExportBtn').style.display = 'inline-block';
+    document.getElementById('modalExportBtn').onclick = function () {
+      Elevate.exportScript([ide], libsPath, 'uninstall');
+    };
+
+    window.setTimeout(function () {
+      try {
+        Elevate.executeViaElevatedScript([ide], libsPath, 'uninstall', updateModalProgress, function (success, message) {
+          if (success) {
+            modalLog('卸载完成！', 'success');
+            ide.egeInstalled = false;
+          } else {
+            modalLog('卸载失败: ' + message, 'error');
+          }
+          enableModalClose();
+          renderIDEList();
+        });
+      } catch (e) {
+        modalLog('卸载出错: ' + e.message, 'error');
+        enableModalClose();
+      }
+    }, 100);
+    return;
+  }
+
   window.setTimeout(function () {
     try {
       uninstallFromIDE(ide, function (success, message) {
@@ -875,6 +961,7 @@ function showModal(title) {
   document.getElementById('modalProgress').style.width = '0%';
   document.getElementById('modalCloseBtn').disabled = true;
   document.getElementById('modalGuideBtn').style.display = 'none'; // 隐藏使用说明按钮
+  document.getElementById('modalExportBtn').style.display = 'none'; // 隐藏导出脚本按钮
   document.getElementById('operationModal').className = 'modal-overlay show';
 }
 
@@ -1586,6 +1673,7 @@ document.onkeydown = function (event) {
       { id: 'unsupportedVSGuideModal', close: closeUnsupportedVSGuide },
       { id: 'installGuideModal', close: closeInstallGuide },
       { id: 'clionPluginModal', close: closeClionPluginModal },
+      { id: 'scriptPreviewModal', close: closeScriptPreview },
       {
         id: 'operationModal', close: function () {
           // 操作进度窗口只有在完成后才能关闭
@@ -1607,3 +1695,96 @@ document.onkeydown = function (event) {
     }
   }
 };
+
+/**
+ * ========== Debug 模式：脚本预览功能 ==========
+ */
+
+// 全局变量：保存脚本预览的上下文
+var scriptPreviewContext = null;
+
+/**
+ * 显示脚本预览窗口（Debug 模式专用）
+ */
+function showScriptPreview(scriptContent, selectedIDEs, egeLibsPath, mode, progressCallback, completeCallback) {
+  // 保存上下文供后续使用
+  scriptPreviewContext = {
+    scriptContent: scriptContent,
+    selectedIDEs: selectedIDEs,
+    egeLibsPath: egeLibsPath,
+    mode: mode,
+    progressCallback: progressCallback,
+    completeCallback: completeCallback
+  };
+
+  // 显示脚本内容
+  document.getElementById('scriptPreviewContent').innerText = scriptContent;
+  document.getElementById('scriptPreviewTitle').innerText =
+    'PowerShell 脚本预览 (Debug 模式) - ' + (mode === 'install' ? '安装' : '卸载');
+
+  // 显示模态窗口
+  document.getElementById('scriptPreviewModal').className = 'modal-overlay show';
+}
+
+/**
+ * 用户确认执行脚本
+ */
+function confirmScriptExecution() {
+  if (!scriptPreviewContext) return;
+
+  // 先保存上下文（closeScriptPreview 会清空它）
+  var context = scriptPreviewContext;
+  
+  // 关闭预览窗口（不触发取消回调）
+  document.getElementById('scriptPreviewModal').className = 'modal-overlay';
+  scriptPreviewContext = null;
+
+  // 调用 Elevate 模块继续执行（跳过 Debug 检测）
+  if (typeof Elevate !== 'undefined' && typeof Elevate.continueWithScriptExecution === 'function') {
+    Elevate.continueWithScriptExecution(
+      context.scriptContent,
+      context.selectedIDEs,
+      context.egeLibsPath,
+      context.mode,
+      context.progressCallback,
+      context.completeCallback
+    );
+  }
+}
+
+/**
+ * 从预览窗口导出脚本
+ */
+function exportScriptFromPreview() {
+  if (!scriptPreviewContext) return;
+
+  // 先保存上下文
+  var context = scriptPreviewContext;
+  
+  // 关闭预览窗口（不触发取消回调）
+  document.getElementById('scriptPreviewModal').className = 'modal-overlay';
+  scriptPreviewContext = null;
+
+  // 调用 Elevate.exportScript
+  if (typeof Elevate !== 'undefined' && typeof Elevate.exportScript === 'function') {
+    Elevate.exportScript(
+      context.selectedIDEs,
+      context.egeLibsPath,
+      context.mode
+    );
+  }
+}
+
+/**
+ * 关闭脚本预览窗口（取消操作）
+ */
+function closeScriptPreview() {
+  document.getElementById('scriptPreviewModal').className = 'modal-overlay';
+
+  // 如果取消了操作，通知完成回调
+  if (scriptPreviewContext && scriptPreviewContext.completeCallback) {
+    scriptPreviewContext.completeCallback(false, '用户取消了操作', false, false);
+  }
+
+  scriptPreviewContext = null;
+}
